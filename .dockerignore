@@ -1,0 +1,11 @@
+.git
+.venv
+.idea
+.env
+.env.*
+data
+work
+node_modules
+frontend
+**/__pycache__
+**/*.egg-info
