@@ -41,6 +41,9 @@ class Settings:
     report_max_tokens: int = 800
     # Chosen on non-PCB VisA dev categories; PCB stays a held-out test (docs/BENCHMARK.md).
     image_size: int = 384
+    torch_threads: int | None = field(
+        default_factory=lambda: int(os.getenv("WORKSIGHT_TORCH_THREADS", "0")) or None
+    )
     max_reference_images: int = 50
     max_upload_bytes: int = 10 * 1024 * 1024
     max_image_pixels: int = 16_000_000

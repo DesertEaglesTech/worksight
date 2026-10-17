@@ -14,7 +14,7 @@ from .detector import (
     make_bank,
     render_heatmap,
 )
-from .encoder import VisualEncoder
+from .encoder import VisualEncoder, cpu_budget
 from .evaluation import metrics, promotion_gate
 from .report import ReportError, TokenFactoryClient, build_messages, generate
 from .store import Store, new_id, now
@@ -37,7 +37,9 @@ class InspectionService:
         self.settings = settings
         self.store = Store(settings.data_dir)
         self.encoder_factory = encoder_factory or (
-            lambda: VisualEncoder(settings.device, settings.require_amd, settings.image_size)
+            lambda: VisualEncoder(
+                settings.device, settings.require_amd, settings.image_size, settings.torch_threads
+            )
         )
         self._encoder = None
         self.lock = threading.RLock()
@@ -82,6 +84,7 @@ class InspectionService:
             "require_amd": self.settings.require_amd,
             "runtime": self._encoder.info() if self._encoder is not None else None,
             "queue": "single_process",
+            "cpu_budget": cpu_budget(),
             "report": {
                 "enabled": self.report_client is not None,
                 "provider": "AMD Token Factory",

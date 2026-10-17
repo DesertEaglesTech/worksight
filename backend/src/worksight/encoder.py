@@ -1,3 +1,5 @@
+import math
+import os
 import platform
 
 import numpy as np
@@ -29,11 +31,32 @@ def select_device(requested: str, require_amd: bool = False) -> torch.device:
     return device
 
 
+def cpu_budget() -> int:
+    """CPUs this process may really use; containers often see the host's cores but get a quota."""
+    count = len(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else os.cpu_count()
+    try:
+        quota, period = open("/sys/fs/cgroup/cpu.max").read().split()
+        if quota != "max":
+            count = min(count, max(1, math.ceil(int(quota) / int(period))))
+    except (OSError, ValueError):
+        pass
+    return max(1, count or 1)
+
+
 class VisualEncoder:
     """Frozen ImageNet encoder. Full image resized, never center-cropped."""
 
-    def __init__(self, device: str = "auto", require_amd: bool = False, image_size: int = 384):
+    def __init__(
+        self,
+        device: str = "auto",
+        require_amd: bool = False,
+        image_size: int = 384,
+        threads: int | None = None,
+    ):
         self.device = select_device(device, require_amd)
+        if self.device.type == "cpu":
+            # Oversubscribing a CPU quota makes every inference much slower.
+            torch.set_num_threads(threads or cpu_budget())
         self.image_size = image_size
         self.signature = f"resnet18-imagenet1k-v1-layer2-layer3-l2-resize{image_size}-v1"
         # A download failure is an error, never a switch to random weights.
@@ -57,6 +80,7 @@ class VisualEncoder:
             "torch_version": torch.__version__,
             "torchvision_version": torchvision.__version__,
             "hip_version": torch.version.hip,
+            "cpu_threads": torch.get_num_threads(),
             "encoder": self.signature,
         }
 
