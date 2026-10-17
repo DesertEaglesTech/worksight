@@ -163,6 +163,20 @@ so an NVIDIA device is not reported as AMD. [GPU access instructions](docs/AMD_A
 The [ROCm Dockerfile](backend/Dockerfile.rocm) requires a verified target-compatible image tag through
 `ROCM_IMAGE`. It preserves the image's PyTorch. Container execution remains to be tested on Linux/AMD.
 
+## Inspection report on AMD Token Factory
+
+Optional. With `RADEON_API_KEY` set, `POST /api/v1/inspections/{id}/report` asks a vision-language
+model hosted on AMD GPUs (Token Factory: `Gemma-4-31B-IT`, falling back to `DeepSeek-V4.1-Flash`)
+to describe what is visibly different between the inspected part, its heatmap overlay and the most
+similar reference. The detector's decision, score and threshold are passed in and never changed;
+the report is labelled assistive and records which model answered. Details: [docs/API.md](docs/API.md).
+
+The images go to AMD's hosted endpoint (`developer.amd.com.cn`) only on request; per AMD's terms,
+prompts and outputs are kept for about two days and not used for training. Do not use it for
+confidential parts. The team key has a shared daily cap and about 20 requests per minute.
+This is **not** the detector's inference: running the detector itself on AMD still requires an AMD
+GPU instance (see AMD deployment).
+
 ## Real-data benchmark
 
 Current results on VisA PCB (CC BY 4.0), CPU only, with reproduction and AMD rerun commands:

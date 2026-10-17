@@ -16,6 +16,7 @@ from .detector import (
 )
 from .encoder import VisualEncoder
 from .evaluation import metrics, promotion_gate
+from .report import ReportError, TokenFactoryClient, build_messages, generate
 from .store import Store, new_id, now
 
 log = logging.getLogger(__name__)
@@ -25,10 +26,14 @@ class Conflict(ValueError):
     pass
 
 
+class Unavailable(RuntimeError):
+    pass
+
+
 class InspectionService:
     """Single-process prototype with one GPU queue; persistent records and immutable versions."""
 
-    def __init__(self, settings: Settings, encoder_factory=None):
+    def __init__(self, settings: Settings, encoder_factory=None, report_client=None):
         self.settings = settings
         self.store = Store(settings.data_dir)
         self.encoder_factory = encoder_factory or (
@@ -37,6 +42,15 @@ class InspectionService:
         self._encoder = None
         self.lock = threading.RLock()
         self.executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="worksight-gpu")
+        # Reports wait on a remote model; keep them off the GPU queue.
+        self.report_executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="worksight-report")
+        self.report_client = report_client or (
+            TokenFactoryClient(
+                settings.report_base_url, settings.report_api_key, settings.report_timeout_s
+            )
+            if settings.report_api_key
+            else None
+        )
         # In-process tasks cannot survive a restart. Do not leave stale running states.
         for job in self.store.all("job"):
             if job["status"] in {"queued", "running"}:
@@ -46,7 +60,7 @@ class InspectionService:
                     finished_at=now(),
                 )
                 self.store.put("job", job)
-                if job.get("resource_kind") in {"profile", "inspection"}:
+                if job.get("resource_kind") in {"profile", "inspection", "report"}:
                     resource = self.store.get(job["resource_kind"], job["resource_id"])
                     resource["status"] = "failed"
                     self.store.put(job["resource_kind"], resource)
@@ -59,6 +73,7 @@ class InspectionService:
 
     def close(self):
         self.executor.shutdown(wait=True)
+        self.report_executor.shutdown(wait=True)
 
     def health(self):
         return {
@@ -67,10 +82,15 @@ class InspectionService:
             "require_amd": self.settings.require_amd,
             "runtime": self._encoder.info() if self._encoder is not None else None,
             "queue": "single_process",
+            "report": {
+                "enabled": self.report_client is not None,
+                "provider": "AMD Token Factory",
+                "models": list(self.settings.report_models),
+            },
             "version": "0.1.0",
         }
 
-    def submit(self, operation: str, action, resource_kind=None, resource_id=None):
+    def submit(self, operation: str, action, resource_kind=None, resource_id=None, executor=None):
         job = {
             "id": new_id(),
             "operation": operation,
@@ -93,16 +113,18 @@ class InspectionService:
                 log.exception("Operation %s failed (%s)", operation, job["id"])
                 job.update(
                     status="failed",
-                    error=f"{type(exc).__name__}: processing failed; see server logs",
+                    error=str(exc)
+                    if isinstance(exc, ReportError)
+                    else f"{type(exc).__name__}: processing failed; see server logs",
                 )
-                if resource_kind in {"profile", "inspection"}:
+                if resource_kind in {"profile", "inspection", "report"}:
                     resource = self.store.get(resource_kind, resource_id)
                     resource.update(status="failed", error=job["error"])
                     self.store.put(resource_kind, resource)
             job["finished_at"] = now()
             self.store.put("job", job)
 
-        self.executor.submit(run)
+        (executor or self.executor).submit(run)
         return {
             "job_id": job["id"],
             "status": "queued",
@@ -468,3 +490,52 @@ class InspectionService:
                 },
             )
             return profile
+
+    def request_report(self, inspection_id):
+        if self.report_client is None:
+            raise Unavailable("Inspection reports are not configured on this server")
+        inspection = self.store.get("inspection", inspection_id)
+        if inspection["status"] != "ready":
+            raise Conflict("Inspection has not completed")
+        report = {
+            "id": new_id(),
+            "inspection_id": inspection_id,
+            "profile_id": inspection["profile_id"],
+            "status": "queued",
+            "created_at": now(),
+            "assistive_only": True,
+            "model_decision": inspection["decision"],
+            "inputs": ["original", "heatmap_overlay", "reference"],
+            "error": None,
+        }
+        self.store.put("report", report)
+
+        def run():
+            report["status"] = "running"
+            self.store.put("report", report)
+            asset = lambda url: self.store.image(url.rsplit("/", 1)[-1])  # noqa: E731
+            messages = build_messages(
+                inspection,
+                self.store.image(inspection["image"]["asset"]),
+                asset(inspection["overlay_url"]),
+                asset(inspection["reference_url"]),
+                self.settings.report_image_side,
+            )
+            result = generate(
+                self.report_client,
+                self.settings.report_models,
+                messages,
+                self.settings.report_max_tokens,
+            )
+            report.update(status="ready", finished_at=now(), **result)
+            self.store.put("report", report)
+            return {"report_id": report["id"], "inspection_id": inspection_id}
+
+        return self.submit("report", run, "report", report["id"], self.report_executor)
+
+    def latest_report(self, inspection_id):
+        self.store.get("inspection", inspection_id)
+        reports = [r for r in self.store.all("report") if r["inspection_id"] == inspection_id]
+        if not reports:
+            raise KeyError("report not found")
+        return reports[0]

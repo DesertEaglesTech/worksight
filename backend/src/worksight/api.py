@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 
 from .config import Settings
-from .service import Conflict, InspectionService
+from .service import Conflict, InspectionService, Unavailable
 
 
 class FeedbackRequest(BaseModel):
@@ -59,6 +59,10 @@ def create_app(settings: Settings | None = None, service: InspectionService | No
     @app.exception_handler(Conflict)
     async def conflict(_request, exc):
         return JSONResponse(status_code=409, content={"detail": str(exc)})
+
+    @app.exception_handler(Unavailable)
+    async def unavailable(_request, exc):
+        return JSONResponse(status_code=503, content={"detail": str(exc)})
 
     @app.exception_handler(ValueError)
     async def invalid(_request, exc):
@@ -124,6 +128,20 @@ def create_app(settings: Settings | None = None, service: InspectionService | No
     @app.post("/api/v1/inspections/{inspection_id}/feedback", dependencies=dependencies)
     def feedback(inspection_id: str, body: FeedbackRequest, svc=Depends(get_service)):
         return svc.feedback(inspection_id, body.label, body.note)
+
+    @app.post(
+        "/api/v1/inspections/{inspection_id}/report", status_code=202, dependencies=dependencies
+    )
+    def request_report(inspection_id: str, svc=Depends(get_service)):
+        return svc.request_report(inspection_id)
+
+    @app.get("/api/v1/inspections/{inspection_id}/report", dependencies=dependencies)
+    def latest_report(inspection_id: str, svc=Depends(get_service)):
+        return svc.latest_report(inspection_id)
+
+    @app.get("/api/v1/reports/{report_id}", dependencies=dependencies)
+    def report(report_id: str, svc=Depends(get_service)):
+        return svc.store.get("report", report_id)
 
     @app.get("/api/v1/profiles/{profile_id}/feedback", dependencies=dependencies)
     def feedback_list(profile_id: str, svc=Depends(get_service)):

@@ -48,7 +48,9 @@ def wait_job(client, response):
 
 @pytest.fixture
 def client(tmp_path):
-    settings = Settings(data_dir=tmp_path, memory_per_image=16, min_validation_per_class=2)
+    settings = Settings(
+        data_dir=tmp_path, memory_per_image=16, min_validation_per_class=2, report_api_key=""
+    )
     service = InspectionService(settings, TestEncoder)
     with TestClient(create_app(settings, service)) as client:
         yield client

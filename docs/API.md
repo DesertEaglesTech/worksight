@@ -28,6 +28,9 @@ inspections use `ready`. Disable duplicate submission while a request is pending
 | GET | `/api/v1/inspections/{id}` | Inspection result once ready |
 | POST | `/api/v1/inspections/{id}/feedback` | JSON `{label: "normal" | "anomaly" | "unsure", note?: string}` |
 | GET | `/api/v1/profiles/{id}/feedback` | `{items: Feedback[]}` |
+| POST | `/api/v1/inspections/{id}/report` | Assistive VLM report; job result `{report_id, inspection_id}`; 503 if not configured |
+| GET | `/api/v1/inspections/{id}/report` | Latest report for the inspection; 404 if none |
+| GET | `/api/v1/reports/{id}` | Report by ID |
 | POST | `/api/v1/profiles/{id}/validation` | Multipart repeated `normal` and `anomaly`; frozen labelled validation set |
 | POST | `/api/v1/profiles/{id}/candidates` | JSON `{feedback_ids: string[]}`; job result `{profile_id, version_id, state}` |
 | POST | `/api/v1/profiles/{id}/versions/{version}/evaluate` | Job result `{evaluation_id, gate}` |
@@ -54,6 +57,35 @@ When `status="ready"`:
 
 The reference is chosen by nearest-patch votes, not a causal explanation. Heatmap uses a consistent
 profile-relative scale; do not normalize each image independently into a misleading hot spot.
+
+## Inspection report (assistive, optional)
+
+A vision-language model on AMD Token Factory describes a **ready** inspection. It receives the
+original image, the heatmap overlay, the most similar reference and the detector's decision, score
+and threshold. It **never changes** `decision`, `anomaly_score` or `threshold`, and it is not a
+second classifier. Images leave the backend only when this endpoint is called.
+
+Enabled only when the server has `RADEON_API_KEY`; check `GET /health` → `report.enabled`.
+When disabled, POST returns 503: hide or disable the button.
+
+Models are tried in order (`WORKSIGHT_REPORT_MODELS`, default `Gemma-4-31B-IT,DeepSeek-V4.1-Flash`).
+The next model is tried only after a server error, timeout or malformed output. A rate limit (429)
+or rejected key stops immediately. Expect 15–60 s; the job runs outside the GPU queue.
+
+Report fields when `status="ready"`:
+
+- `summary`, `observations` (up to 8 strings), `suggested_check` (string or null).
+- `heatmap_consistency`: `consistent | partly_consistent | inconsistent | unclear`; the model's view of
+  whether the highlighted regions show a visible difference.
+- `model` (requested ID that answered), `served_model`, `provider` (`AMD Token Factory`),
+  `latency_ms`, `usage` tokens, `failed_attempts` (models skipped and why).
+- `assistive_only: true`, `model_decision` (detector decision at request time), `inputs`.
+
+On failure `status="failed"` and `error` holds an operator-safe message, also in the job's `error`.
+
+UI rules: label it "AI description (assistive)", show the model name and "runs on AMD Token Factory",
+keep it visually below the detector result and the engineer's decision, and never present
+`heatmap_consistency` as a confidence or a verdict. The text can be wrong; the engineer decides.
 
 ## Upload example
 
