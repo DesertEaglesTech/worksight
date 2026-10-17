@@ -79,6 +79,9 @@ The [ROCm Dockerfile](backend/Dockerfile.rocm) requires a verified target-compat
 
 ## Real-data benchmark
 
+Current results on VisA PCB (CC BY 4.0), CPU only, with reproduction and AMD rerun commands:
+[docs/BENCHMARK.md](docs/BENCHMARK.md).
+
 Manifest paths are relative to its directory:
 
 ```json
