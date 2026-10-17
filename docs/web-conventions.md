@@ -3,7 +3,7 @@
 The repository initially contained LICENSE, a short README and start.txt. No application conventions were found. LICENSE, start.txt and Git history are preserved.
 
 - Web source stays in `web/`, separate from ML/FastAPI. Next.js App Router, strict TypeScript, Tailwind CSS and shared CSS visual tokens.
-- Response schemas live in `src/lib/contract.ts`, live transport in `api.ts`, temporary fixtures in `demo.ts`. Regenerate the OpenAPI proposal when the contract changes.
+- Response schemas live in `src/lib/contract.ts`, live transport in `backend-api.ts`, backend payload validation in `backend-contract.ts`, temporary fixtures in `demo.ts`. Regenerate the archived proposal schemas when the normalized UI contract changes; the actual API is documented in `API.md` and `/openapi.json`.
 - Backend owns durable records. Do not add a separate browser or web-server profile database.
 - Select mode through server environment configuration. Never silently fall back to demo. Keep mode configuration explicit in server settings and documentation. The operator UI omits mode banners and fixture disclosures at the user’s request.
 - Gate optional features using capabilities. Never infer measured time, confidence, GPU state or quality improvement.
