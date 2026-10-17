@@ -7,11 +7,16 @@ import torch
 from PIL import Image
 
 
-def make_bank(features: list[np.ndarray], per_image: int = 128) -> tuple[np.ndarray, np.ndarray]:
+def make_bank(
+    features: list[np.ndarray], per_image: int | None = None
+) -> tuple[np.ndarray, np.ndarray]:
+    """All reference patches by default; sampling left gaps that read as anomalies."""
     banks, owners = [], []
     for i, patches in enumerate(features):
-        indices = np.random.default_rng(42 + i).choice(
-            len(patches), min(per_image, len(patches)), replace=False
+        indices = (
+            np.arange(len(patches))
+            if per_image is None or per_image >= len(patches)
+            else np.random.default_rng(42 + i).choice(len(patches), per_image, replace=False)
         )
         banks.append(patches[indices])
         owners.append(np.full(len(indices), i, dtype=np.int32))
@@ -41,19 +46,39 @@ def image_score(patch_scores: np.ndarray) -> float:
     return float(np.partition(patch_scores, -n)[-n:].mean())
 
 
+def per_image_for_cap(features: list[np.ndarray], cap: int, per_image: int | None = None):
+    """Keep every patch while the bank fits the cap; otherwise an equal share per reference."""
+    total = sum(len(f) for f in features)
+    if total <= cap:
+        return per_image
+    share = max(1, cap // len(features))
+    return share if per_image is None else min(per_image, share)
+
+
 def estimate_threshold(
-    features: list[np.ndarray], bank: np.ndarray, owners: np.ndarray, device="cpu"
+    features: list[np.ndarray],
+    bank: np.ndarray,
+    owners: np.ndarray,
+    device="cpu",
+    sample: int | None = None,
 ) -> dict:
     # Exclude ALL patches of the scored reference, avoiding self-match leakage.
+    indices = list(range(len(features)))
+    if sample and len(indices) > sample:
+        # Evenly spaced, deterministic subset keeps large profiles fast to build.
+        indices = sorted({round(i * (len(features) - 1) / (sample - 1)) for i in range(sample)})
     scores = [
-        image_score(distances(f, bank[owners != i], device)[0]) for i, f in enumerate(features)
+        image_score(distances(features[i], bank[owners != i], device)[0]) for i in indices
     ]
-    threshold = max(0.005, float(np.quantile(scores, 0.95)) * 1.2)
+    # Leave-one-out scores overstate normal scores (the scored image is missing from memory),
+    # so a high quantile times a margin was too strict. Rule chosen on dev categories only.
+    threshold = max(0.005, float(np.mean(scores) + 2 * np.std(scores)))
     return {
         "value": threshold,
-        "method": "leave_one_reference_out_q95_x1.2",
+        "method": "leave_one_reference_out_mean_plus_2sd",
         "status": "heuristic_not_probability",
         "reference_scores": scores,
+        "scored_references": len(indices),
         "review_margin": 0.1,
     }
 

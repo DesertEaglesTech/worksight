@@ -26,7 +26,17 @@ def test_threshold_excludes_scored_image():
     bank, owners = make_bank(features)
     calibration = estimate_threshold(features, bank, owners)
     assert calibration["reference_scores"] == [1.0, 1.0]
-    assert calibration["value"] == pytest.approx(1.2)
+    # mean + 2 sd of identical leave-one-out scores
+    assert calibration["value"] == pytest.approx(1.0)
+    assert calibration["method"] == "leave_one_reference_out_mean_plus_2sd"
+
+
+def test_memory_keeps_every_reference_patch_by_default():
+    features = [np.eye(4, dtype=np.float32), np.eye(4, dtype=np.float32)[:3]]
+    bank, owners = make_bank(features)
+    assert len(bank) == 7
+    assert owners.tolist() == [0, 0, 0, 0, 1, 1, 1]
+    assert len(make_bank(features, per_image=2)[0]) == 4
 
 
 def test_heatmap_does_not_turn_normal_image_red():

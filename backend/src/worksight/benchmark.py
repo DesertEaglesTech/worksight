@@ -9,7 +9,8 @@ from time import perf_counter
 import numpy as np
 from PIL import Image, ImageOps
 
-from .detector import distances, estimate_threshold, image_score, make_bank
+from .config import Settings
+from .detector import distances, estimate_threshold, image_score, make_bank, per_image_for_cap
 from .encoder import VisualEncoder
 from .evaluation import metrics
 from .store import now
@@ -27,8 +28,11 @@ def run_benchmark(manifest_path: Path, device="auto", require_amd=False):
     base = manifest_path.resolve().parent
     references = manifest["references"]
     tests = manifest["test"]
-    if not 3 <= len(references) <= 50 or not tests:
-        raise ValueError("Provide 3–50 references and a nonempty test set")
+    settings = Settings()
+    if not 3 <= len(references) <= settings.max_reference_images or not tests:
+        raise ValueError(
+            f"Provide 3–{settings.max_reference_images} references and a nonempty test set"
+        )
     if {item["label"] for item in tests} != {"normal", "anomaly"}:
         raise ValueError("Final test must contain both normal and anomaly labels")
     images, reference_hashes = [], set()
@@ -51,8 +55,10 @@ def run_benchmark(manifest_path: Path, device="auto", require_amd=False):
     encoder.synchronize()
     start = perf_counter()
     features = [encoder.extract(image)[0] for image in images]
-    bank, owners = make_bank(features)
-    threshold = estimate_threshold(features, bank, owners, encoder.device)
+    bank, owners = make_bank(features, per_image_for_cap(features, settings.max_memory_patches))
+    threshold = estimate_threshold(
+        features, bank, owners, encoder.device, settings.threshold_sample
+    )
     encoder.synchronize()
     onboarding_ms = (perf_counter() - start) * 1000
     results, latencies = [], []

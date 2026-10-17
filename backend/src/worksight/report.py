@@ -75,7 +75,9 @@ def data_url(image: Image.Image, side: int) -> str:
     return "data:image/jpeg;base64," + base64.b64encode(buffer.getvalue()).decode()
 
 
-def build_messages(inspection: dict, original, overlay, reference, side: int) -> list:
+def build_messages(
+    inspection: dict, original, overlay, reference, side: int, documents: str | None = None
+) -> list:
     task = (
         f"Detector result (authoritative, do not change it): decision={inspection['decision']}, "
         f"anomaly_score={inspection['anomaly_score']:.4f}, threshold={inspection['threshold']:.4f}. "
@@ -90,8 +92,16 @@ def build_messages(inspection: dict, original, overlay, reference, side: int) ->
         '{"summary": "one or two sentences", '
         '"observations": ["short visible difference with its location"], '
         '"heatmap_consistency": "consistent | partly_consistent | inconsistent | unclear", '
-        '"suggested_check": "what the engineer should look at first"}'
+        '"suggested_check": "what the engineer should look at first", '
+        '"relevant_requirements": ["requirement from the documentation that applies, quoted briefly"]}'
     )
+    if documents:
+        task += (
+            "\nPart documentation provided by the engineer (may be incomplete). Use it to name "
+            "which requirements the visible differences touch. Do not invent tolerances it does "
+            "not state; return an empty relevant_requirements list if none apply.\n"
+            f"<documentation>\n{documents}\n</documentation>"
+        )
     return [
         {"role": "system", "content": SYSTEM},
         {
@@ -120,6 +130,7 @@ def parse_report(content: str | None) -> dict:
     observations = data.get("observations")
     consistency = data.get("heatmap_consistency")
     suggested = data.get("suggested_check")
+    requirements = data.get("relevant_requirements")
     return {
         "summary": data["summary"].strip()[:600],
         "observations": [
@@ -128,6 +139,10 @@ def parse_report(content: str | None) -> dict:
         ][:8],
         "heatmap_consistency": consistency if consistency in CONSISTENCY else "unclear",
         "suggested_check": suggested.strip()[:300] if isinstance(suggested, str) else None,
+        "relevant_requirements": [
+            r.strip()[:300] for r in (requirements if isinstance(requirements, list) else [])
+            if isinstance(r, str) and r.strip()
+        ][:5],
     }
 
 

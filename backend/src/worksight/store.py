@@ -37,7 +37,10 @@ class Store:
     def put(self, kind: str, record: dict):
         with self.connect() as db:
             db.execute(
-                "INSERT OR REPLACE INTO records VALUES (?, ?, ?)",
+                # Upsert keeps the row (and rowid); INSERT OR REPLACE would re-insert updated
+                # records and make them look newest.
+                "INSERT INTO records VALUES (?, ?, ?) "
+                "ON CONFLICT(kind, id) DO UPDATE SET payload = excluded.payload",
                 (kind, record["id"], json.dumps(record, allow_nan=False)),
             )
         return record
@@ -56,7 +59,10 @@ class Store:
             rows = db.execute(
                 "SELECT payload FROM records WHERE kind=? ORDER BY rowid DESC", (kind,)
             ).fetchall()
-        return [json.loads(row[0]) for row in rows]
+        records = [json.loads(row[0]) for row in rows]
+        # Newest first by creation time, then ID; never by storage order.
+        records.sort(key=lambda r: (r.get("created_at", ""), r["id"]), reverse=True)
+        return records
 
     def save_image(self, content: bytes, max_bytes: int, max_pixels: int) -> dict:
         if not content or len(content) > max_bytes:
