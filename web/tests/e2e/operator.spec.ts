@@ -143,13 +143,17 @@ test("invalid and corrupt images cannot start inspection", async ({ page }) => {
     mimeType: "image/svg+xml",
     buffer: Buffer.from("<svg/>"),
   });
-  await expect(page.getByRole("alert")).toContainText("unsupported file type");
+  await expect(
+    page.getByRole("alert").filter({ hasText: "unsupported file type" }),
+  ).toBeVisible();
   await page.getByLabel("Upload inspection image").setInputFiles({
     name: "corrupt.png",
     mimeType: "image/png",
     buffer: Buffer.from("not an image"),
   });
-  await expect(page.getByRole("alert")).toContainText("could not be decoded");
+  await expect(
+    page.getByRole("alert").filter({ hasText: "could not be decoded" }),
+  ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Run inspection", exact: true }),
   ).toBeDisabled();
