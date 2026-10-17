@@ -64,9 +64,18 @@
 /* The result and independent review stay together in the page's normal flow. */
 .design-current .heading-actions {
   display: flex;
-  flex-wrap: nowrap;
-  flex-shrink: 0;
+  /* Wrap instead of pushing the page sideways when a third action appears. */
+  flex-wrap: wrap;
+  flex-shrink: 1;
+  min-width: 0;
   gap: 10px;
+}
+.design-current .page-heading {
+  flex-wrap: wrap;
+}
+.design-current .page-heading > div:first-child {
+  flex: 1 1 260px;
+  min-width: 0;
 }
 .design-current .decision-panel .decision {
   font-size: 26px;
