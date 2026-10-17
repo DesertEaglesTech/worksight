@@ -16,9 +16,9 @@ No upstream redirects, arbitrary routes, browser credentials, or live-to-demo fa
 
 The proxy permits the GET/POST routes in API.md, plus GET `/health`. It preserves meaningful
 FastAPI `detail` strings/validation messages for request/state errors and sanitizes server errors.
-Cross-origin mutations are rejected. The web limits combined uploads to 50 MiB; proxy body limit
-is 52 MiB including multipart metadata. Backend limits: 10 MiB/file, 16 million pixels/image,
-3–50 distinct references. These fixed limits are declared by the adapter; there is no `/capabilities`.
+Cross-origin mutations are rejected. Proxy body limit
+is 128 MiB including multipart metadata (client combined limit 120 MiB). Backend limits: 10 MiB/file, 16 million pixels/image,
+3–200 distinct references. These fixed limits are declared by the adapter; there is no `/capabilities`.
 
 ## Creating a profile
 

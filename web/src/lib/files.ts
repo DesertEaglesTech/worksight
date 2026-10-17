@@ -1,9 +1,11 @@
 import type { Capabilities } from "./contract";
 export const defaultLimits: Capabilities["limits"] = {
   max_file_bytes: 20 * 1024 * 1024,
-  max_files: 50,
+  max_files: 200,
   allowed_mime_types: ["image/jpeg", "image/png", "image/webp"],
 };
+/** Stays under the server proxy's 128 MiB request limit, including multipart overhead. */
+export const MAX_COMBINED_BYTES = 120 * 1024 * 1024;
 export function validateFiles(
   files: File[],
   limits = defaultLimits,
@@ -18,8 +20,8 @@ export function validateFiles(
     if (file.size > limits.max_file_bytes)
       return `${file.name}: exceeds the ${Math.floor(limits.max_file_bytes / 1024 / 1024)} MB limit.`;
   }
-  if (files.reduce((n, f) => n + f.size, 0) > 50 * 1024 * 1024)
-    return "The combined upload exceeds 50 MB. Upload fewer images at a time.";
+  if (files.reduce((n, f) => n + f.size, 0) > MAX_COMBINED_BYTES)
+    return "The combined upload exceeds 120 MB. Upload fewer or smaller images at a time.";
   return null;
 }
 export async function validateImages(

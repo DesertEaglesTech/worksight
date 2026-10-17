@@ -298,7 +298,7 @@ export default function Workspace({
       setNotice(
         demo
           ? "Profile created. Add known-good samples to prepare it for inspection."
-          : "Draft created in this tab. Add 3–50 distinct images (10–20 recommended), then build to save it on the server. Reloading discards this unsent draft.",
+          : "Draft created in this tab. Add 3–200 distinct images (10–20 minimum recommended; more covers more variation), then build to save it on the server. Reloading discards this unsent draft.",
       );
     });
   }
@@ -874,7 +874,7 @@ export default function Workspace({
                         {!demo && (
                           <p className="draft-notice">
                             Unsent draft · stored only in this tab. Reloading
-                            discards the name and files. Add 3–50 distinct
+                            discards the name and files. Add 3–200 distinct
                             reference images; 10–20 recommended.
                           </p>
                         )}

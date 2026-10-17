@@ -29,7 +29,7 @@ import { validateFiles, validateImages } from "./files";
 
 export const backendLimits = {
   max_file_bytes: 10 * 1024 * 1024,
-  max_files: 50,
+  max_files: 200,
   min_reference_files: 3,
   max_image_pixels: 16_000_000,
   allowed_mime_types: ["image/jpeg", "image/png", "image/webp"],
