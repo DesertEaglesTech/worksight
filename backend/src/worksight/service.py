@@ -1,10 +1,15 @@
+import base64
+import hashlib
+import json
 import logging
 import threading
 from concurrent.futures import ThreadPoolExecutor
+from datetime import UTC, datetime, timedelta
 from time import perf_counter
 
 import numpy as np
 
+from . import documents as docs
 from .config import Settings
 from .detector import (
     decision,
@@ -22,11 +27,28 @@ from .store import Store, new_id, now
 log = logging.getLogger(__name__)
 
 
+def utc_iso(value):
+    """Parse an ISO time with timezone (Z or offset) into the stored UTC format."""
+    if value is None:
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise ValueError("Times must be ISO 8601 with timezone") from exc
+    if parsed.tzinfo is None:
+        raise ValueError("Times must include a timezone")
+    return parsed.astimezone(UTC).isoformat()
+
+
 class Conflict(ValueError):
     pass
 
 
 class Unavailable(RuntimeError):
+    pass
+
+
+class RateLimited(RuntimeError):
     pass
 
 
@@ -93,9 +115,11 @@ class InspectionService:
             "version": "0.1.0",
         }
 
-    def submit(self, operation: str, action, resource_kind=None, resource_id=None, executor=None):
+    def submit(
+        self, operation: str, action, resource_kind=None, resource_id=None, executor=None, job_id=None
+    ):
         job = {
-            "id": new_id(),
+            "id": job_id or new_id(),
             "operation": operation,
             "status": "queued",
             "created_at": now(),
@@ -494,47 +518,114 @@ class InspectionService:
             )
             return profile
 
-    def request_report(self, inspection_id):
+    def _accepted(self, job_id, resource_id, reused):
+        job = self.store.get("job", job_id)
+        return {
+            "job_id": job_id,
+            "status": job["status"],
+            "resource_id": resource_id,
+            "job_url": f"/api/v1/jobs/{job_id}",
+            "reused": reused,
+        }
+
+    def request_report(self, inspection_id, idempotency_key=None, refresh=False):
         if self.report_client is None:
             raise Unavailable("Inspection reports are not configured on this server")
-        inspection = self.store.get("inspection", inspection_id)
-        if inspection["status"] != "ready":
-            raise Conflict("Inspection has not completed")
-        report = {
-            "id": new_id(),
-            "inspection_id": inspection_id,
-            "profile_id": inspection["profile_id"],
-            "status": "queued",
-            "created_at": now(),
-            "assistive_only": True,
-            "model_decision": inspection["decision"],
-            "inputs": ["original", "heatmap_overlay", "reference"],
-            "error": None,
-        }
-        self.store.put("report", report)
-
-        def run():
-            report["status"] = "running"
+        with self.lock:
+            inspection = self.store.get("inspection", inspection_id)
+            if inspection["status"] != "ready":
+                raise Conflict("Inspection has not completed")
+            key_id = None
+            if idempotency_key:
+                if not 1 <= len(idempotency_key) <= 200:
+                    raise ValueError("Idempotency-Key must contain 1–200 characters")
+                key_id = hashlib.sha256(f"report:{idempotency_key}".encode()).hexdigest()
+                try:
+                    known = self.store.get("idempotency", key_id)
+                except KeyError:
+                    known = None
+                if known:
+                    if known["inspection_id"] != inspection_id:
+                        raise Conflict("Idempotency-Key was already used for another request")
+                    report = self.store.get("report", known["report_id"])
+                    return self._accepted(report["job_id"], report["id"], True)
+            existing = [
+                r
+                for r in self.store.all("report")
+                if r["inspection_id"] == inspection_id
+                and r["status"] != "failed"
+                and r.get("job_id")  # records from before job_id was stored are not reused
+            ]
+            if existing and not refresh:
+                return self._accepted(existing[0]["job_id"], existing[0]["id"], True)
+            now_dt = datetime.now(UTC)
+            recent = [
+                datetime.fromisoformat(r["created_at"]) for r in self.store.all("report")
+            ]
+            if sum(t > now_dt - timedelta(hours=1) for t in recent) >= (
+                self.settings.report_hourly_limit
+            ) or sum(t > now_dt - timedelta(days=1) for t in recent) >= (
+                self.settings.report_daily_limit
+            ):
+                raise RateLimited(
+                    "AI description limit reached for this demo; try again later"
+                )
+            report = {
+                "id": new_id(),
+                "inspection_id": inspection_id,
+                "profile_id": inspection["profile_id"],
+                "status": "queued",
+                "created_at": now(),
+                "assistive_only": True,
+                "model_decision": inspection["decision"],
+                "inputs": ["original", "heatmap_overlay", "reference"],
+                "documents_used": [],
+                "error": None,
+                # Known before the job starts, so no later write races the worker.
+                "job_id": new_id(),
+            }
             self.store.put("report", report)
-            asset = lambda url: self.store.image(url.rsplit("/", 1)[-1])  # noqa: E731
-            messages = build_messages(
-                inspection,
-                self.store.image(inspection["image"]["asset"]),
-                asset(inspection["overlay_url"]),
-                asset(inspection["reference_url"]),
-                self.settings.report_image_side,
-            )
-            result = generate(
-                self.report_client,
-                self.settings.report_models,
-                messages,
-                self.settings.report_max_tokens,
-            )
-            report.update(status="ready", finished_at=now(), **result)
-            self.store.put("report", report)
-            return {"report_id": report["id"], "inspection_id": inspection_id}
 
-        return self.submit("report", run, "report", report["id"], self.report_executor)
+            def run():
+                report["status"] = "running"
+                self.store.put("report", report)
+                asset = lambda url: self.store.image(url.rsplit("/", 1)[-1])  # noqa: E731
+                documents = self._document_context(inspection["profile_id"])
+                messages = build_messages(
+                    inspection,
+                    self.store.image(inspection["image"]["asset"]),
+                    asset(inspection["overlay_url"]),
+                    asset(inspection["reference_url"]),
+                    self.settings.report_image_side,
+                    documents["text"],
+                )
+                result = generate(
+                    self.report_client,
+                    self.settings.report_models,
+                    messages,
+                    self.settings.report_max_tokens,
+                )
+                report.update(
+                    status="ready", finished_at=now(), documents_used=documents["ids"], **result
+                )
+                self.store.put("report", report)
+                return {"report_id": report["id"], "inspection_id": inspection_id}
+
+            accepted = self.submit(
+                "report", run, "report", report["id"], self.report_executor, report["job_id"]
+            )
+            if key_id:
+                self.store.put(
+                    "idempotency",
+                    {
+                        "id": key_id,
+                        "operation": "report",
+                        "inspection_id": inspection_id,
+                        "report_id": report["id"],
+                        "created_at": now(),
+                    },
+                )
+            return {**accepted, "reused": False}
 
     def latest_report(self, inspection_id):
         self.store.get("inspection", inspection_id)
@@ -542,3 +633,89 @@ class InspectionService:
         if not reports:
             raise KeyError("report not found")
         return reports[0]
+
+    def list_inspections(
+        self,
+        profile_id,
+        limit=None,
+        cursor=None,
+        since=None,
+        until=None,
+        decision=None,
+        human=None,
+    ):
+        """Newest first by (created_at, id). Without `limit` the old unpaginated shape is kept."""
+        self.store.get("profile", profile_id)
+        since, until = utc_iso(since), utc_iso(until)
+        labels = {
+            f["inspection_id"]: f["label"]
+            for f in self.store.all("feedback")
+            if f["profile_id"] == profile_id
+        }
+        items = []
+        for inspection in self.store.all("inspection"):
+            if inspection["profile_id"] != profile_id:
+                continue
+            created = inspection["created_at"]
+            label = labels.get(inspection["id"])
+            if since and created < since or until and created >= until:
+                continue
+            if decision and inspection.get("decision") != decision:
+                continue
+            if human == "none" and label is not None or human == "any" and label is None:
+                continue
+            if human in {"normal", "anomaly", "unsure"} and label != human:
+                continue
+            items.append({**inspection, "feedback_label": label})
+        if limit is None:
+            return {"items": items}
+        if cursor:
+            try:
+                after = tuple(json.loads(base64.urlsafe_b64decode(cursor.encode())))
+            except (ValueError, TypeError) as exc:
+                raise ValueError("Invalid cursor") from exc
+            items = [i for i in items if (i["created_at"], i["id"]) < after]
+        page = items[:limit]
+        next_cursor = None
+        if len(items) > limit:
+            last = page[-1]
+            next_cursor = base64.urlsafe_b64encode(
+                json.dumps([last["created_at"], last["id"]]).encode()
+            ).decode()
+        return {"items": page, "next_cursor": next_cursor}
+
+    def add_document(self, profile_id, filename, content):
+        self.store.get("profile", profile_id)
+        extracted = docs.extract(filename, content)
+        with self.lock:
+            if any(
+                d["profile_id"] == profile_id and d["sha256"] == extracted["sha256"]
+                for d in self.store.all("document")
+            ):
+                raise Conflict("This document is already attached to the profile")
+            record = {"id": new_id(), "profile_id": profile_id, "created_at": now(), **extracted}
+            self.store.put("document", record)
+        return self._document_summary(record)
+
+    @staticmethod
+    def _document_summary(record):
+        summary = {k: v for k, v in record.items() if k != "text"}
+        summary["excerpt"] = record["text"][:300]
+        return summary
+
+    def list_documents(self, profile_id):
+        self.store.get("profile", profile_id)
+        return {
+            "items": [
+                self._document_summary(d)
+                for d in self.store.all("document")
+                if d["profile_id"] == profile_id
+            ]
+        }
+
+    def _document_context(self, profile_id):
+        attached = [d for d in self.store.all("document") if d["profile_id"] == profile_id]
+        return {
+            "text": docs.context(attached, self.settings.report_document_chars),
+            "ids": [d["id"] for d in attached],
+        }

@@ -37,8 +37,16 @@ class Settings:
         )
     )
     report_timeout_s: float = 120.0
+    # Protect the shared Token Factory quota on public demos; counts all report requests.
+    report_hourly_limit: int = field(
+        default_factory=lambda: int(os.getenv("WORKSIGHT_REPORT_HOURLY_LIMIT", "30"))
+    )
+    report_daily_limit: int = field(
+        default_factory=lambda: int(os.getenv("WORKSIGHT_REPORT_DAILY_LIMIT", "200"))
+    )
     report_image_side: int = 512
     report_max_tokens: int = 800
+    report_document_chars: int = 4000
     # Chosen on non-PCB VisA dev categories; PCB stays a held-out test (docs/BENCHMARK.md).
     image_size: int = 384
     torch_threads: int | None = field(

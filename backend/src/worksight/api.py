@@ -3,13 +3,13 @@ import re
 from contextlib import asynccontextmanager
 from typing import Literal
 
-from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 
 from .config import Settings
-from .service import Conflict, InspectionService, Unavailable
+from .service import Conflict, InspectionService, RateLimited, Unavailable
 
 
 class FeedbackRequest(BaseModel):
@@ -64,6 +64,10 @@ def create_app(settings: Settings | None = None, service: InspectionService | No
     async def unavailable(_request, exc):
         return JSONResponse(status_code=503, content={"detail": str(exc)})
 
+    @app.exception_handler(RateLimited)
+    async def rate_limited(_request, exc):
+        return JSONResponse(status_code=429, content={"detail": str(exc)})
+
     @app.exception_handler(ValueError)
     async def invalid(_request, exc):
         return JSONResponse(status_code=422, content={"detail": str(exc)})
@@ -117,9 +121,17 @@ def create_app(settings: Settings | None = None, service: InspectionService | No
         return svc.inspect(profile_id, await upload(image, svc))
 
     @app.get("/api/v1/profiles/{profile_id}/inspections", dependencies=dependencies)
-    def inspections(profile_id: str, svc=Depends(get_service)):
-        svc.store.get("profile", profile_id)
-        return {"items": [i for i in svc.store.all("inspection") if i["profile_id"] == profile_id]}
+    def inspections(
+        profile_id: str,
+        limit: int | None = Query(default=None, ge=1, le=200),
+        cursor: str | None = None,
+        since: str | None = None,
+        until: str | None = None,
+        decision: Literal["normal", "anomaly", "review"] | None = None,
+        human: Literal["none", "any", "normal", "anomaly", "unsure"] | None = None,
+        svc=Depends(get_service),
+    ):
+        return svc.list_inspections(profile_id, limit, cursor, since, until, decision, human)
 
     @app.get("/api/v1/inspections/{inspection_id}", dependencies=dependencies)
     def inspection(inspection_id: str, svc=Depends(get_service)):
@@ -132,8 +144,13 @@ def create_app(settings: Settings | None = None, service: InspectionService | No
     @app.post(
         "/api/v1/inspections/{inspection_id}/report", status_code=202, dependencies=dependencies
     )
-    def request_report(inspection_id: str, svc=Depends(get_service)):
-        return svc.request_report(inspection_id)
+    def request_report(
+        inspection_id: str,
+        refresh: bool = False,
+        idempotency_key: str | None = Header(default=None),
+        svc=Depends(get_service),
+    ):
+        return svc.request_report(inspection_id, idempotency_key, refresh)
 
     @app.get("/api/v1/inspections/{inspection_id}/report", dependencies=dependencies)
     def latest_report(inspection_id: str, svc=Depends(get_service)):
@@ -142,6 +159,20 @@ def create_app(settings: Settings | None = None, service: InspectionService | No
     @app.get("/api/v1/reports/{report_id}", dependencies=dependencies)
     def report(report_id: str, svc=Depends(get_service)):
         return svc.store.get("report", report_id)
+
+    @app.post("/api/v1/profiles/{profile_id}/documents", status_code=201, dependencies=dependencies)
+    async def add_document(
+        profile_id: str, file: UploadFile = File(...), svc=Depends(get_service)
+    ):
+        try:
+            content = await file.read(10 * 1024 * 1024 + 1)
+        finally:
+            await file.close()
+        return svc.add_document(profile_id, file.filename, content)
+
+    @app.get("/api/v1/profiles/{profile_id}/documents", dependencies=dependencies)
+    def documents(profile_id: str, svc=Depends(get_service)):
+        return svc.list_documents(profile_id)
 
     @app.get("/api/v1/profiles/{profile_id}/feedback", dependencies=dependencies)
     def feedback_list(profile_id: str, svc=Depends(get_service)):
