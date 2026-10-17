@@ -31,6 +31,7 @@ import { createDemoApi } from "@/lib/demo";
 import { waitForJob } from "@/lib/jobs";
 import FileDrop from "./file-drop";
 import InspectionViewer from "./inspection-viewer";
+import VersionWorkflow from "./version-workflow";
 
 const decisionLabel: Record<Decision, string> = {
   pass: "Pass",
@@ -259,7 +260,9 @@ export default function Workspace({ mode }: { mode: Mode }) {
       setDescription("");
       setFormError("");
       setNotice(
-        demo ? "Profile created. Add known-good samples to prepare it for inspection." : "Draft created in this tab. Add 3–50 distinct images (10–20 recommended), then build to save it on the server. Reloading discards this unsent draft.",
+        demo
+          ? "Profile created. Add known-good samples to prepare it for inspection."
+          : "Draft created in this tab. Add 3–50 distinct images (10–20 recommended), then build to save it on the server. Reloading discards this unsent draft.",
       );
     });
   }
@@ -272,7 +275,9 @@ export default function Workspace({ mode }: { mode: Mode }) {
       );
       setSamples([]);
       setNotice(
-        demo ? "Samples accepted. Build the profile when the reference set is ready." : "Files staged in this tab. Build the profile to upload and save them. Reloading discards unsent files.",
+        demo
+          ? "Samples accepted. Build the profile when the reference set is ready."
+          : "Files staged in this tab. Build the profile to upload and save them. Reloading discards unsent files.",
       );
     });
   }
@@ -282,23 +287,42 @@ export default function Workspace({ mode }: { mode: Mode }) {
     await action(
       update ? "Updating profile" : "Building profile",
       async (signal) => {
-        const jobId = await api.buildProfile(id);
-        const done = await waitForJob(api, jobId, setJob, signal);
-        if (!done.result?.profile_id || (!selected.local_draft && done.result.profile_id !== id))
-          throw new Error("The service returned an unexpected profile result.");
-        const items = await refreshProfiles();
-        const p = items.find((p) => p.id === done.result?.profile_id);
-        if (!p || p.status !== "ready")
-          throw new Error(
-            "The build completed, but the profile is not ready. Refresh to check its status.",
+        try {
+          const jobId = await api.buildProfile(id);
+          const done = await waitForJob(api, jobId, setJob, signal);
+          if (
+            !done.result?.profile_id ||
+            (!selected.local_draft && done.result.profile_id !== id)
+          )
+            throw new Error(
+              "The service returned an unexpected profile result.",
+            );
+          const items = await refreshProfiles();
+          const p = items.find((p) => p.id === done.result?.profile_id);
+          if (!p || p.status !== "ready")
+            throw new Error(
+              "The build completed, but the profile is not ready. Refresh to check its status.",
+            );
+          setSelectedId(p.id);
+          setUpdatedVersion(p.version);
+          setVersions(null);
+          setComparison(null);
+          setNotice(
+            `Profile v${p.version} is ready. Inspect the part again to see a new result.`,
           );
-        setSelectedId(p.id);
-        setUpdatedVersion(p.version);
-        setVersions(null);
-        setComparison(null);
-        setNotice(
-          `Profile v${p.version} is ready. Inspect the part again to see a new result.`,
-        );
+        } catch (error) {
+          if (!demo) {
+            try {
+              const records = await refreshProfiles();
+              setSelectedId((current) =>
+                records.some((p) => p.id === current) ? current : "",
+              );
+            } catch {
+              /* Preserve the original processing error. */
+            }
+          }
+          throw error;
+        }
       },
     );
   }
@@ -685,7 +709,10 @@ export default function Workspace({ mode }: { mode: Mode }) {
                       </span>
                     </div>
                     <p className="section-copy">
-                      {selected.description || (demo ? "No description added." : "One part type and camera view per profile.")}
+                      {selected.description ||
+                        (demo
+                          ? "No description added."
+                          : "One part type and camera view per profile.")}
                     </p>
                     <dl className="profile-facts">
                       <div>
@@ -705,66 +732,82 @@ export default function Workspace({ mode }: { mode: Mode }) {
                         <dd>{formatDate(selected.updated_at)}</dd>
                       </div>
                     </dl>
-                    {(!demo && !selected.local_draft) ? <p className="section-copy">This profile is saved on the inspection service. Use engineer-confirmed references and validation to prepare a new version.</p> : <>
-                    {!demo && <p className="draft-notice">Unsent draft · stored only in this tab. Reloading discards the name and files. Add 3–50 distinct reference images; 10–20 recommended.</p>}
-                    <div className="subsection-heading">
-                      <h3>Known-good samples</h3>
-                      <p>Use the same part type, camera view and framing.</p>
-                    </div>
-                    <FileDrop
-                      files={samples}
-                      onChange={setSamples}
-                      multiple
-                      disabled={!canOperate}
-                      limits={capabilities.limits}
-                      label="Upload known-good samples"
-                    />
-                    <div className="action-row">
-                      {demo && (
-                        <button
-                          className="text-button"
+                    {!demo && !selected.local_draft ? (
+                      <p className="section-copy">
+                        This profile is saved on the inspection service. Use
+                        engineer-confirmed references and validation to prepare
+                        a new version.
+                      </p>
+                    ) : (
+                      <>
+                        {!demo && (
+                          <p className="draft-notice">
+                            Unsent draft · stored only in this tab. Reloading
+                            discards the name and files. Add 3–50 distinct
+                            reference images; 10–20 recommended.
+                          </p>
+                        )}
+                        <div className="subsection-heading">
+                          <h3>Known-good samples</h3>
+                          <p>
+                            Use the same part type, camera view and framing.
+                          </p>
+                        </div>
+                        <FileDrop
+                          files={samples}
+                          onChange={setSamples}
+                          multiple
                           disabled={!canOperate}
-                          onClick={() => void loadFixture("sample")}
-                        >
-                          Use example sample
-                        </button>
-                      )}
-                      <button
-                        className="button secondary"
-                        disabled={!canOperate || !samples.length}
-                        onClick={() => void uploadSamples()}
-                      >
-                        Upload {samples.length || ""}{" "}
-                        {samples.length === 1 ? "sample" : "samples"}
-                      </button>
-                    </div>
-                    <div className="build-strip">
-                      <div>
-                        <h3>
-                          {selected.version
-                            ? "Build the next profile version"
-                            : "Build the reference profile"}
-                        </h3>
-                        <p>
-                          Prepare a version from accepted samples and supported
-                          corrections.
-                        </p>
-                      </div>
-                      <button
-                        className="button primary"
-                        disabled={
-                          !canOperate ||
-                          selected.sample_count < (demo ? 1 : 3) ||
-                          selected.status === "building"
-                        }
-                        onClick={() => void buildProfile()}
-                      >
-                        {selected.version
-                          ? "Build next version"
-                          : "Build profile"}
-                      </button>
-                    </div>
-                    </>}
+                          limits={capabilities.limits}
+                          label="Upload known-good samples"
+                        />
+                        <div className="action-row">
+                          {demo && (
+                            <button
+                              className="text-button"
+                              disabled={!canOperate}
+                              onClick={() => void loadFixture("sample")}
+                            >
+                              Use example sample
+                            </button>
+                          )}
+                          <button
+                            className="button secondary"
+                            disabled={!canOperate || !samples.length}
+                            onClick={() => void uploadSamples()}
+                          >
+                            Upload {samples.length || ""}{" "}
+                            {samples.length === 1 ? "sample" : "samples"}
+                          </button>
+                        </div>
+                        <div className="build-strip">
+                          <div>
+                            <h3>
+                              {selected.version
+                                ? "Build the next profile version"
+                                : "Build the reference profile"}
+                            </h3>
+                            <p>
+                              Prepare a version from accepted samples and
+                              supported corrections.
+                            </p>
+                          </div>
+                          <button
+                            className="button primary"
+                            disabled={
+                              !canOperate ||
+                              selected.sample_count < (demo ? 1 : 3) ||
+                              selected.status === "building"
+                            }
+                            onClick={() => void buildProfile()}
+                          >
+                            {selected.version
+                              ? "Build next version"
+                              : "Build profile"}
+                          </button>
+                        </div>
+                      </>
+                    )}
                     {selected.status === "ready" && (
                       <button
                         className="button secondary"
@@ -776,166 +819,189 @@ export default function Workspace({ mode }: { mode: Mode }) {
                       </button>
                     )}
                   </section>
-                  <section className="versions-section">
-                    <div className="section-heading">
-                      <h2>Profile versions</h2>
-                      {!capabilities.features.version_history && (
-                        <span className="planned">Planned</span>
-                      )}
-                    </div>
-                    {!capabilities.features.version_history ? (
-                      <p className="section-copy">
-                        Version history, comparison and restore become available
-                        when the backend supports them. The active version is
-                        shown above.
-                      </p>
-                    ) : (
-                      <>
-                        <button
-                          className="button secondary"
-                          disabled={!canOperate}
-                          onClick={() =>
-                            void action("Loading version history", async () =>
-                              setVersions(await api.versions(selected.id)),
-                            )
-                          }
-                        >
-                          Load version history
-                        </button>
-                        {versions && !versions.length && (
+                  {!demo && !selected.local_draft && api.workflow ? (
+                    <VersionWorkflow
+                      key={selected.id}
+                      api={api}
+                      profile={selected}
+                      disabled={!canOperate}
+                      run={action}
+                      onJob={setJob}
+                      onChanged={refreshProfiles}
+                    />
+                  ) : (
+                    <>
+                      <section className="versions-section">
+                        <div className="section-heading">
+                          <h2>Profile versions</h2>
+                          {!capabilities.features.version_history && (
+                            <span className="planned">Planned</span>
+                          )}
+                        </div>
+                        {!capabilities.features.version_history ? (
                           <p className="section-copy">
-                            No version records are available.
+                            Version history, comparison and restore become
+                            available when the backend supports them. The active
+                            version is shown above.
                           </p>
-                        )}
-                        {versions?.map((v) => (
-                          <div className="version-row" key={v.version}>
-                            <div>
-                              <strong>
-                                v{v.version}
-                                {v.active ? " · Active" : ""}
-                              </strong>
-                              <p>
-                                {v.sample_count} samples ·{" "}
-                                {formatDate(v.created_at)} · {v.source}
+                        ) : (
+                          <>
+                            <button
+                              className="button secondary"
+                              disabled={!canOperate}
+                              onClick={() =>
+                                void action(
+                                  "Loading version history",
+                                  async () =>
+                                    setVersions(
+                                      await api.versions(selected.id),
+                                    ),
+                                )
+                              }
+                            >
+                              Load version history
+                            </button>
+                            {versions && !versions.length && (
+                              <p className="section-copy">
+                                No version records are available.
                               </p>
-                            </div>
-                            {!v.active && (
-                              <div className="version-actions">
-                                {capabilities.features.version_comparison && (
-                                  <button
-                                    className="text-button"
-                                    disabled={!canOperate}
-                                    onClick={() =>
-                                      void action(
-                                        "Comparing versions",
-                                        async () =>
-                                          setComparison(
-                                            await api.compare(
-                                              selected.id,
-                                              v.version,
-                                              selected.version,
-                                            ),
-                                          ),
-                                      )
-                                    }
-                                  >
-                                    Compare
-                                  </button>
+                            )}
+                            {versions?.map((v) => (
+                              <div className="version-row" key={v.version}>
+                                <div>
+                                  <strong>
+                                    v{v.version}
+                                    {v.active ? " · Active" : ""}
+                                  </strong>
+                                  <p>
+                                    {v.sample_count} samples ·{" "}
+                                    {formatDate(v.created_at)} · {v.source}
+                                  </p>
+                                </div>
+                                {!v.active && (
+                                  <div className="version-actions">
+                                    {capabilities.features
+                                      .version_comparison && (
+                                      <button
+                                        className="text-button"
+                                        disabled={!canOperate}
+                                        onClick={() =>
+                                          void action(
+                                            "Comparing versions",
+                                            async () =>
+                                              setComparison(
+                                                await api.compare(
+                                                  selected.id,
+                                                  v.version,
+                                                  selected.version,
+                                                ),
+                                              ),
+                                          )
+                                        }
+                                      >
+                                        Compare
+                                      </button>
+                                    )}
+                                    {capabilities.features.rollback && (
+                                      <button
+                                        className="text-button"
+                                        disabled={!canOperate}
+                                        onClick={() => {
+                                          if (
+                                            window.confirm(
+                                              `Restore profile version ${v.version}? Existing inspection records retain their original version.`,
+                                            )
+                                          )
+                                            void action(
+                                              "Restoring version",
+                                              async (signal) => {
+                                                const id = await api.rollback(
+                                                  selected.id,
+                                                  v.version,
+                                                );
+                                                await waitForJob(
+                                                  api,
+                                                  id,
+                                                  setJob,
+                                                  signal,
+                                                );
+                                                await refreshProfiles();
+                                                setVersions(
+                                                  await api.versions(
+                                                    selected.id,
+                                                  ),
+                                                );
+                                                setComparison(null);
+                                                setNotice(
+                                                  "Profile version restored by the service.",
+                                                );
+                                              },
+                                            );
+                                        }}
+                                      >
+                                        Restore v{v.version}
+                                      </button>
+                                    )}
+                                  </div>
                                 )}
-                                {capabilities.features.rollback && (
-                                  <button
-                                    className="text-button"
-                                    disabled={!canOperate}
-                                    onClick={() => {
-                                      if (
-                                        window.confirm(
-                                          `Restore profile version ${v.version}? Existing inspection records retain their original version.`,
-                                        )
-                                      )
-                                        void action(
-                                          "Restoring version",
-                                          async (signal) => {
-                                            const id = await api.rollback(
-                                              selected.id,
-                                              v.version,
-                                            );
-                                            await waitForJob(
-                                              api,
-                                              id,
-                                              setJob,
-                                              signal,
-                                            );
-                                            await refreshProfiles();
-                                            setVersions(
-                                              await api.versions(selected.id),
-                                            );
-                                            setComparison(null);
-                                            setNotice(
-                                              "Profile version restored by the service.",
-                                            );
-                                          },
-                                        );
-                                    }}
-                                  >
-                                    Restore v{v.version}
-                                  </button>
+                              </div>
+                            ))}
+                            {!capabilities.features.version_comparison && (
+                              <p className="feature-note">
+                                Version comparison{" "}
+                                <span className="planned">Planned</span>
+                              </p>
+                            )}
+                            {!capabilities.features.rollback && (
+                              <p className="feature-note">
+                                Version restore{" "}
+                                <span className="planned">Planned</span>
+                              </p>
+                            )}
+                            {comparison && (
+                              <div className="comparison-result">
+                                <h3>
+                                  v{comparison.from_version} compared with v
+                                  {comparison.to_version}
+                                </h3>
+                                <p>{comparison.summary}</p>
+                                {comparison.metrics.length ? (
+                                  <table>
+                                    <thead>
+                                      <tr>
+                                        <th>Metric</th>
+                                        <th>Before</th>
+                                        <th>After</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {comparison.metrics.map((m) => (
+                                        <tr key={m.name}>
+                                          <td>{m.name}</td>
+                                          <td>
+                                            {m.before ?? "Not reported"}{" "}
+                                            {m.unit}
+                                          </td>
+                                          <td>
+                                            {m.after ?? "Not reported"} {m.unit}
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                ) : (
+                                  <p>
+                                    No evaluation metrics reported by the
+                                    service.
+                                  </p>
                                 )}
                               </div>
                             )}
-                          </div>
-                        ))}
-                        {!capabilities.features.version_comparison && (
-                          <p className="feature-note">
-                            Version comparison{" "}
-                            <span className="planned">Planned</span>
-                          </p>
+                          </>
                         )}
-                        {!capabilities.features.rollback && (
-                          <p className="feature-note">
-                            Version restore{" "}
-                            <span className="planned">Planned</span>
-                          </p>
-                        )}
-                        {comparison && (
-                          <div className="comparison-result">
-                            <h3>
-                              v{comparison.from_version} compared with v
-                              {comparison.to_version}
-                            </h3>
-                            <p>{comparison.summary}</p>
-                            {comparison.metrics.length ? (
-                              <table>
-                                <thead>
-                                  <tr>
-                                    <th>Metric</th>
-                                    <th>Before</th>
-                                    <th>After</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {comparison.metrics.map((m) => (
-                                    <tr key={m.name}>
-                                      <td>{m.name}</td>
-                                      <td>
-                                        {m.before ?? "Not reported"} {m.unit}
-                                      </td>
-                                      <td>
-                                        {m.after ?? "Not reported"} {m.unit}
-                                      </td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            ) : (
-                              <p>
-                                No evaluation metrics reported by the service.
-                              </p>
-                            )}
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </section>
+                      </section>
+                    </>
+                  )}
                   <details className="profile-record">
                     <summary>Profile record</summary>
                     <dl className="detail-list">
@@ -1196,7 +1262,51 @@ export default function Workspace({ mode }: { mode: Mode }) {
                               : `${inspection.processing_ms.toLocaleString()} ms`}
                           </dd>
                         </div>
+                        {inspection.anomaly_score !== undefined && (
+                          <div>
+                            <dt>Anomaly score</dt>
+                            <dd>{inspection.anomaly_score.toFixed(4)}</dd>
+                          </div>
+                        )}
+                        {inspection.threshold !== undefined && (
+                          <div>
+                            <dt>Threshold</dt>
+                            <dd>{inspection.threshold.toFixed(4)}</dd>
+                          </div>
+                        )}
                       </dl>
+                      {inspection.threshold_status && (
+                        <p className="small-note">
+                          {inspection.threshold_status ===
+                          "heuristic_not_probability"
+                            ? "Heuristic anomaly threshold, not a calibrated probability."
+                            : inspection.threshold_status}
+                        </p>
+                      )}
+                      {inspection.runtime && (
+                        <>
+                          <span
+                            className={`runtime-badge ${inspection.runtime.amd_gpu ? "amd" : ""}`}
+                          >
+                            {inspection.runtime.amd_gpu
+                              ? `AMD GPU · ${inspection.runtime.device_name}`
+                              : inspection.runtime.device === "cpu"
+                                ? "CPU"
+                                : inspection.runtime.device_name}
+                          </span>
+                          <p className="small-note">
+                            Inference time covers preprocessing, encoding and
+                            retrieval. It excludes loading, rendering and
+                            network.
+                          </p>
+                        </>
+                      )}
+                      {inspection.matches_reference_image && (
+                        <p className="reference-warning" role="alert">
+                          This image is already a reference. It is not an
+                          independent inspection example.
+                        </p>
+                      )}
                     </>
                   ) : (
                     <div className="awaiting">
@@ -1242,6 +1352,8 @@ export default function Workspace({ mode }: { mode: Mode }) {
                     <form onSubmit={(e) => void submitFeedback(e)}>
                       <p className="section-copy">
                         Confirm the part separately from the model result.
+                        {!demo &&
+                          " Once saved, the decision and note cannot be edited in this version."}
                       </p>
                       <label className="field-label" htmlFor="human-decision">
                         Human decision
@@ -1249,7 +1361,7 @@ export default function Workspace({ mode }: { mode: Mode }) {
                       <select
                         id="human-decision"
                         value={humanDecision}
-                        disabled={!!busy}
+                        disabled={!!busy || (!demo && !!inspection.feedback)}
                         onChange={(e) =>
                           setHumanDecision(e.target.value as Decision)
                         }
@@ -1267,16 +1379,20 @@ export default function Workspace({ mode }: { mode: Mode }) {
                         maxLength={2000}
                         rows={3}
                         value={comment}
-                        disabled={!!busy}
+                        disabled={!!busy || (!demo && !!inspection.feedback)}
                         onChange={(e) => setComment(e.target.value)}
                       />
                       <button
                         className="button primary full"
                         type="submit"
-                        disabled={!canOperate}
+                        disabled={
+                          !canOperate || (!demo && !!inspection.feedback)
+                        }
                       >
                         {inspection.feedback
-                          ? "Update review"
+                          ? demo
+                            ? "Update review"
+                            : "Review saved"
                           : "Save engineer review"}
                       </button>
                       {inspection.feedback && (
@@ -1315,7 +1431,15 @@ export default function Workspace({ mode }: { mode: Mode }) {
                       Request a new version using the supported correction
                       workflow.
                     </p>
-                    {capabilities.features.profile_updates ? (
+                    {!demo && api.workflow ? (
+                      <button
+                        className="button secondary full"
+                        disabled={!canOperate}
+                        onClick={() => setScreen("profiles")}
+                      >
+                        Review validation & versions
+                      </button>
+                    ) : capabilities.features.profile_updates ? (
                       <button
                         className="button secondary full"
                         disabled={
@@ -1438,20 +1562,28 @@ export default function Workspace({ mode }: { mode: Mode }) {
             disabled={!!busy}
             onChange={(e) => setName(e.target.value)}
           />
-          {demo ? <>
-          <label className="field-label" htmlFor="profile-description">
-            Description <span>(optional)</span>
-          </label>
-          <textarea
-            id="profile-description"
-            rows={3}
-            maxLength={1000}
-            placeholder="Part type, camera view or inspection criteria"
-            value={description}
-            disabled={!!busy}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-          </> : <p className="small-note">This creates an unsent draft in this tab. Upload references and build it to save the profile. Descriptions are not yet stored by the service.</p>}
+          {demo ? (
+            <>
+              <label className="field-label" htmlFor="profile-description">
+                Description <span>(optional)</span>
+              </label>
+              <textarea
+                id="profile-description"
+                rows={3}
+                maxLength={1000}
+                placeholder="Part type, camera view or inspection criteria"
+                value={description}
+                disabled={!!busy}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </>
+          ) : (
+            <p className="small-note">
+              This creates an unsent draft in this tab. Upload references and
+              build it to save the profile. Descriptions are not yet stored by
+              the service.
+            </p>
+          )}
           {formError && (
             <p className="field-error" role="alert">
               {formError}
