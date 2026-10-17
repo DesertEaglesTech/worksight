@@ -727,7 +727,12 @@ main {
   padding: 16px 20px;
   border-bottom: 1px solid var(--line);
 }
+.inspect-action {
+  flex-wrap: wrap;
+}
 .inspect-action > div {
+  /* Never squeeze the status text into a one-letter column; the button wraps instead. */
+  flex: 1 1 180px;
   min-width: 0;
 }
 .inspect-action strong {
@@ -2518,5 +2523,21 @@ td {
   .ai-report-columns {
     grid-template-columns: 1fr;
     gap: 22px;
+  }
+}
+
+/* Stack image and result panel when the workspace (not the window) is too narrow for both. */
+main#main {
+  container-type: inline-size;
+  container-name: workspace;
+}
+@container workspace (max-width: 720px) {
+  main#main > .inspection-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  main#main > .inspection-layout > .result-sidebar {
+    border-left: 0;
+    border-top: 1px solid #cfd4da;
+    max-height: none;
   }
 }
