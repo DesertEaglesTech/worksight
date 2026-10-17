@@ -1,13 +1,24 @@
 .DS_Store
 .idea/
+.env*
+!.env.example
+
+# Web
 **/node_modules/
 **/.next/
 **/out/
 **/coverage/
 **/test-results/
 **/playwright-report/
-.env*
-!.env.example
 web/next-env.d.ts
 web/tsconfig.tsbuildinfo
+
+# Backend
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+data/
 work/

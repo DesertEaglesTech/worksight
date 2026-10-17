@@ -1,0 +1,10 @@
+# Supply an official target-compatible ROCm PyTorch image tag verified on the GPU host.
+ARG ROCM_IMAGE
+FROM ${ROCM_IMAGE}
+WORKDIR /app
+COPY backend/ /app/backend/
+RUN python -c "import torch; assert torch.version.hip, 'ROCm PyTorch base image required'" \
+    && python -m pip install --no-cache-dir /app/backend
+ENV WORKSIGHT_DEVICE=cuda WORKSIGHT_REQUIRE_AMD=1 WORKSIGHT_DATA_DIR=/data TORCH_HOME=/data/torch
+EXPOSE 8000
+CMD ["python", "-m", "uvicorn", "worksight.api:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
