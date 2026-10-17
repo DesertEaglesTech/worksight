@@ -28,6 +28,7 @@ import type {
 } from "@/lib/contract";
 import { createBackendApi } from "@/lib/backend-api";
 import { createDemoApi } from "@/lib/demo";
+import { ReportPanel } from "@/components/report-panel";
 import { waitForJob } from "@/lib/jobs";
 import FileDrop from "./file-drop";
 import InspectionViewer from "./inspection-viewer";
@@ -262,7 +263,7 @@ export default function Workspace({ mode }: { mode: Mode }) {
       setNotice(
         demo
           ? "Profile created. Add known-good samples to prepare it for inspection."
-          : "Draft created in this tab. Add 3–50 distinct images (10–20 recommended), then build to save it on the server. Reloading discards this unsent draft.",
+          : "Draft created in this tab. Add 3–200 distinct images (10–20 minimum recommended; more covers more variation), then build to save it on the server. Reloading discards this unsent draft.",
       );
     });
   }
@@ -756,7 +757,7 @@ export default function Workspace({ mode }: { mode: Mode }) {
                         {!demo && (
                           <p className="draft-notice">
                             Unsent draft · stored only in this tab. Reloading
-                            discards the name and files. Add 3–50 distinct
+                            discards the name and files. Add 3–200 distinct
                             reference images; 10–20 recommended.
                           </p>
                         )}
@@ -1341,6 +1342,9 @@ export default function Workspace({ mode }: { mode: Mode }) {
                     </div>
                   )}
                 </section>
+                {!demo && inspection && (
+                  <ReportPanel inspectionId={inspection.id} />
+                )}
                 <section className="sidebar-section display-panel">
                   <div className="section-heading">
                     <h2>Image display</h2>

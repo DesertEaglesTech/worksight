@@ -79,11 +79,11 @@ describe("operator safety and API boundary", () => {
     expect(
       validateFiles(
         Array.from(
-          { length: 51 },
+          { length: 201 },
           () => new File(["x"], "a.png", { type: "image/png" }),
         ),
       ),
-    ).toContain("50");
+    ).toContain("200");
   });
   it("bounds chunked uploads even without Content-Length", async () => {
     const stream = new ReadableStream({

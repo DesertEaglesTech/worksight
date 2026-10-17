@@ -2,6 +2,8 @@ import { NextRequest } from "next/server";
 import {
   allowedRoute,
   boundedBody,
+  forwardedQuery,
+  idempotencyKey,
   MAX_BODY,
   upstreamError,
 } from "@/lib/proxy";
@@ -54,11 +56,18 @@ async function proxy(
   }
   try {
     const url = new URL(`${base.replace(/\/$/, "")}/${path.join("/")}`);
+    url.search = forwardedQuery(
+      request.method,
+      path,
+      request.nextUrl.searchParams,
+    ).toString();
     if (!["http:", "https:"].includes(url.protocol))
       throw new Error("invalid_base");
     const headers = new Headers();
     if (request.headers.get("content-type"))
       headers.set("Content-Type", request.headers.get("content-type")!);
+    const key = idempotencyKey(request.headers.get("idempotency-key"));
+    if (key) headers.set("Idempotency-Key", key);
     if (process.env.WORKSIGHT_API_TOKEN)
       headers.set("Authorization", `Bearer ${process.env.WORKSIGHT_API_TOKEN}`);
     const upstream = await fetch(url, {

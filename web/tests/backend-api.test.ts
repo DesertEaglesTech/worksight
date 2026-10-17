@@ -17,7 +17,12 @@ import {
   feedbackLabel,
   backendLimits,
 } from "../src/lib/backend-api";
-import { allowedRoute, upstreamError } from "../src/lib/proxy";
+import {
+  allowedRoute,
+  forwardedQuery,
+  idempotencyKey,
+  upstreamError,
+} from "../src/lib/proxy";
 import { assetUrl } from "../src/lib/api";
 const date = "2026-10-18T01:00:00.123456+00:00";
 const asset = `${"a".repeat(64)}.png`;
@@ -256,6 +261,17 @@ it("allows only real routes and strict authenticated PNG asset paths", () => {
     ["POST", "api/v1/profiles/p1/versions/v2/evaluate"],
     ["POST", "api/v1/profiles/p1/versions/v2/activate"],
     ["GET", "api/v1/evaluations/e1"],
+    ["POST", "api/v1/profiles/p1/batches"],
+    ["GET", "api/v1/profiles/p1/batches"],
+    ["GET", "api/v1/batches/b1"],
+    ["POST", "api/v1/profiles/p1/documents"],
+    ["GET", "api/v1/profiles/p1/documents"],
+    ["GET", "api/v1/profiles/p1/stats"],
+    ["GET", "api/v1/profiles/p1/validation"],
+    ["GET", "api/v1/profiles/p1/activations"],
+    ["POST", "api/v1/inspections/i1/report"],
+    ["GET", "api/v1/inspections/i1/report"],
+    ["GET", "api/v1/reports/r1"],
   ];
   for (const [method, path] of routes)
     expect(allowedRoute(method, path.split("/"))).toBe(true);
@@ -278,7 +294,7 @@ it("allows only real routes and strict authenticated PNG asset paths", () => {
   expect(assetUrl(`/api/v1/assets/${"A".repeat(32)}.png`)).toBe("");
   expect(backendLimits).toMatchObject({
     max_file_bytes: 10485760,
-    max_files: 50,
+    max_files: 200,
     max_image_pixels: 16000000,
   });
   expect(upstreamError(422, { detail: [{ msg: "Invalid image" }] })).toBe(
@@ -492,4 +508,52 @@ it("numbers versions by backend microsecond timestamps instead of opaque ID orde
     ["z-first", 1],
     ["a-second", 2],
   ]);
+});
+
+it("forwards only known query parameters and safe idempotency keys", () => {
+  const history = ["api", "v1", "profiles", "p1", "inspections"];
+  const query = new URLSearchParams(
+    "limit=20&cursor=abc_-=&decision=anomaly&human=none&since=2026-10-18T00:00:00Z&evil=1&decision2=x",
+  );
+  expect(Object.fromEntries(forwardedQuery("GET", history, query))).toEqual({
+    limit: "20",
+    cursor: "abc_-=",
+    decision: "anomaly",
+    human: "none",
+    since: "2026-10-18T00:00:00Z",
+  });
+  expect(
+    forwardedQuery(
+      "GET",
+      history,
+      new URLSearchParams("limit=abc&human=all"),
+    ).toString(),
+  ).toBe("");
+  const report = ["api", "v1", "inspections", "i1", "report"];
+  expect(
+    forwardedQuery(
+      "POST",
+      report,
+      new URLSearchParams("refresh=true&limit=5"),
+    ).toString(),
+  ).toBe("refresh=true");
+  expect(
+    forwardedQuery("GET", ["api", "v1", "profiles"], query).toString(),
+  ).toBe("");
+  expect(idempotencyKey("report-abc_1")).toBe("report-abc_1");
+  for (const bad of [null, "", "has space", "x".repeat(201), "line\nbreak"])
+    expect(idempotencyKey(bad)).toBeNull();
+});
+it("shows the backend reason for a rate-limited AI description", () => {
+  expect(
+    upstreamError(429, {
+      detail: "AI description limit reached for this demo; try again later",
+    }),
+  ).toBe("AI description limit reached for this demo; try again later");
+  expect(upstreamError(429, null)).toBe(
+    "The service is busy. Please try again shortly.",
+  );
+  expect(upstreamError(429, { detail: "<html>" })).toBe(
+    "The inspection service encountered an error. Try again later.",
+  );
 });
