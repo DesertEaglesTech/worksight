@@ -66,6 +66,20 @@ Trade-offs: CPU inspection is ~20× slower than v1 (more patches at higher resol
 reference is ~6× larger (2304 patches × 384 dims), and profiles built with v1 must be rebuilt because
 the encoder signature changed (the API returns 409 for them).
 
+### More references (measured after the design was fixed)
+
+Same detector, same PCB test, 100 references instead of 20 (`--references 100`, same seed rule).
+100 references exceed the memory cap, so each keeps an equal share of its patches. Not used to
+choose anything.
+
+| Category | References | AUROC | F1 | FPR | Recall |
+|---|---|---|---|---|---|
+| pcb1 | 20 → 100 | 0.905 → 0.907 | 0.591 → 0.789 | 0.050 → 0.090 | 0.440 → 0.710 |
+| pcb3 | 20 → 100 | 0.875 → 0.913 | 0.613 → 0.547 | 0.040 → 0.010 | 0.460 → 0.380 |
+
+AUROC improved on both; the threshold's operating point moved in opposite directions. More
+references help separation, but the threshold still needs checking per part.
+
 ## Reading the results
 
 - AUROC rose on all four boards, most on pcb2 and pcb3, which were weakest.

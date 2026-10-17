@@ -175,7 +175,8 @@ Optional. With `RADEON_API_KEY` set, `POST /api/v1/inspections/{id}/report` asks
 model hosted on AMD GPUs (Token Factory: `Gemma-4-31B-IT`, falling back to `DeepSeek-V4.1-Flash`)
 to describe what is visibly different between the inspected part, its heatmap overlay and the most
 similar reference. The detector's decision, score and threshold are passed in and never changed;
-the report is labelled assistive and records which model answered. Details: [docs/API.md](docs/API.md).
+the report is labelled assistive and records which model answered. Part documentation attached
+to the profile (PDF/text, extracted locally) is added to the report prompt only. Details: [docs/API.md](docs/API.md).
 
 The images go to AMD's hosted endpoint (`developer.amd.com.cn`) only on request; per AMD's terms,
 prompts and outputs are kept for about two days and not used for training. Do not use it for
@@ -236,7 +237,8 @@ A passing gate is not a production safety guarantee.
 
 - Run **one process / one worker**. The queue is in-process, not distributed.
 - No multi-user tenancy, retention UI or production authorization system.
-- 3–50 distinct references; 10 MiB and 16 million pixels/image; validation at most 100 images.
+- 3–200 distinct references (memory capped at 80,000 patches); batches up to 200 images;
+  10 MiB and 16 million pixels/image; validation at most 100 images.
 - Full image resized to 384×384 without cropping. Aspect distortion, lighting changes, small defects
   and new camera views may reduce performance. Heatmap is indicative localization.
 - No claim of arbitrary-machine generalization, causal diagnosis or remaining-life prediction.

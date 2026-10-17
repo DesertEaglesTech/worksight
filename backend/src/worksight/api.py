@@ -120,6 +120,24 @@ def create_app(settings: Settings | None = None, service: InspectionService | No
         svc.store.get("profile", profile_id)
         return svc.inspect(profile_id, await upload(image, svc))
 
+    @app.post("/api/v1/profiles/{profile_id}/batches", status_code=202, dependencies=dependencies)
+    async def create_batch(
+        profile_id: str, images: list[UploadFile] = File(...), svc=Depends(get_service)
+    ):
+        svc.store.get("profile", profile_id)
+        if not 1 <= len(images) <= config.max_batch_images:
+            raise HTTPException(422, f"Provide 1–{config.max_batch_images} images")
+        uploads = [(im.filename, await upload(im, svc)) for im in images]
+        return svc.create_batch(profile_id, uploads)
+
+    @app.get("/api/v1/profiles/{profile_id}/batches", dependencies=dependencies)
+    def batches(profile_id: str, svc=Depends(get_service)):
+        return svc.list_batches(profile_id)
+
+    @app.get("/api/v1/batches/{batch_id}", dependencies=dependencies)
+    def batch(batch_id: str, svc=Depends(get_service)):
+        return svc.get_batch(batch_id)
+
     @app.get("/api/v1/profiles/{profile_id}/inspections", dependencies=dependencies)
     def inspections(
         profile_id: str,
@@ -173,6 +191,18 @@ def create_app(settings: Settings | None = None, service: InspectionService | No
     @app.get("/api/v1/profiles/{profile_id}/documents", dependencies=dependencies)
     def documents(profile_id: str, svc=Depends(get_service)):
         return svc.list_documents(profile_id)
+
+    @app.get("/api/v1/profiles/{profile_id}/stats", dependencies=dependencies)
+    def stats(profile_id: str, svc=Depends(get_service)):
+        return svc.stats(profile_id)
+
+    @app.get("/api/v1/profiles/{profile_id}/validation", dependencies=dependencies)
+    def read_validation(profile_id: str, svc=Depends(get_service)):
+        return svc.get_validation(profile_id)
+
+    @app.get("/api/v1/profiles/{profile_id}/activations", dependencies=dependencies)
+    def activations(profile_id: str, svc=Depends(get_service)):
+        return svc.activations(profile_id)
 
     @app.get("/api/v1/profiles/{profile_id}/feedback", dependencies=dependencies)
     def feedback_list(profile_id: str, svc=Depends(get_service)):

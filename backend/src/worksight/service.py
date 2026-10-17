@@ -17,6 +17,7 @@ from .detector import (
     estimate_threshold,
     image_score,
     make_bank,
+    per_image_for_cap,
     render_heatmap,
 )
 from .encoder import VisualEncoder, cpu_budget
@@ -76,18 +77,13 @@ class InspectionService:
             else None
         )
         # In-process tasks cannot survive a restart. Do not leave stale running states.
-        for job in self.store.all("job"):
-            if job["status"] in {"queued", "running"}:
-                job.update(
-                    status="failed",
-                    error="Server restarted; resubmit the operation",
-                    finished_at=now(),
-                )
-                self.store.put("job", job)
-                if job.get("resource_kind") in {"profile", "inspection", "report"}:
-                    resource = self.store.get(job["resource_kind"], job["resource_id"])
-                    resource["status"] = "failed"
-                    self.store.put(job["resource_kind"], resource)
+        # External AI requests are never retried automatically; the client resubmits.
+        reason = "Server restarted before this finished; submit it again"
+        for kind in ("job", "profile", "inspection", "report", "batch"):
+            for record in self.store.all(kind):
+                if record.get("status") in {"queued", "running"}:
+                    record.update(status="failed", error=reason, finished_at=now())
+                    self.store.put(kind, record)
 
     @property
     def encoder(self):
@@ -144,7 +140,7 @@ class InspectionService:
                     if isinstance(exc, ReportError)
                     else f"{type(exc).__name__}: processing failed; see server logs",
                 )
-                if resource_kind in {"profile", "inspection", "report"}:
+                if resource_kind in {"profile", "inspection", "report", "batch"}:
                     resource = self.store.get(resource_kind, resource_id)
                     resource.update(status="failed", error=job["error"])
                     self.store.put(resource_kind, resource)
@@ -188,12 +184,17 @@ class InspectionService:
     def _save_version(self, profile_id, images, parent=None, feedback_ids=None):
         start = perf_counter()
         features = self._features(images)
-        bank, owners = make_bank(features, self.settings.memory_per_image)
+        per_image = per_image_for_cap(
+            features, self.settings.max_memory_patches, self.settings.memory_per_image
+        )
+        bank, owners = make_bank(features, per_image)
         # Keep the baseline threshold for feedback candidates: improvement cannot come from moving it.
         threshold = (
             parent["threshold"]
             if parent
-            else estimate_threshold(features, bank, owners, self.encoder.device)
+            else estimate_threshold(
+                features, bank, owners, self.encoder.device, self.settings.threshold_sample
+            )
         )
         version = {
             "id": new_id(),
@@ -205,6 +206,7 @@ class InspectionService:
             "references": images,
             "reference_count": len(images),
             "memory_patches": len(bank),
+            "memory_per_reference": per_image,  # null = every patch kept
             "threshold": threshold,
             "feedback_ids": feedback_ids or [],
             "evaluation_id": None,
@@ -248,8 +250,7 @@ class InspectionService:
 
         return self.submit("create_profile", build, "profile", profile["id"])
 
-    def inspect(self, profile_id, image):
-        version = self._version(profile_id)
+    def _new_inspection(self, profile_id, version, image, **extra):
         inspection = {
             "id": new_id(),
             "profile_id": profile_id,
@@ -257,49 +258,127 @@ class InspectionService:
             "image": image,
             "status": "queued",
             "created_at": now(),
+            **extra,
         }
+        return self.store.put("inspection", inspection)
+
+    def _run_inspection(self, inspection, version, bank, owners):
+        image = inspection["image"]
+        inspection["status"] = "running"
+        self.store.put("inspection", inspection)
+        original = self.store.image(image["asset"])
+        self.encoder.synchronize()
+        start = perf_counter()
+        features, grid = self.encoder.extract(original)
+        patch_scores, matches = distances(features, bank, self.encoder.device)
+        self.encoder.synchronize()
+        latency = (perf_counter() - start) * 1000
+        score = image_score(patch_scores)
+        threshold = version["threshold"]["value"]
+        heatmap, overlay = render_heatmap(original, patch_scores, grid, threshold)
+        heat_name, overlay_name = f"{new_id()}.png", f"{new_id()}.png"
+        heatmap.save(self.store.assets / heat_name)
+        overlay.save(self.store.assets / overlay_name)
+        best_owner = int(np.bincount(owners[matches]).argmax())
+        reference = version["references"][best_owner]
+        inspection.update(
+            status="ready",
+            anomaly_score=score,
+            threshold=threshold,
+            decision=decision(score, threshold),
+            threshold_status=version["threshold"]["status"],
+            image_url=f"/api/v1/assets/{image['asset']}",
+            heatmap_url=f"/api/v1/assets/{heat_name}",
+            overlay_url=f"/api/v1/assets/{overlay_name}",
+            reference_url=f"/api/v1/assets/{reference['asset']}",
+            reference_match_method="most_nearest_patch_votes",
+            inference_ms=round(latency, 3),
+            runtime=self.encoder.info(),
+            matches_reference_image=image["sha256"]
+            in {r["sha256"] for r in version["references"]},
+            finished_at=now(),
+        )
         self.store.put("inspection", inspection)
 
+    def inspect(self, profile_id, image):
+        version = self._version(profile_id)
+        inspection = self._new_inspection(profile_id, version, image)
+
         def run():
-            inspection["status"] = "running"
-            self.store.put("inspection", inspection)
             bank, owners = self._load_bank(version)
-            original = self.store.image(image["asset"])
-            self.encoder.synchronize()
-            start = perf_counter()
-            features, grid = self.encoder.extract(original)
-            patch_scores, matches = distances(features, bank, self.encoder.device)
-            self.encoder.synchronize()
-            latency = (perf_counter() - start) * 1000
-            score = image_score(patch_scores)
-            threshold = version["threshold"]["value"]
-            heatmap, overlay = render_heatmap(original, patch_scores, grid, threshold)
-            heat_name, overlay_name = f"{new_id()}.png", f"{new_id()}.png"
-            heatmap.save(self.store.assets / heat_name)
-            overlay.save(self.store.assets / overlay_name)
-            best_owner = int(np.bincount(owners[matches]).argmax())
-            reference = version["references"][best_owner]
-            inspection.update(
-                status="ready",
-                anomaly_score=score,
-                threshold=threshold,
-                decision=decision(score, threshold),
-                threshold_status=version["threshold"]["status"],
-                image_url=f"/api/v1/assets/{image['asset']}",
-                heatmap_url=f"/api/v1/assets/{heat_name}",
-                overlay_url=f"/api/v1/assets/{overlay_name}",
-                reference_url=f"/api/v1/assets/{reference['asset']}",
-                reference_match_method="most_nearest_patch_votes",
-                inference_ms=round(latency, 3),
-                runtime=self.encoder.info(),
-                matches_reference_image=image["sha256"]
-                in {r["sha256"] for r in version["references"]},
-                finished_at=now(),
-            )
-            self.store.put("inspection", inspection)
+            self._run_inspection(inspection, version, bank, owners)
             return {"inspection_id": inspection["id"]}
 
         return self.submit("inspect", run, "inspection", inspection["id"])
+
+    def create_batch(self, profile_id, uploads):
+        """Inspect many images as one job; each image becomes an ordinary inspection."""
+        if not 1 <= len(uploads) <= self.settings.max_batch_images:
+            raise ValueError(f"Provide 1–{self.settings.max_batch_images} images")
+        version = self._version(profile_id)
+        batch = {
+            "id": new_id(),
+            "profile_id": profile_id,
+            "version_id": version["id"],
+            "status": "queued",
+            "created_at": now(),
+            "total": len(uploads),
+            "processed": 0,
+            "error": None,
+        }
+        inspections = [
+            self._new_inspection(profile_id, version, image, batch_id=batch["id"], filename=name)
+            for name, image in uploads
+        ]
+        batch["inspection_ids"] = [i["id"] for i in inspections]
+        self.store.put("batch", batch)
+
+        def run():
+            batch["status"] = "running"
+            self.store.put("batch", batch)
+            bank, owners = self._load_bank(version)
+            for inspection in inspections:
+                try:
+                    self._run_inspection(inspection, version, bank, owners)
+                except Exception:
+                    # One unreadable image must not abort the rest of the batch.
+                    log.exception("Batch %s item %s failed", batch["id"], inspection["id"])
+                    inspection.update(status="failed", error="Processing failed for this image")
+                    self.store.put("inspection", inspection)
+                batch["processed"] += 1
+                self.store.put("batch", batch)
+            batch.update(status="ready", finished_at=now())
+            self.store.put("batch", batch)
+            return {"batch_id": batch["id"]}
+
+        return self.submit("batch", run, "batch", batch["id"])
+
+    def get_batch(self, batch_id):
+        batch = self.store.get("batch", batch_id)
+        items = []
+        for identifier in batch["inspection_ids"]:
+            inspection = self.store.get("inspection", identifier)
+            items.append(
+                {
+                    "inspection_id": identifier,
+                    "filename": inspection.get("filename"),
+                    "status": inspection["status"],
+                    "decision": inspection.get("decision"),
+                    "anomaly_score": inspection.get("anomaly_score"),
+                    "inference_ms": inspection.get("inference_ms"),
+                }
+            )
+        counts = {k: 0 for k in ("normal", "review", "anomaly", "failed", "pending")}
+        for item in items:
+            key = item["decision"] or ("failed" if item["status"] == "failed" else "pending")
+            counts[key] += 1
+        # Most suspicious first, so the engineer starts where review matters most.
+        items.sort(key=lambda x: (x["anomaly_score"] is None, -(x["anomaly_score"] or 0)))
+        return {**batch, "counts": counts, "items": items}
+
+    def list_batches(self, profile_id):
+        self.store.get("profile", profile_id)
+        return {"items": [b for b in self.store.all("batch") if b["profile_id"] == profile_id]}
 
     def feedback(self, inspection_id, label, note=""):
         with self.lock:
@@ -718,4 +797,112 @@ class InspectionService:
         return {
             "text": docs.context(attached, self.settings.report_document_chars),
             "ids": [d["id"] for d in attached],
+        }
+
+    def stats(self, profile_id):
+        """Facts measured from this profile's own records; nothing estimated."""
+        profile = self.store.get("profile", profile_id)
+        versions = [v for v in self.store.all("version") if v["profile_id"] == profile_id]
+        active = next((v for v in versions if v["id"] == profile["active_version_id"]), None)
+        ready = [
+            i
+            for i in self.store.all("inspection")
+            if i["profile_id"] == profile_id and i["status"] == "ready"
+        ]
+        labels = {
+            f["inspection_id"]: f["label"]
+            for f in self.store.all("feedback")
+            if f["profile_id"] == profile_id
+        }
+        latencies = [i["inference_ms"] for i in ready]
+        decisions = {k: sum(i["decision"] == k for i in ready) for k in ("normal", "review", "anomaly")}
+        pairs = [(i["decision"], labels[i["id"]]) for i in ready if i["id"] in labels]
+        confusion = {
+            f"{d}->{h}": sum(p == (d, h) for p in pairs)
+            for d in ("normal", "review", "anomaly")
+            for h in ("normal", "anomaly", "unsure")
+        }
+        decided = [(d, h) for d, h in pairs if d != "review" and h != "unsure"]
+        return {
+            "profile_id": profile_id,
+            "created_at": profile["created_at"],
+            "versions": len(versions),
+            "onboarding": None
+            if active is None
+            else {
+                "version_id": active["id"],
+                "reference_count": active["reference_count"],
+                "build_ms": active.get("build_ms"),
+                "memory_patches": active.get("memory_patches"),
+                "scope": "feature extraction + memory + threshold, warm encoder; no model training",
+            },
+            "inspections": {
+                "count": len(ready),
+                "decisions": decisions,
+                "inference_ms_p50": float(np.median(latencies)) if latencies else None,
+                "inference_ms_p95": float(np.quantile(latencies, 0.95)) if latencies else None,
+                "first_at": min((i["created_at"] for i in ready), default=None),
+                "last_at": max((i["created_at"] for i in ready), default=None),
+            },
+            "engineer_review": {
+                "feedback_count": len(labels),
+                "labels": {k: sum(v == k for v in labels.values()) for k in ("normal", "anomaly", "unsure")},
+                "model_to_human": confusion,
+                "agreement": {
+                    "agree": sum(d == h for d, h in decided),
+                    "compared": len(decided),
+                    "rate": sum(d == h for d, h in decided) / len(decided) if decided else None,
+                    "rule": "normal/anomaly decisions vs normal/anomaly labels; review and unsure excluded",
+                },
+            },
+            "batches": sum(b["profile_id"] == profile_id for b in self.store.all("batch")),
+            "reports": {
+                k: sum(
+                    r["profile_id"] == profile_id and r["status"] == k
+                    for r in self.store.all("report")
+                )
+                for k in ("ready", "failed")
+            },
+        }
+
+    def get_validation(self, profile_id):
+        profile = self.store.get("profile", profile_id)
+        if not profile.get("validation_id"):
+            raise KeyError("validation set not found")
+        record = self.store.get("validation", profile["validation_id"])
+        samples = [
+            {
+                "sha256": sample["image"]["sha256"],
+                "label": "anomaly" if sample["label"] else "normal",
+                "image_url": f"/api/v1/assets/{sample['image']['asset']}",
+            }
+            for sample in record["samples"]
+        ]
+        return {
+            "id": record["id"],
+            "profile_id": profile_id,
+            "created_at": record["created_at"],
+            "baseline_version_id": record["baseline_version_id"],
+            "frozen": True,
+            "counts": {k: sum(x["label"] == k for x in samples) for k in ("normal", "anomaly")},
+            "samples": samples,
+        }
+
+    def activations(self, profile_id):
+        self.store.get("profile", profile_id)
+        created = {
+            v["id"]: v["created_at"]
+            for v in self.store.all("version")
+            if v["profile_id"] == profile_id
+        }
+        return {
+            "items": [
+                {
+                    **a,
+                    "activated_at": a["created_at"],
+                    "to_version_created_at": created.get(a["to_version_id"]),
+                }
+                for a in self.store.all("activation")
+                if a["profile_id"] == profile_id
+            ]
         }

@@ -52,7 +52,13 @@ class Settings:
     torch_threads: int | None = field(
         default_factory=lambda: int(os.getenv("WORKSIGHT_TORCH_THREADS", "0")) or None
     )
-    max_reference_images: int = 50
+    max_reference_images: int = 200
+    # Memory cap: above it, each reference keeps an equal share of its patches.
+    max_memory_patches: int = field(
+        default_factory=lambda: int(os.getenv("WORKSIGHT_MAX_MEMORY_PATCHES", "80000"))
+    )
+    threshold_sample: int = 30  # references scored leave-one-out for the threshold
+    max_batch_images: int = 200
     max_upload_bytes: int = 10 * 1024 * 1024
     max_image_pixels: int = 16_000_000
     memory_per_image: int | None = None  # None keeps every reference patch
