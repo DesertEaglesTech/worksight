@@ -1,6 +1,10 @@
 import { z } from "zod";
-import { runtimeSchema, gateSchema, type Evaluation } from "./backend-contract";
-export type { Evaluation } from "./backend-contract";
+import {
+  runtimeSchema,
+  gateSchema,
+  type Evaluation,
+} from "./backend-contract.ts";
+export type { Evaluation } from "./backend-contract.ts";
 
 export const decisionSchema = z.enum(["pass", "fail", "review"]);
 export type Decision = z.infer<typeof decisionSchema>;
@@ -142,5 +146,5 @@ export interface WorksightApi {
   ): Promise<Inspection>;
   versions(id: string): Promise<ProfileVersion[]>;
   compare(id: string, from: number, to: number): Promise<VersionComparison>;
-  rollback(id: string, version: number): Promise<string>;
+  rollback(id: string, version: number): Promise<string | void>;
 }

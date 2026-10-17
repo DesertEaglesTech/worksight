@@ -268,18 +268,21 @@ export default function Workspace({ mode }: { mode: Mode }) {
   }
   async function uploadSamples() {
     if (!selected || !samples.length) return;
-    await action("Uploading samples", async () => {
-      const p = await api.uploadSamples(selected.id, samples);
-      setProfiles((current) =>
-        current.map((item) => (item.id === p.id ? p : item)),
-      );
-      setSamples([]);
-      setNotice(
-        demo
-          ? "Samples accepted. Build the profile when the reference set is ready."
-          : "Files staged in this tab. Build the profile to upload and save them. Reloading discards unsent files.",
-      );
-    });
+    await action(
+      demo ? "Uploading samples" : "Staging reference files",
+      async () => {
+        const p = await api.uploadSamples(selected.id, samples);
+        setProfiles((current) =>
+          current.map((item) => (item.id === p.id ? p : item)),
+        );
+        setSamples([]);
+        setNotice(
+          demo
+            ? "Samples accepted. Build the profile when the reference set is ready."
+            : "Files staged in this tab. Build the profile to upload and save them. Reloading discards unsent files.",
+        );
+      },
+    );
   }
   async function buildProfile(update = false) {
     if (!selected) return;
@@ -716,7 +719,11 @@ export default function Workspace({ mode }: { mode: Mode }) {
                     </p>
                     <dl className="profile-facts">
                       <div>
-                        <dt>Accepted samples</dt>
+                        <dt>
+                          {selected.local_draft
+                            ? "Staged samples"
+                            : "Accepted samples"}
+                        </dt>
                         <dd>{selected.sample_count}</dd>
                       </div>
                       <div>
@@ -728,7 +735,13 @@ export default function Workspace({ mode }: { mode: Mode }) {
                         </dd>
                       </div>
                       <div>
-                        <dt>{demo ? "Last updated" : "Version created"}</dt>
+                        <dt>
+                          {demo
+                            ? "Last updated"
+                            : selected.local_draft
+                              ? "Draft started"
+                              : "Version created"}
+                        </dt>
                         <dd>{formatDate(selected.updated_at)}</dd>
                       </div>
                     </dl>
@@ -776,7 +789,7 @@ export default function Workspace({ mode }: { mode: Mode }) {
                             disabled={!canOperate || !samples.length}
                             onClick={() => void uploadSamples()}
                           >
-                            Upload {samples.length || ""}{" "}
+                            {demo ? "Upload" : "Stage"} {samples.length || ""}{" "}
                             {samples.length === 1 ? "sample" : "samples"}
                           </button>
                         </div>
@@ -819,7 +832,16 @@ export default function Workspace({ mode }: { mode: Mode }) {
                       </button>
                     )}
                   </section>
-                  {!demo && !selected.local_draft && api.workflow ? (
+                  {!demo &&
+                  (selected.local_draft || selected.status !== "ready") ? (
+                    <p className="section-copy">
+                      {selected.local_draft
+                        ? "Version history and validation become available after this draft is built and saved."
+                        : selected.status === "failed"
+                          ? "Profile preparation failed. Create a new profile with valid distinct images to retry."
+                          : "The service is preparing this profile. Refresh profiles to check its status."}
+                    </p>
+                  ) : !demo && api.workflow ? (
                     <VersionWorkflow
                       key={selected.id}
                       api={api}
@@ -919,12 +941,13 @@ export default function Workspace({ mode }: { mode: Mode }) {
                                                   selected.id,
                                                   v.version,
                                                 );
-                                                await waitForJob(
-                                                  api,
-                                                  id,
-                                                  setJob,
-                                                  signal,
-                                                );
+                                                if (id)
+                                                  await waitForJob(
+                                                    api,
+                                                    id,
+                                                    setJob,
+                                                    signal,
+                                                  );
                                                 await refreshProfiles();
                                                 setVersions(
                                                   await api.versions(
@@ -1556,7 +1579,7 @@ export default function Workspace({ mode }: { mode: Mode }) {
             autoFocus
             id="profile-name"
             required
-            maxLength={100}
+            maxLength={demo ? 100 : 120}
             placeholder="e.g. Bearing housing · top view"
             value={name}
             disabled={!!busy}

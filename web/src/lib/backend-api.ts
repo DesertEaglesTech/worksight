@@ -62,6 +62,12 @@ export function mapVersions(
     .sort(
       (a, b) =>
         Date.parse(a.created_at) - Date.parse(b.created_at) ||
+        (a.created_at.match(/\.(\d+)/)?.[1] ?? "")
+          .padEnd(9, "0")
+          .slice(3)
+          .localeCompare(
+            (b.created_at.match(/\.(\d+)/)?.[1] ?? "").padEnd(9, "0").slice(3),
+          ) ||
         a.id.localeCompare(b.id),
     )
     .map((v, i) => ({
@@ -395,16 +401,66 @@ export function createBackendApi(): WorksightApi {
       return inspection(inspectionId);
     },
     versions,
-    async compare() {
+    async compare(profileId, from, to) {
+      const items = await versions(profileId);
+      const before = items.find((v) => v.version === from);
+      const after = items.find((v) => v.version === to);
+      if (!before?.id || !after?.id)
+        throw new ApiError("Choose existing profile versions.", 404);
+      for (const version of [after, before]) {
+        if (!version.evaluation_id) continue;
+        const report = await backendRequest(
+          `/evaluations/${id(version.evaluation_id)}`,
+          evaluationSchema,
+        );
+        const forward =
+          report.baseline_version_id === before.id &&
+          report.version_id === after.id;
+        const reverse =
+          report.baseline_version_id === after.id &&
+          report.version_id === before.id;
+        if (report.profile_id !== profileId || (!forward && !reverse)) continue;
+        const first = forward ? report.baseline : report.candidate;
+        const second = forward ? report.candidate : report.baseline;
+        const keys = [
+          "auroc",
+          "f1",
+          "false_positive_rate",
+          "recall",
+          "false_positive",
+          "false_negative",
+        ] as const;
+        return {
+          from_version: from,
+          to_version: to,
+          summary: report.gate.passed
+            ? report.gate.improved
+              ? "Improvement measured on the frozen validation set."
+              : "No regression measured on the frozen validation set."
+            : "The candidate failed the validation gate.",
+          metrics: keys.map((key) => ({
+            name: key.replaceAll("_", " "),
+            before: first[key],
+            after: second[key],
+            unit: "",
+          })),
+        };
+      }
       throw new ApiError(
-        "Use the candidate evaluation report to compare validated versions.",
-        501,
+        "No evaluation report exists for these two versions. Evaluate a candidate against its active baseline.",
+        404,
       );
     },
-    async rollback() {
-      throw new ApiError(
-        "Use explicit version activation to restore an approved version.",
-        501,
+    async rollback(profileId, number) {
+      const version = (await versions(profileId)).find(
+        (v) => v.version === number,
+      );
+      if (!version?.id || version.state !== "approved")
+        throw new ApiError("Only approved versions can be restored.", 409);
+      await backendRequest(
+        `/profiles/${id(profileId)}/versions/${id(version.id)}/activate`,
+        backendProfileSchema,
+        { method: "POST" },
       );
     },
     workflow: {

@@ -94,13 +94,11 @@ it("sanitizes upstream stack traces", async () => {
 it("refuses active-content assets from the backend", async () => {
   vi.stubGlobal(
     "fetch",
-    vi
-      .fn()
-      .mockResolvedValue(
-        new Response("<svg/>", {
-          headers: { "Content-Type": "image/svg+xml" },
-        }),
-      ),
+    vi.fn().mockResolvedValue(
+      new Response("<svg/>", {
+        headers: { "Content-Type": "image/svg+xml" },
+      }),
+    ),
   );
   const response = await GET(
     new NextRequest(
@@ -109,4 +107,86 @@ it("refuses active-content assets from the backend", async () => {
     context(["api", "v1", "assets", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png"]),
   );
   expect(response.status).toBe(502);
+});
+it("authenticates PNG assets through the server without leaking credentials", async () => {
+  const fetcher = vi
+    .fn()
+    .mockResolvedValue(
+      new Response(new Uint8Array([137, 80, 78, 71]), {
+        headers: { "Content-Type": "image/png" },
+      }),
+    );
+  vi.stubGlobal("fetch", fetcher);
+  const file = "b".repeat(64) + ".png";
+  const response = await GET(
+    new NextRequest(
+      `https://worksight.example/api/backend/api/v1/assets/${file}`,
+    ),
+    context(["api", "v1", "assets", file]),
+  );
+  expect(response.status).toBe(200);
+  expect(response.headers.get("content-type")).toBe("image/png");
+  expect(response.headers.get("cache-control")).toBe("private, no-store");
+  expect(fetcher.mock.calls[0][1].headers.get("Authorization")).toBe(
+    "Bearer test-server-only-token",
+  );
+  expect(response.headers.get("Authorization")).toBeNull();
+});
+it("preserves useful FastAPI validation errors without reflecting input or internal server details", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi
+      .fn()
+      .mockResolvedValue(
+        Response.json(
+          {
+            detail: [
+              {
+                msg: "Provide at least 5 images per class",
+                input: "private input",
+              },
+            ],
+          },
+          { status: 422 },
+        ),
+      ),
+  );
+  const response = await POST(
+    new NextRequest(
+      "https://worksight.example/api/backend/api/v1/profiles/p1/validation",
+      { method: "POST" },
+    ),
+    context(["api", "v1", "profiles", "p1", "validation"]),
+  );
+  expect(response.status).toBe(422);
+  const body = await response.json();
+  expect(body.error.message).toBe("Provide at least 5 images per class");
+  expect(JSON.stringify(body)).not.toContain("private input");
+});
+it("accepts the actual browser Host when standalone Next canonicalizes its internal URL", async () => {
+  const fetcher = vi
+    .fn()
+    .mockResolvedValue(
+      Response.json(
+        {
+          job_id: "j",
+          status: "queued",
+          resource_id: "p",
+          job_url: "/api/v1/jobs/j",
+        },
+        { status: 202 },
+      ),
+    );
+  vi.stubGlobal("fetch", fetcher);
+  const request = new NextRequest(
+    "http://localhost:3101/api/backend/api/v1/profiles",
+    {
+      method: "POST",
+      headers: { Host: "127.0.0.1:3101", Origin: "http://127.0.0.1:3101" },
+    },
+  );
+  expect((await POST(request, context(["api", "v1", "profiles"]))).status).toBe(
+    202,
+  );
+  expect(fetcher).toHaveBeenCalledOnce();
 });

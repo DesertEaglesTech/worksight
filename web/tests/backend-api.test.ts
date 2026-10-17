@@ -47,7 +47,11 @@ const version = backendVersionSchema.parse({
   parent_version_id: null,
   state: "approved",
   reference_count: 10,
-  references: [image],
+  references: Array.from({ length: 10 }, (_, i) => ({
+    ...image,
+    asset: `${i.toString(16).padStart(64, "0")}.png`,
+    sha256: i.toString(16).padStart(64, "0"),
+  })),
   threshold: { value: 0.2, status: "heuristic_not_probability" },
   feedback_ids: [],
   evaluation_id: null,
@@ -105,7 +109,7 @@ it("maps offset timestamps, active opaque versions and actual profile references
     version: 1,
     sample_count: 10,
     description: "",
-    thumbnail_url: `/api/v1/assets/${asset}`,
+    thumbnail_url: `/api/v1/assets/${"0".repeat(64)}.png`,
   });
   expect(
     mapProfile({ ...profile, active_version_id: null, status: "running" }, []),
@@ -198,19 +202,17 @@ it("handles FastAPI detail strings, arrays, service outages and invalid response
   });
 });
 it("stages drafts only in memory and submits one multipart create operation", async () => {
-  const fetcher = vi
-    .fn()
-    .mockResolvedValue(
-      Response.json(
-        {
-          job_id: "j1",
-          status: "queued",
-          resource_id: "p1",
-          job_url: "/api/v1/jobs/j1",
-        },
-        { status: 202 },
-      ),
-    );
+  const fetcher = vi.fn().mockResolvedValue(
+    Response.json(
+      {
+        job_id: "j1",
+        status: "queued",
+        resource_id: "p1",
+        job_url: "/api/v1/jobs/j1",
+      },
+      { status: 202 },
+    ),
+  );
   vi.stubGlobal("fetch", fetcher);
   vi.stubGlobal(
     "Image",
@@ -341,7 +343,19 @@ it("uses the real inspection, feedback, validation, candidate, evaluation and ac
         return Response.json({ items: [feedback] });
       if (url.endsWith("/inspections/i1")) return Response.json(rawInspection);
       if (url.endsWith("/profiles/p1/versions"))
-        return Response.json({ items: [version] });
+        return Response.json({
+          items: [
+            version,
+            {
+              ...version,
+              id: "v2",
+              created_at: "2026-10-18T02:00:00+00:00",
+              parent_version_id: "v1",
+              state: "candidate",
+              evaluation_id: "e1",
+            },
+          ],
+        });
       if (url.endsWith("/profiles/p1")) return Response.json(profile);
       if (url.endsWith("/validation"))
         return Response.json({
@@ -403,6 +417,16 @@ it("uses the real inspection, feedback, validation, candidate, evaluation and ac
     baseline: metric,
     candidate: metric,
   });
+  expect(await api.compare("p1", 1, 2)).toMatchObject({
+    from_version: 1,
+    to_version: 2,
+    summary: "No regression measured on the frozen validation set.",
+    metrics: expect.arrayContaining([
+      { name: "f1", before: 0.8, after: 0.8, unit: "" },
+    ]),
+  });
+  await expect(api.rollback("p1", 2)).rejects.toThrow("approved");
+  await expect(api.rollback("p1", 1)).resolves.toBeUndefined();
   await api.workflow!.activateVersion("p1", "v1");
   expect(fetcher.mock.calls.at(-1)![0]).toBe(
     "/api/backend/api/v1/profiles/p1/versions/v1/activate",
@@ -426,5 +450,46 @@ it("loads persisted profiles and reviews from the backend, never from another ad
   expect((await first.profiles()).map((p) => p.id)).toContain(draft.id);
   expect((await createBackendApi().profiles()).map((p) => p.id)).toEqual([
     "p1",
+  ]);
+});
+it("rejects images larger than the actual 16 MP backend limit before staging", async () => {
+  vi.stubGlobal(
+    "Image",
+    class {
+      naturalWidth = 5000;
+      naturalHeight = 4000;
+      onload?: () => void;
+      set src(_value: string) {
+        this.onload?.();
+      }
+    },
+  );
+  const api = createBackendApi();
+  const draft = await api.createProfile("PCB", "");
+  await expect(
+    api.uploadSamples(draft.id, [
+      new File(["image"], "oversized.png", { type: "image/png" }),
+    ]),
+  ).rejects.toThrow("16 megapixel limit");
+});
+it("numbers versions by backend microsecond timestamps instead of opaque ID order", () => {
+  const first = {
+    ...version,
+    id: "z-first",
+    created_at: "2026-10-18T01:00:00.123001+00:00",
+  };
+  const second = {
+    ...version,
+    id: "a-second",
+    created_at: "2026-10-18T01:00:00.123002+00:00",
+  };
+  expect(
+    mapVersions({ ...profile, active_version_id: "a-second" }, [
+      second,
+      first,
+    ]).map((v) => [v.id, v.version]),
+  ).toEqual([
+    ["z-first", 1],
+    ["a-second", 2],
   ]);
 });

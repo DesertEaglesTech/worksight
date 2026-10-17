@@ -22,8 +22,21 @@ async function proxy(
   if (!allowedRoute(request.method, path))
     return fail(404, "not_found", "This API route is not available.");
   const origin = request.headers.get("origin");
-  if (request.method !== "GET" && origin && origin !== request.nextUrl.origin)
-    return fail(403, "invalid_origin", "This request is not allowed.");
+  if (request.method !== "GET" && origin) {
+    // Standalone Next may canonicalize nextUrl to localhost. Compare the browser
+    // origin with the actual HTTP Host, never an untrusted forwarded-host header.
+    try {
+      const source = new URL(origin);
+      const host = request.headers.get("host") || request.nextUrl.host;
+      if (
+        !["http:", "https:"].includes(source.protocol) ||
+        source.host !== host
+      )
+        return fail(403, "invalid_origin", "This request is not allowed.");
+    } catch {
+      return fail(403, "invalid_origin", "This request is not allowed.");
+    }
+  }
   const base = process.env.WORKSIGHT_API_URL;
   if (!base)
     return fail(
