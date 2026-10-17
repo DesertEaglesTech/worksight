@@ -113,7 +113,7 @@ Tests cover upload rejection, schema validation, proxy restrictions, bounded upl
 - ROCm-aware device selection; `WORKSIGHT_REQUIRE_AMD=1` refuses CPU/NVIDIA fallback.
 
 This is a **PatchCore-inspired baseline**, not a reproduction: ResNet-18, normalized concatenated
-features, deterministic per-reference random sampling, cosine distance and top-1%-patch image score.
+features at 384×384, every reference patch in memory, cosine distance and top-1%-patch image score.
 Do not quote published PatchCore metrics as Worksight results.
 
 **Not implemented:** PDF specification extraction, sensor forecasts, camera-shift diagnosis or active
@@ -211,7 +211,7 @@ python -m worksight.benchmark --manifest data/dataset/manifest.json --output dat
 python -m worksight.benchmark --manifest data/dataset/manifest.json --output data/evidence/amd.json --device cuda --require-amd
 ```
 
-Threshold uses leave-one-reference-image-out scores, 95th percentile × 1.2, floor 0.005. This is
+Threshold uses leave-one-reference-image-out scores, mean + 2 standard deviations, floor 0.005. This is
 **heuristic, not calibrated probability or a guaranteed false-positive rate**. API decisions use a
 ±10% review band. Binary benchmark metrics use `score >= threshold` and disclose that rule. No test
 labels tune the threshold. Timings include preprocessing, encoder and retrieval with synchronization,
@@ -237,7 +237,7 @@ A passing gate is not a production safety guarantee.
 - Run **one process / one worker**. The queue is in-process, not distributed.
 - No multi-user tenancy, retention UI or production authorization system.
 - 3–50 distinct references; 10 MiB and 16 million pixels/image; validation at most 100 images.
-- Full image resized to 224×224 without cropping. Aspect distortion, lighting changes, small defects
+- Full image resized to 384×384 without cropping. Aspect distortion, lighting changes, small defects
   and new camera views may reduce performance. Heatmap is indicative localization.
 - No claim of arbitrary-machine generalization, causal diagnosis or remaining-life prediction.
 

@@ -32,7 +32,7 @@ def select_device(requested: str, require_amd: bool = False) -> torch.device:
 class VisualEncoder:
     """Frozen ImageNet encoder. Full image resized, never center-cropped."""
 
-    def __init__(self, device: str = "auto", require_amd: bool = False, image_size: int = 224):
+    def __init__(self, device: str = "auto", require_amd: bool = False, image_size: int = 384):
         self.device = select_device(device, require_amd)
         self.image_size = image_size
         self.signature = f"resnet18-imagenet1k-v1-layer2-layer3-l2-resize{image_size}-v1"

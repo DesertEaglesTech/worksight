@@ -39,9 +39,10 @@ class Settings:
     report_timeout_s: float = 120.0
     report_image_side: int = 512
     report_max_tokens: int = 800
-    image_size: int = 224
+    # Chosen on non-PCB VisA dev categories; PCB stays a held-out test (docs/BENCHMARK.md).
+    image_size: int = 384
     max_reference_images: int = 50
     max_upload_bytes: int = 10 * 1024 * 1024
     max_image_pixels: int = 16_000_000
-    memory_per_image: int = 128
+    memory_per_image: int | None = None  # None keeps every reference patch
     min_validation_per_class: int = 5
