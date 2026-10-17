@@ -155,11 +155,12 @@ def generate(
     models: tuple[str, ...],
     messages: list,
     max_tokens: int,
-    server_error_retries: int = 1,
+    server_error_retries: int = 2,
     retry_delay_s: float = 3.0,
 ) -> dict:
-    """Try models in order. A server error gets one more try on the same model first;
-    timeouts and malformed output move straight to the next model."""
+    """Try models in order. Server errors are retried on the same model with growing pauses
+    (Gemma on Token Factory fails in short bursts); timeouts and malformed output move
+    straight to the next model."""
     attempts = []
     queue = [(model, server_error_retries) for model in models]
     while queue:
@@ -172,7 +173,7 @@ def generate(
         except ReportError as exc:
             attempts.append({"model": model, "error": str(exc)})
             if exc.server_error and retries_left > 0:
-                sleep(retry_delay_s)
+                sleep(retry_delay_s * (server_error_retries - retries_left + 1))
                 queue.insert(0, (model, retries_left - 1))
                 continue
             if exc.retryable:

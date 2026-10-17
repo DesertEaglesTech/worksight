@@ -155,3 +155,14 @@ def test_timeout_moves_on_without_retrying_the_same_model(monkeypatch):
     )
     assert generate(fake, ("A", "B"), [], 100)["model"] == "B"
     assert [c["model"] for c in fake.calls] == ["A", "B"]
+
+
+def test_server_errors_back_off_then_fall_back(monkeypatch):
+    pauses = []
+    monkeypatch.setattr("worksight.report.sleep", pauses.append)
+    error = ReportError("Report model A is unavailable (HTTP 500)", retryable=True, server_error=True)
+    fake = FakeModel(error, error, error, reply(json.dumps(GOOD)))
+    result = generate(fake, ("A", "B"), [], 100)
+    assert [c["model"] for c in fake.calls] == ["A", "A", "A", "B"]
+    assert pauses == [3.0, 6.0] and result["model"] == "B"
+    assert len(result["failed_attempts"]) == 3
