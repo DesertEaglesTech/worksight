@@ -553,6 +553,15 @@ class InspectionService:
 
         return self.submit("evaluate_candidate", evaluate)
 
+    def archive_profile(self, profile_id):
+        # Hides a profile from the list; its versions, inspections and assets stay readable.
+        with self.lock:
+            profile = self.store.get("profile", profile_id)
+            if not profile.get("archived_at"):
+                profile["archived_at"] = now()
+                self.store.put("profile", profile)
+            return profile
+
     def activate(self, profile_id, version_id):
         with self.lock:
             profile = self.store.get("profile", profile_id)

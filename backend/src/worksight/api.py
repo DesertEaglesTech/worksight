@@ -91,7 +91,7 @@ def create_app(settings: Settings | None = None, service: InspectionService | No
 
     @app.get("/api/v1/profiles", dependencies=dependencies)
     def profiles(svc=Depends(get_service)):
-        return {"items": svc.store.all("profile")}
+        return {"items": [p for p in svc.store.all("profile") if not p.get("archived_at")]}
 
     @app.post("/api/v1/profiles", status_code=202, dependencies=dependencies)
     async def create_profile(
@@ -107,6 +107,10 @@ def create_app(settings: Settings | None = None, service: InspectionService | No
     @app.get("/api/v1/profiles/{profile_id}", dependencies=dependencies)
     def profile(profile_id: str, svc=Depends(get_service)):
         return svc.store.get("profile", profile_id)
+
+    @app.post("/api/v1/profiles/{profile_id}/archive", dependencies=dependencies)
+    def archive(profile_id: str, svc=Depends(get_service)):
+        return svc.archive_profile(profile_id)
 
     @app.get("/api/v1/profiles/{profile_id}/versions", dependencies=dependencies)
     def versions(profile_id: str, svc=Depends(get_service)):

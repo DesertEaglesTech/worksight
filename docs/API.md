@@ -22,6 +22,7 @@ inspections use `ready`. Disable duplicate submission while a request is pending
 | GET | `/api/v1/profiles` | `{items: Profile[]}` |
 | POST | `/api/v1/profiles` | Multipart `name`, repeated `images` (3–200); job result `{profile_id, version_id}` |
 | GET | `/api/v1/profiles/{id}` | Profile and active version ID |
+| POST | `/api/v1/profiles/{id}/archive` | Hide the profile from the list (idempotent); it, its versions and inspections stay readable by ID. Not proxied by the web app |
 | GET | `/api/v1/profiles/{id}/versions` | `{items: Version[]}` |
 | POST | `/api/v1/profiles/{id}/inspections` | Multipart `image`; job result `{inspection_id}` |
 | GET | `/api/v1/profiles/{id}/inspections` | `{items: Inspection[]}`; optional pagination and filters, see History |

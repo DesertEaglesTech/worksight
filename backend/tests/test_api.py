@@ -192,3 +192,15 @@ def test_restart_marks_interrupted_tasks_failed(tmp_path):
         assert service.store.get("profile", "interrupted")["status"] == "failed"
     finally:
         service.close()
+
+
+def test_archived_profile_leaves_list_but_stays_readable(client):
+    profile_id = create_profile(client)
+    result = inspect(client, profile_id, (240, 10, 10))
+    archived = client.post(f"/api/v1/profiles/{profile_id}/archive").json()
+    assert archived["archived_at"]
+    assert client.post(f"/api/v1/profiles/{profile_id}/archive").json() == archived
+    assert profile_id not in [p["id"] for p in client.get("/api/v1/profiles").json()["items"]]
+    assert client.get(f"/api/v1/profiles/{profile_id}").status_code == 200
+    assert client.get(f"/api/v1/inspections/{result['id']}").status_code == 200
+    assert client.post("/api/v1/profiles/missing/archive").status_code == 404
