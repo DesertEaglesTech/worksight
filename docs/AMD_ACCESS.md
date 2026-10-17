@@ -30,6 +30,8 @@ program route, not a verified event-specific SLA. Do not assume a new request fi
 
 ## Verify actual execution
 
+Shortest path: `bash scripts/amd_run.sh` (see [BENCHMARK.md](BENCHMARK.md)). Manual steps:
+
 ```bash
 python -c 'import torch; print({"torch": torch.__version__, "hip": torch.version.hip, "gpu_available": torch.cuda.is_available()}); assert torch.version.hip and torch.cuda.is_available(); print(torch.cuda.get_device_name(0))'
 python -m pip install -e './backend[dev]'

@@ -60,6 +60,21 @@ The archive is about 1.9 GB.
 
 ## AMD rerun
 
+One command on the AMD machine (ROCm PyTorch and torchvision already installed):
+
+```bash
+git clone https://github.com/DesertEaglesTech/worksight.git && cd worksight
+bash scripts/amd_run.sh
+```
+
+It stops unless PyTorch sees an AMD ROCm GPU, then installs the backend without replacing torch,
+downloads VisA if needed, builds the same manifests, runs the HTTP smoke test and the benchmark with
+`--require-amd`, and writes `environment.json`, `smoke/`, `<category>.json`, `summary.md` and
+`run.log` to `data/evidence/visa-amd/`. Copy that folder back. Rehearse locally with
+`DRY_RUN_CPU=1 CATEGORIES=pcb1 bash scripts/amd_run.sh` (writes to `work/`, never AMD evidence).
+
+Manual equivalent:
+
 On the AMD machine, with the vendor ROCm PyTorch already installed, run the same manifest
 commands and then:
 
