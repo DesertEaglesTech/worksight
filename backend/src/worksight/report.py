@@ -9,7 +9,7 @@ import io
 import json
 import urllib.error
 import urllib.request
-from time import perf_counter
+from time import perf_counter, sleep
 
 from PIL import Image
 
@@ -26,9 +26,11 @@ SYSTEM = (
 class ReportError(Exception):
     """Operator-safe failure; the message is shown to users."""
 
-    def __init__(self, message, retryable=False):
+    def __init__(self, message, retryable=False, server_error=False):
         super().__init__(message)
         self.retryable = retryable
+        # Token Factory 5xx (e.g. a provider-side out-of-memory) is often gone seconds later.
+        self.server_error = server_error
 
 
 class TokenFactoryClient:
@@ -61,7 +63,9 @@ class TokenFactoryClient:
             if exc.code == 429:
                 raise ReportError("Report service rate limit reached; try again in a minute") from exc
             raise ReportError(
-                f"Report model {model} is unavailable (HTTP {exc.code})", retryable=exc.code >= 500
+                f"Report model {model} is unavailable (HTTP {exc.code})",
+                retryable=exc.code >= 500,
+                server_error=exc.code >= 500,
             ) from exc
         except (TimeoutError, urllib.error.URLError, OSError) as exc:
             raise ReportError(f"Report model {model} did not respond", retryable=True) from exc
@@ -146,10 +150,20 @@ def parse_report(content: str | None) -> dict:
     }
 
 
-def generate(client, models: tuple[str, ...], messages: list, max_tokens: int) -> dict:
-    """Try models in order; move on only for transient model failures."""
+def generate(
+    client,
+    models: tuple[str, ...],
+    messages: list,
+    max_tokens: int,
+    server_error_retries: int = 1,
+    retry_delay_s: float = 3.0,
+) -> dict:
+    """Try models in order. A server error gets one more try on the same model first;
+    timeouts and malformed output move straight to the next model."""
     attempts = []
-    for model in models:
+    queue = [(model, server_error_retries) for model in models]
+    while queue:
+        model, retries_left = queue.pop(0)
         start = perf_counter()
         try:
             response = client.complete(model, messages, max_tokens)
@@ -157,6 +171,10 @@ def generate(client, models: tuple[str, ...], messages: list, max_tokens: int) -
             report = parse_report(choice["message"].get("content"))
         except ReportError as exc:
             attempts.append({"model": model, "error": str(exc)})
+            if exc.server_error and retries_left > 0:
+                sleep(retry_delay_s)
+                queue.insert(0, (model, retries_left - 1))
+                continue
             if exc.retryable:
                 continue
             raise

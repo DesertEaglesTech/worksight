@@ -131,3 +131,27 @@ def test_generate_reports_every_failed_model():
     )
     with pytest.raises(ReportError, match="A: Report model A did not respond; B: .*malformed"):
         generate(fake, ("A", "B"), [], 100)
+
+
+def test_server_error_retries_the_same_model_before_falling_back(monkeypatch):
+    monkeypatch.setattr("worksight.report.sleep", lambda _s: None)
+    fake = FakeModel(
+        ReportError("Report model A is unavailable (HTTP 500)", retryable=True, server_error=True),
+        reply(json.dumps(GOOD), model="self-dploy/A"),
+    )
+    result = generate(fake, ("A", "B"), [], 100)
+    assert result["model"] == "A"
+    assert [c["model"] for c in fake.calls] == ["A", "A"]
+    assert result["failed_attempts"] == [
+        {"model": "A", "error": "Report model A is unavailable (HTTP 500)"}
+    ]
+
+
+def test_timeout_moves_on_without_retrying_the_same_model(monkeypatch):
+    monkeypatch.setattr("worksight.report.sleep", lambda _s: None)
+    fake = FakeModel(
+        ReportError("Report model A did not respond", retryable=True),
+        reply(json.dumps(GOOD)),
+    )
+    assert generate(fake, ("A", "B"), [], 100)["model"] == "B"
+    assert [c["model"] for c in fake.calls] == ["A", "B"]
