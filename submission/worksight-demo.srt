@@ -1,0 +1,48 @@
+1
+00:00:00,000 --> 00:00:04,000
+Worksight. Synthetic UI demo. No ML inference or performance claims.
+
+2
+00:00:04,000 --> 00:00:09,000
+Create a profile for the part and camera view.
+
+3
+00:00:09,000 --> 00:00:14,000
+Preview a verified good sample before uploading it. This example image is synthetic.
+
+4
+00:00:14,000 --> 00:00:19,000
+Upload the sample and build profile v1. The demo simulates the build job.
+
+5
+00:00:19,000 --> 00:00:24,000
+Upload a new part image for inspection. Demo results are fixed regardless of input.
+
+6
+00:00:24,000 --> 00:00:31,000
+Review the original with an illustrative heatmap. Processing time is not reported.
+
+7
+00:00:31,000 --> 00:00:38,000
+Adjust opacity and compare the part against the similar reference.
+
+8
+00:00:38,000 --> 00:00:45,000
+Record Fail as the human decision. The model decision remains Needs review.
+
+9
+00:00:45,000 --> 00:00:52,000
+Request profile v2. The earlier inspection still uses v1. No quality improvement is claimed.
+
+10
+00:00:52,000 --> 00:00:58,000
+Inspect again. The new result now refers to profile v2.
+
+11
+00:00:58,000 --> 00:01:02,000
+The same inspection workspace adapts to a phone viewport.
+
+12
+00:01:02,000 --> 00:01:07,000
+Live FastAPI and AMD validation are pending backend integration.
+

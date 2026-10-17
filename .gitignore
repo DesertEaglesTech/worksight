@@ -1,0 +1,13 @@
+.DS_Store
+.idea/
+**/node_modules/
+**/.next/
+**/out/
+**/coverage/
+**/test-results/
+**/playwright-report/
+.env*
+!.env.example
+web/next-env.d.ts
+web/tsconfig.tsbuildinfo
+work/
