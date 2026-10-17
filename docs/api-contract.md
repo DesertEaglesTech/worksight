@@ -62,8 +62,34 @@ engineer decision already exists; the model result and saved review are never re
 
 Only real job IDs are polled. `stage=operation`, `progress=null`; no made-up completion percentage
 or cancellation support. Backend error strings become `{code: processing_failed, message}`.
-Result preserves profile, inspection, version, evaluation IDs and gate. Dates accept timezone offsets.
+Result preserves profile, inspection, version, evaluation and report IDs and gate. Dates accept timezone offsets.
 Polling is bounded to ten minutes. Aborting UI polling does not cancel backend work.
+
+## Assistive AI description
+
+Live-only optional `WorksightApi.reports` uses existing FastAPI endpoints, without backend changes:
+
+- GET `/health`: `report.enabled` controls generation; older health payloads without `report`
+  disable it. Availability is independent of the detector's runtime and does not imply a local AMD GPU.
+- POST `/api/v1/inspections/{id}/report`: explicit operator request, no request body. The accepted
+  response's `resource_id` is the real report ID. Poll the real job, preserving
+  `result.report_id` and `result.inspection_id`, then GET `/api/v1/reports/{id}`.
+- GET `/api/v1/inspections/{id}/report`: latest stored record; only 404 means none. It is read on
+  opening the panel or clicking **Check saved description**. Queued/running records resume read-only
+  GET polling by report ID because stored reports do not include a job ID. No second POST is made.
+
+`backend-contract.ts` validates queued/running/failed/ready variants, offset timestamps,
+`assistive_only: true`, actual model/provider, summary, observations, suggested check, heatmap
+consistency, latency, usage and failed model attempts. Each record must match the current inspection
+ID, profile ID and original detector decision. React renders the generated text without raw HTML.
+The detector result, anomaly score, threshold and engineer decision remain separate and unchanged.
+
+Only the explicit generation button requests external image processing. The UI explains that the
+original, overlay and reference go to AMD Token Factory. The vendor key remains backend-only.
+Abort stops browser checking, not backend processing. Auth/rate-limit/service failures stay visible;
+there is no automatic mutation retry or demo fallback. After an ambiguous failure, the operator must
+read the saved record before requesting another generation. Polling is bounded to ten minutes.
+Demo has no report feature and its implementation is unchanged.
 
 ## Validated updates and restore
 
@@ -102,3 +128,6 @@ These are recorded requirements, not changes made to backend code:
    incorrect notes. The web locks saved records and reports 409; it does not bypass immutability.
 6. Reachable AMD/ROCm deployment and measured run evidence. Local CPU checks do not establish AMD
    execution or production defect-detection quality. Dataset metrics require separate evaluation.
+7. Profile rename and persisted source/provenance fields. The web currently keeps backend names
+   unchanged. A server-configured saved-inspection pointer can show its explicitly configured
+   provenance, but does not persist additional profile metadata or override backend records.

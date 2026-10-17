@@ -11,10 +11,10 @@ export function allowedRoute(method: string, segments: string[]): boolean {
   const path = segments.join("/");
   const record = "[a-zA-Z0-9_-]+";
   const get = new RegExp(
-    `^api/v1/(profiles|profiles/${record}(/(versions|inspections|feedback))?|jobs/${record}|inspections/${record}|evaluations/${record}|assets/(?:[0-9a-f]{32}|[0-9a-f]{64})\\.png)$`,
+    `^api/v1/(profiles|profiles/${record}(/(versions|inspections|feedback))?|jobs/${record}|inspections/${record}(/report)?|reports/${record}|evaluations/${record}|assets/(?:[0-9a-f]{32}|[0-9a-f]{64})\\.png)$`,
   );
   const post = new RegExp(
-    `^api/v1/(runtime/warmup|profiles|profiles/${record}/(inspections|validation|candidates)|profiles/${record}/versions/${record}/(evaluate|activate)|inspections/${record}/feedback)$`,
+    `^api/v1/(runtime/warmup|profiles|profiles/${record}/(inspections|validation|candidates)|profiles/${record}/versions/${record}/(evaluate|activate)|inspections/${record}/(feedback|report))$`,
   );
   return method === "GET"
     ? path === "health" || get.test(path)

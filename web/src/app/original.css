@@ -1,0 +1,191 @@
+/* Original Worksight appearance, matching the published Railway interface. */
+.design-current {
+  background: var(--bg);
+  color: var(--ink);
+}
+.design-current .result-sidebar {
+  height: auto;
+  max-height: none;
+  overflow: visible;
+}
+.design-current .decision-panel {
+  border-top: 0;
+}
+.design-current .result-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.design-current .result-facts > div {
+  display: block;
+}
+.design-current .result-facts dt {
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+.design-current .result-facts dd {
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+}
+.design-current .sidebar-section > summary {
+  cursor: pointer;
+}
+.design-current .heading-actions {
+  align-items: center;
+  justify-content: flex-end;
+}
+.design-current .theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  padding: 10px;
+  border: 1px solid #cbd0d6;
+  border-radius: var(--radius);
+  background: #fff;
+  color: #515965;
+}
+.design-current .theme-toggle:hover {
+  background: #f6f7f8;
+  border-color: #989fa8;
+}
+.design-current .mobile-workspace-bar .theme-toggle {
+  margin-left: auto;
+}
+@media (max-width: 760px) {
+  .design-current .heading-actions > .theme-toggle {
+    display: none;
+  }
+}
+/* The result and independent review stay together in the page's normal flow. */
+.design-current .heading-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+  gap: 10px;
+}
+.design-current .decision-panel .decision {
+  font-size: 26px;
+  line-height: 1.15;
+  font-weight: 600;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.design-current .result-version,
+.design-current .result-note {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.design-current .result-note {
+  margin-top: 4px;
+}
+.design-current .ai-description-link {
+  display: inline-block;
+  margin-top: 14px;
+  font-size: 14px;
+  text-underline-offset: 3px;
+}
+.design-current .ai-description {
+  scroll-margin-top: calc(var(--comparison-height, 0px) + 24px);
+}
+.design-current .sidebar-section > summary {
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.design-current .display-options {
+  padding-top: 18px;
+}
+.design-current .inspection-details .detail-list {
+  margin-top: 16px;
+}
+.design-current .profile-source {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+.design-current .workflow-sequence {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  margin: 20px 0 8px;
+  padding: 0 0 20px;
+  list-style: none;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+  color: var(--muted);
+}
+.design-current .workflow-sequence li {
+  display: flex;
+  gap: 8px;
+}
+.design-current .workflow-sequence span {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.design-current .workflow-step {
+  padding-block: 18px;
+}
+.design-current .workflow-step h3 {
+  font-size: 16px;
+  font-weight: 700;
+}
+.design-current .workflow-step .section-copy {
+  max-width: 75ch;
+  font-size: 14px;
+}
+.design-current.with-navigation .inspection-layout.comparison-open {
+  grid-template-columns: minmax(0, 1fr);
+}
+.design-current .comparison-open .image-stage.split .image-frame {
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  aspect-ratio: var(--inspection-aspect, 1.3333);
+}
+.design-current .comparison-open .result-sidebar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-left: 0;
+  border-top: 1px solid var(--line);
+  align-items: start;
+}
+.design-current .comparison-open .engineer-panel {
+  grid-column: 2;
+  grid-row: 1 / span 4;
+  border-left: 1px solid var(--line);
+  border-bottom: 0;
+}
+.design-current
+  .comparison-open
+  :is(.decision-panel, .update-panel, .display-panel, .inspection-details) {
+  grid-column: 1;
+}
+@media (max-width: 760px) {
+  .design-current .comparison-open .image-stage.split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .design-current .comparison-open .result-sidebar {
+    display: block;
+  }
+  .design-current .comparison-open .engineer-panel {
+    border-left: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .design-current .heading-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .design-current .heading-actions .button {
+    flex: 1;
+  }
+  .design-current .viewer-statusbar {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}

@@ -11,6 +11,8 @@ import {
   type ProfileFeedback,
 } from "./contract";
 import {
+  assistiveReportSchema,
+  reportAvailabilitySchema,
   backendProfileSchema,
   backendVersionSchema,
   backendFeedbackSchema,
@@ -188,13 +190,16 @@ export async function backendRequest<T>(
 ): Promise<T> {
   let response: Response;
   try {
-    response = await fetch(`/api/backend/api/v1${path}`, {
-      ...init,
-      cache: "no-store",
-      signal: init.signal
-        ? AbortSignal.any([init.signal, AbortSignal.timeout(45_000)])
-        : AbortSignal.timeout(45_000),
-    });
+    response = await fetch(
+      path === "/health" ? "/api/backend/health" : `/api/backend/api/v1${path}`,
+      {
+        ...init,
+        cache: "no-store",
+        signal: init.signal
+          ? AbortSignal.any([init.signal, AbortSignal.timeout(45_000)])
+          : AbortSignal.timeout(45_000),
+      },
+    );
   } catch (error) {
     if (init.signal?.aborted) throw error;
     throw new ApiError(
@@ -253,22 +258,26 @@ export function createBackendApi(): WorksightApi {
         { signal },
       )
     ).items;
-  const versions = async (profileId: string): Promise<ProfileVersion[]> => {
+  const versions = async (
+    profileId: string,
+    signal?: AbortSignal,
+  ): Promise<ProfileVersion[]> => {
     if (drafts.has(profileId)) return [];
     const [profile, items] = await Promise.all([
-      rawProfile(profileId),
-      rawVersions(profileId),
+      rawProfile(profileId, signal),
+      rawVersions(profileId, signal),
     ]);
     return mapVersions(profile, items);
   };
-  const inspection = async (inspectionId: string) => {
+  const inspection = async (inspectionId: string, signal?: AbortSignal) => {
     const record = await backendRequest(
       `/inspections/${id(inspectionId)}`,
       backendInspectionSchema,
+      { signal },
     );
     const [items, feedback] = await Promise.all([
-      versions(record.profile_id),
-      rawFeedback(record.profile_id),
+      versions(record.profile_id, signal),
+      rawFeedback(record.profile_id, signal),
     ]);
     return mapInspection(record, items, feedback);
   };
@@ -462,6 +471,63 @@ export function createBackendApi(): WorksightApi {
         backendProfileSchema,
         { method: "POST" },
       );
+    },
+    reports: {
+      async availability(signal) {
+        const health = await backendRequest(
+          "/health",
+          reportAvailabilitySchema,
+          { signal },
+        );
+        return { enabled: health.report?.enabled === true };
+      },
+      async latest(inspectionId, signal) {
+        try {
+          const report = await backendRequest(
+            `/inspections/${id(inspectionId)}/report`,
+            assistiveReportSchema,
+            { signal },
+          );
+          if (report.inspection_id !== inspectionId)
+            throw new ApiError(
+              "The service returned a description for a different inspection.",
+              502,
+              "invalid_response",
+            );
+          return report;
+        } catch (error) {
+          if (error instanceof ApiError && error.status === 404) return null;
+          throw error;
+        }
+      },
+      async get(reportId, signal) {
+        const report = await backendRequest(
+          `/reports/${id(reportId)}`,
+          assistiveReportSchema,
+          { signal },
+        );
+        if (report.id !== reportId)
+          throw new ApiError(
+            "The service returned a different description.",
+            502,
+            "invalid_response",
+          );
+        return report;
+      },
+      async request(inspectionId, signal) {
+        const accepted = await backendRequest(
+          `/inspections/${id(inspectionId)}/report`,
+          acceptedSchema,
+          { method: "POST", signal },
+        );
+        if (!accepted.resource_id)
+          throw new ApiError(
+            "The service did not return a description ID. Check the saved description before trying again.",
+            502,
+            "invalid_response",
+          );
+        return { job_id: accepted.job_id, report_id: accepted.resource_id };
+      },
     },
     workflow: {
       async profileFeedback(profileId, signal) {

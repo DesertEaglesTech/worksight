@@ -1,0 +1,296 @@
+/* Selected Engineering design. Theme affects UI surfaces, never image or heatmap pixels. */
+.design-engineering .theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  min-height: 36px;
+  padding: 8px;
+  border: 1px solid #56636d;
+  border-radius: 2px;
+  background: transparent;
+  color: #e1e7eb;
+  font-size: 13px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.design-engineering .theme-toggle:hover {
+  background: #34414b;
+  border-color: #83929e;
+}
+.design-engineering .theme-toggle:focus-visible {
+  outline-color: #d4b58e;
+}
+
+.design-engineering.theme-dark {
+  --bg: #1c2329;
+  --paper: #252f37;
+  --ink: #e4eaee;
+  --muted: #a8b4be;
+  --line: #46525c;
+  --accent: #d1a571;
+  --accent-hover: #e0bb8d;
+  --canvas: #151c21;
+  color-scheme: dark;
+}
+.design-engineering.theme-dark :is(input, select, textarea) {
+  background: #1f2830;
+  color: var(--ink);
+  border-color: #65747f;
+}
+.design-engineering.theme-dark :is(input, textarea)::placeholder {
+  color: #9eabb5;
+}
+.design-engineering.theme-dark :is(input, select, textarea):disabled {
+  background: #28323a;
+}
+.design-engineering.theme-dark .button.primary {
+  color: #1c252c;
+}
+.design-engineering.theme-dark .button.secondary,
+.design-engineering.theme-dark .page-heading > .button {
+  color: #e0e7ec;
+  background: #2c3740;
+  border-color: #697985;
+}
+.design-engineering.theme-dark .button.secondary:hover:not(:disabled),
+.design-engineering.theme-dark .page-heading > .button:hover:not(:disabled) {
+  background: #3a4854;
+}
+.design-engineering.theme-dark .icon-button {
+  color: #bac7d0;
+}
+.design-engineering.theme-dark .icon-button:hover:not(:disabled) {
+  color: #e4eaee;
+  background: #3c4b56;
+}
+.design-engineering.theme-dark .inspection-controls {
+  background: #29343d;
+  border-color: #53616d;
+}
+.design-engineering.theme-dark .inspection-layout {
+  background: var(--paper);
+  border-color: #53616d;
+}
+.design-engineering.theme-dark .inspection-main,
+.design-engineering.theme-dark .result-sidebar,
+.design-engineering.theme-dark .ai-description {
+  background: var(--paper);
+  border-color: #53616d;
+}
+.design-engineering.theme-dark .viewer-toolbar {
+  background: #29343d;
+}
+.design-engineering.theme-dark .segmented button {
+  color: #b5c1ca;
+}
+.design-engineering.theme-dark .segmented button.selected {
+  color: #f1f4f6;
+  background: #394854;
+  border-bottom-color: #d1a571;
+}
+.design-engineering.theme-dark .viewer-statusbar {
+  background: #29343d;
+  color: #b0bec8;
+}
+.design-engineering.theme-dark .zoom-controls {
+  color: #c5d1da;
+}
+.design-engineering.theme-dark .fit-button {
+  background: #34424d;
+  color: #d0dae1;
+  border-color: #60717e;
+}
+.design-engineering.theme-dark .fit-button:hover {
+  background: #425561;
+}
+.design-engineering.theme-dark .inspect-action strong {
+  color: #dce5eb;
+}
+.design-engineering.theme-dark .reference-strip {
+  background: #202a32;
+}
+.design-engineering.theme-dark .reference-small {
+  background: #36434d;
+}
+.design-engineering.theme-dark .ready-text,
+.design-engineering.theme-dark .saved-tag {
+  color: #b6dac3;
+}
+.design-engineering.theme-dark
+  :is(
+    .small-note,
+    .section-copy,
+    .awaiting p,
+    .awaiting h3,
+    .empty-copy,
+    .upload-guidance,
+    .toolbar-note,
+    .library-summary,
+    .reference-strip p,
+    .profile-item-info > span:not(.status)
+  ) {
+  color: #a8b8c3;
+}
+.design-engineering.theme-dark .field-label {
+  color: #cbd7df;
+}
+.design-engineering.theme-dark .field-label span {
+  color: #a8b8c3;
+}
+.design-engineering.theme-dark .opacity-controls output {
+  color: #cbd7df;
+}
+.design-engineering.theme-dark .runtime-badge {
+  background: #303e48;
+  color: #c7d5df;
+  border-color: #657580;
+}
+.design-engineering.theme-dark .decision {
+  color: #ead1a1;
+  background: #443b2c;
+}
+.design-engineering.theme-dark .decision.pass {
+  color: #b6dac3;
+  background: #293e33;
+}
+.design-engineering.theme-dark .decision.fail {
+  color: #f0beb8;
+  background: #493331;
+}
+.design-engineering.theme-dark .decision-panel .decision {
+  background: transparent;
+}
+.design-engineering.theme-dark .status {
+  color: #c3d0da;
+  background: #3a4955;
+}
+.design-engineering.theme-dark .status.ready {
+  color: #b6dac3;
+  background: #293e33;
+}
+.design-engineering.theme-dark .status.failed {
+  color: #f0beb8;
+  background: #493331;
+}
+.design-engineering.theme-dark .status.building {
+  color: #ead1a1;
+  background: #443b2c;
+}
+.design-engineering.theme-dark .upload-stage {
+  background: #202a32;
+}
+.design-engineering.theme-dark .dropzone {
+  background: #28343d;
+  border-color: #6f8493;
+  color: #b3c3ce;
+}
+.design-engineering.theme-dark .dropzone:hover:not(:disabled),
+.design-engineering.theme-dark .dropzone.dragging {
+  background: #34434f;
+  border-color: #d1a571;
+}
+.design-engineering.theme-dark .dropzone strong {
+  color: #e0e8ed;
+}
+.design-engineering.theme-dark .dropzone small {
+  color: #b3c3ce;
+}
+.design-engineering.theme-dark .preview {
+  border-color: #536675;
+  background: #303e49;
+}
+.design-engineering.theme-dark .preview > span {
+  background: #303e49;
+  color: #c8d5de;
+}
+.design-engineering.theme-dark .preview .remove {
+  background: #293842;
+  color: #d6e0e7;
+}
+.design-engineering.theme-dark .profiles-layout {
+  background: var(--paper);
+  border-color: #53616d;
+}
+.design-engineering.theme-dark .library {
+  background: #202a32;
+}
+.design-engineering.theme-dark .profile-item {
+  background: transparent;
+  color: #e0e8ed;
+}
+.design-engineering.theme-dark .profile-item:hover:not(:disabled) {
+  background: #303f4a;
+}
+.design-engineering.theme-dark .profile-item.selected {
+  background: #394a57;
+  border-color: #d1a571;
+}
+.design-engineering.theme-dark .profile-thumb {
+  background: #394a57;
+}
+.design-engineering.theme-dark .count,
+.design-engineering.theme-dark .planned {
+  background: #3a4955;
+  color: #c3d0da;
+}
+.design-engineering.theme-dark .recorded-review small {
+  color: #a8b8c3;
+}
+.design-engineering.theme-dark .workflow-notice,
+.design-engineering.theme-dark .gate-result.passed,
+.design-engineering.theme-dark .alert.success {
+  background: #293e33;
+  color: #b6dac3;
+  border-color: #567e64;
+}
+.design-engineering.theme-dark .gate-result.rejected,
+.design-engineering.theme-dark .alert.error {
+  background: #493331;
+  color: #f0beb8;
+  border-color: #94645d;
+}
+.design-engineering.theme-dark .field-error {
+  color: #f0beb8;
+}
+.design-engineering.theme-dark
+  :is(.reference-warning, .draft-notice, .image-warning) {
+  background: #443b2c;
+  color: #ead1a1;
+}
+.design-engineering.theme-dark .ai-report-attribution {
+  color: #c7d2da;
+}
+.design-engineering.theme-dark .ai-report-failure {
+  background: #493331;
+  border-color: #c59086;
+}
+.design-engineering.theme-dark .create-dialog {
+  background: var(--paper);
+  color: var(--ink);
+  border-color: #65747f;
+}
+.design-engineering.theme-dark .workspace-footer {
+  color: #a3b1bc;
+}
+
+@media (max-width: 760px) {
+  .design-engineering .workspace-navigation > .theme-toggle {
+    display: none;
+  }
+  .design-engineering .mobile-workspace-bar > .theme-toggle {
+    margin-left: auto;
+    min-width: 36px;
+  }
+  .design-engineering .mobile-workspace-bar > .theme-toggle span {
+    display: none;
+  }
+  .design-engineering .mobile-workspace-bar > span:last-of-type {
+    color: #bac5cd;
+  }
+}
+@media (max-width: 480px) {
+  .design-engineering .mobile-workspace-bar > span:last-of-type {
+    display: none;
+  }
+}

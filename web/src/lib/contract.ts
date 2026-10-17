@@ -3,8 +3,9 @@ import {
   runtimeSchema,
   gateSchema,
   type Evaluation,
+  type AssistiveReport,
 } from "./backend-contract.ts";
-export type { Evaluation } from "./backend-contract.ts";
+export type { Evaluation, AssistiveReport } from "./backend-contract.ts";
 
 export const decisionSchema = z.enum(["pass", "fail", "review"]);
 export type Decision = z.infer<typeof decisionSchema>;
@@ -51,6 +52,7 @@ export const jobSchema = z.object({
       inspection_id: z.string().optional(),
       version_id: z.string().optional(),
       evaluation_id: z.string().optional(),
+      report_id: z.string().optional(),
       state: z.string().optional(),
       gate: gateSchema.optional(),
     })
@@ -128,9 +130,22 @@ export interface VersionWorkflow {
   evaluation(id: string): Promise<Evaluation>;
   activateVersion(id: string, versionId: string): Promise<void>;
 }
+export interface InspectionReports {
+  availability(signal?: AbortSignal): Promise<{ enabled: boolean }>;
+  latest(
+    inspectionId: string,
+    signal?: AbortSignal,
+  ): Promise<AssistiveReport | null>;
+  get(reportId: string, signal?: AbortSignal): Promise<AssistiveReport>;
+  request(
+    inspectionId: string,
+    signal?: AbortSignal,
+  ): Promise<{ job_id: string; report_id: string }>;
+}
 export type Mode = "demo" | "live" | "unconfigured";
 export interface WorksightApi {
   workflow?: VersionWorkflow;
+  reports?: InspectionReports;
   capabilities(signal?: AbortSignal): Promise<Capabilities>;
   profiles(signal?: AbortSignal): Promise<Profile[]>;
   createProfile(name: string, description: string): Promise<Profile>;
@@ -138,7 +153,7 @@ export interface WorksightApi {
   buildProfile(id: string): Promise<string>;
   job(id: string, signal?: AbortSignal): Promise<Job>;
   inspect(profileId: string, image: File): Promise<string>;
-  inspection(id: string): Promise<Inspection>;
+  inspection(id: string, signal?: AbortSignal): Promise<Inspection>;
   feedback(
     id: string,
     decision: Decision,

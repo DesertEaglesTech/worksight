@@ -39,7 +39,7 @@ Open http://127.0.0.1:3000. The example env selects demo explicitly. Development
 2. Add known-good JPEG, PNG or WebP images, or choose **Use example sample** in demo. Click **Upload samples**, then **Build profile**.
 3. Click **Inspect with this profile**. Upload a new image or choose **Use example part image** in demo, then **Run inspection**.
 4. Adjust heatmap opacity and switch between Heatmap, Original and Compare.
-   Use the viewer's zoom controls and Fit button to examine the surface. Drag to pan when zoomed in. Image display settings and engineer review share the right sidebar.
+   Use the viewer's zoom controls and Fit button to examine the surface. Drag either image to pan when zoomed in; Compare synchronizes both images. Engineer review follows Model result. Opacity and technical information are under **Image display** and **Inspection details**.
 5. Choose a **Human decision**, add a note and save. The model decision remains unchanged.
 6. In live mode open **Reference samples → Validation & versions**. Upload a distinct 5+5 validation set and acknowledge that it will be frozen. Select Pass feedback, build a candidate, evaluate, inspect the measured report, then Apply only when the gate passes. Restore uses an approved earlier version. Existing inspections keep the version they originally used.
 
@@ -62,7 +62,19 @@ WORKSIGHT_API_URL=http://127.0.0.1:8000
 WORKSIGHT_API_TOKEN=
 ```
 
+`npm start` loads the web root's `.env*` files before launching the standalone server.
+Existing process environment variables take precedence; secrets stay on the server.
+
 The URL is the backend origin without `/api/v1`. The optional token stays server-side and must equal the backend's `WORKSIGHT_API_KEY`. Never prefix credentials with `NEXT_PUBLIC_`. Browser calls go through `/api/backend/api/v1/...`, so this pattern does not require browser-to-FastAPI CORS.
+
+Optionally set `WORKSIGHT_EXAMPLE_INSPECTION_ID` to a real saved inspection with a completed
+AI description, then restart. **Open saved inspection** loads its backend records using GET only;
+it never generates a new report. The button is unavailable if the report is absent, unfinished,
+failed or does not match the inspection. No example ID or profile database is bundled in the web.
+`WORKSIGHT_EXAMPLE_SOURCE` can supply known provenance for that example's profile (for example,
+`VisA PCB1 · CC BY 4.0`); it appears in profile information and inspection details. Use a clear
+part/camera-view name when creating the profile. Existing backend names and engineer notes are
+preserved; the current API has no profile rename endpoint.
 
 See the [web adapter mapping and Requests to ML](docs/api-contract.md), and the backend's actual [API](docs/API.md). The old OpenAPI proposal is archived and does not describe live endpoints. Live failures never switch to demo. Without an explicit mode the app shows setup instructions and disables operations.
 
@@ -176,6 +188,21 @@ model hosted on AMD GPUs (Token Factory: `Gemma-4-31B-IT`, falling back to `Deep
 to describe what is visibly different between the inspected part, its heatmap overlay and the most
 similar reference. The detector's decision, score and threshold are passed in and never changed;
 the report is labelled assistive and records which model answered. Details: [docs/API.md](docs/API.md).
+
+In the live web app, run an inspection, then use **AI description (assistive) → Generate
+description** below the image workspace. The panel shows the saved summary, observations,
+suggested engineer check, heatmap consistency and actual responding model. **Report details**
+contains the response time and backend report ID. **Check saved description** only reads the
+existing record; it does not ask the model again. Returning from Reference samples resumes
+checking an in-progress report for the current inspection. Generation does not block engineer
+review or navigation. Failures stay visible and never switch to demo or automatically retry.
+
+Set `RADEON_API_KEY` only on the backend (for local development, load root `.env` with
+`uvicorn worksight.api:app --env-file .env --port 8000 --workers 1`). Restart the backend after
+changing it. The web reads availability from `/health`; an unconfigured service disables
+generation while retaining access to saved descriptions. This hosted-service key is separate
+from the optional `WORKSIGHT_API_KEY` / `WORKSIGHT_API_TOKEN` pair protecting FastAPI.
+Never place it in `NEXT_PUBLIC_*` or commit `.env`.
 
 The images go to AMD's hosted endpoint (`developer.amd.com.cn`) only on request; per AMD's terms,
 prompts and outputs are kept for about two days and not used for training. Do not use it for

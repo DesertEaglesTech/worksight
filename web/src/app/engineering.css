@@ -1,0 +1,700 @@
+/* 02. Engineering: left task navigation, straight rules and tabular data. */
+.design-engineering {
+  --bg: #e9ecee;
+  --ink: #20272d;
+  --muted: #616d77;
+  --line: #ced4d8;
+  --accent: #985518;
+  --accent-hover: #78400e;
+  --canvas: #22282c;
+  --radius: 0px;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Arial, Helvetica, sans-serif;
+}
+/* Fixed left navigation, collapsible on desktop. */
+.design-engineering.with-navigation {
+  --navigation-width: 224px;
+}
+.design-engineering .workspace-navigation {
+  position: fixed;
+  inset: var(--comparison-height, 0px) auto 0 0;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  width: var(--navigation-width);
+  height: auto;
+  padding: 0 12px 16px;
+  overflow-y: auto;
+  border: 0;
+  border-right: 1px solid #10181d;
+  background: #222b32;
+  color: #ecf0f3;
+}
+.design-engineering .navigation-brand-row {
+  min-height: 84px;
+  padding: 0 10px;
+}
+.design-engineering .workspace-navigation .brand {
+  color: #fff;
+  font-size: 23px;
+  font-weight: 700;
+  letter-spacing: -0.7px;
+}
+.design-engineering .brand-mark {
+  width: 12px;
+  height: 12px;
+  border: 2px solid #c28c51;
+  border-radius: 0;
+}
+.design-engineering .navigation-section-label,
+.design-engineering .navigation-profile-count,
+.design-engineering .navigation-bottom p {
+  display: none;
+}
+.design-engineering .workspace-navigation nav {
+  display: grid;
+  gap: 6px;
+}
+.design-engineering .workspace-nav-item {
+  min-height: 48px;
+  padding: 12px 10px;
+  gap: 10px;
+  font-size: 15px;
+  white-space: nowrap;
+  color: #bfc8cf;
+  border-radius: 0;
+  border-left: 3px solid transparent;
+  border-bottom: 0;
+}
+.design-engineering .workspace-nav-item svg {
+  flex-shrink: 0;
+}
+.design-engineering .workspace-nav-item.active,
+.design-engineering .workspace-nav-item.active:hover {
+  color: white;
+  background: #2c373f;
+  border-left-color: #c28c51;
+  box-shadow: none;
+  font-weight: 700;
+}
+.design-engineering .workspace-nav-item:hover:not(:disabled) {
+  color: #fff;
+  background: #2c373f;
+}
+.design-engineering .navigation-profile {
+  margin: 28px 0 0;
+  padding: 22px 10px 0;
+  border-top: 1px solid #44515a;
+  min-width: 0;
+  max-width: none;
+}
+.design-engineering .navigation-profile .navigation-section-label {
+  display: block;
+  padding: 0;
+  color: #a7b3bc;
+  font-size: 13px;
+}
+.design-engineering .navigation-profile button {
+  padding: 0;
+  gap: 7px;
+}
+.design-engineering .navigation-profile strong {
+  color: #eef1f3;
+  font-size: 14px;
+  font-weight: 700;
+  max-width: 100%;
+  white-space: normal;
+}
+.design-engineering .navigation-profile button > span:not(.status) {
+  color: #a7b3bc;
+  font-size: 13px;
+}
+.design-engineering .navigation-profile .status {
+  display: none;
+}
+.design-engineering .navigation-bottom {
+  display: block;
+  margin-top: auto;
+  padding-top: 24px;
+}
+.design-engineering .navigation-toggle {
+  color: #bfc8cf;
+  border-color: #44515a;
+}
+.design-engineering .navigation-toggle:hover {
+  color: #fff;
+  background: #2c373f;
+}
+.design-engineering .workspace-navigation > .theme-toggle {
+  margin: 10px 0 0 10px;
+}
+.design-engineering.with-navigation.navigation-collapsed {
+  --navigation-width: 72px;
+}
+.design-engineering.navigation-collapsed
+  :is(.navigation-wordmark, .navigation-label, .navigation-profile) {
+  display: none;
+}
+.design-engineering.navigation-collapsed
+  :is(.navigation-brand-row, .workspace-nav-item, .navigation-toggle) {
+  justify-content: center;
+  padding-inline: 0;
+}
+.design-engineering.navigation-collapsed .workspace-navigation > .theme-toggle {
+  align-self: center;
+  margin-left: 0;
+}
+.design-engineering main {
+  width: calc(100% - var(--navigation-width));
+  margin: 0 0 0 var(--navigation-width);
+  padding: 28px 24px 0;
+}
+.design-engineering .page-heading {
+  margin-bottom: 18px;
+  align-items: center;
+}
+.design-engineering :is(h1, h2, h3) {
+  font-weight: 700;
+}
+.design-engineering h1 {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.6px;
+}
+.design-engineering .page-heading p {
+  font-size: 14px;
+  margin-top: 6px;
+}
+.design-engineering .page-heading > .button {
+  background: #fff;
+  color: var(--ink);
+  border-color: #afb9c1;
+}
+.design-engineering .button {
+  min-height: 40px;
+  font-size: 14px;
+  border-radius: 0;
+  font-weight: 500;
+}
+.design-engineering .button.secondary {
+  border-color: #afb9c1;
+}
+.design-engineering .inspection-controls {
+  min-height: 88px;
+  padding: 15px 18px;
+  gap: 30px;
+  background: #f8f9fa;
+  border-color: #bac3ca;
+  border-radius: 0;
+}
+.design-engineering .profile-selector {
+  max-width: 370px;
+}
+.design-engineering .profile-selector label {
+  font-size: 12px;
+}
+.design-engineering .select-wrap select {
+  font-size: 15px;
+  font-weight: 500;
+  border-color: #adb8c0;
+  padding: 8px 32px 8px 10px;
+}
+.design-engineering .select-wrap svg {
+  top: 12px;
+}
+.design-engineering .setup-facts {
+  gap: 28px;
+}
+.design-engineering .setup-facts > div:last-child {
+  display: flex;
+}
+.design-engineering .setup-facts strong {
+  text-transform: none;
+  font-size: 13px;
+}
+.design-engineering .inspection-layout {
+  grid-template-columns: minmax(0, 1fr) 330px;
+  border-color: #bac3ca;
+  border-radius: 0;
+}
+.design-engineering .viewer-toolbar {
+  height: 54px;
+  min-height: 54px;
+  padding: 0 16px;
+  background: #fff;
+}
+.design-engineering .viewer-toolbar h2 {
+  font-size: 15px;
+  font-weight: 700;
+}
+.design-engineering .segmented {
+  gap: 0;
+  padding: 0;
+  border-radius: 0;
+  align-self: stretch;
+  background: transparent;
+}
+.design-engineering .segmented button {
+  padding: 0 15px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  font-size: 13px;
+}
+.design-engineering .segmented button.selected {
+  background: #f3f5f6;
+  color: #242d35;
+  border-bottom-color: #5b6872;
+  box-shadow: none;
+}
+.design-engineering .image-frame,
+.design-engineering .image-stage.split .image-frame {
+  height: clamp(480px, calc(100dvh - 375px), 900px);
+}
+.design-engineering .image-caption {
+  top: 12px;
+  left: 12px;
+  background: #1b2228;
+  color: #d2d9df;
+  border: 1px solid #46515b;
+  border-radius: 0;
+}
+.design-engineering .image-caption,
+.design-engineering .viewer-statusbar,
+.design-engineering .result-facts dd,
+.design-engineering .detail-list dd,
+.design-engineering .profile-facts dd,
+.design-engineering .runtime-badge,
+.design-engineering .setup-facts strong {
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+}
+.design-engineering .viewer-statusbar {
+  background: #f0f3f5;
+  font-size: 13px;
+  padding-inline: 16px;
+}
+.design-engineering .result-sidebar {
+  height: auto;
+  max-height: none;
+  background: #fff;
+  border-left-color: #bac3ca;
+  overflow: visible;
+}
+.design-engineering .sidebar-section {
+  padding: 18px;
+}
+.design-engineering .sidebar-section h2 {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.design-engineering .decision-panel {
+  border-top: 0;
+  padding-top: 18px;
+}
+.design-engineering .decision-panel .section-heading {
+  flex-direction: row;
+  align-items: center;
+}
+.design-engineering .result-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px 18px;
+  padding-block: 4px;
+}
+.design-engineering .result-facts > div {
+  display: block;
+}
+.design-engineering .result-facts dt {
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+.design-engineering .result-facts dd {
+  font-size: 20px;
+  font-weight: 400;
+}
+.design-engineering .decision {
+  font-size: 13px;
+  border: 1px solid currentColor;
+  border-radius: 0;
+  padding: 2px 7px;
+}
+.design-engineering .decision svg {
+  display: none;
+}
+.design-engineering .field-label {
+  font-size: 13px;
+  margin-top: 15px;
+}
+.design-engineering .engineer-panel textarea {
+  min-height: 75px;
+}
+.design-engineering .engineer-panel .section-copy,
+.design-engineering .display-panel .small-note {
+  font-size: 13px;
+}
+.design-engineering .small-note {
+  font-size: 12px;
+  line-height: 1.6;
+}
+.design-engineering .runtime-badge {
+  font-size: 13px;
+  background: #f4f6f7;
+  border-radius: 0;
+}
+.design-engineering .upload-stage {
+  min-height: 480px;
+  padding: 24px;
+  background: #f2f4f5;
+}
+.design-engineering .dropzone {
+  background: #fff;
+  border-color: #9aa7b1;
+}
+.design-engineering .dropzone:hover:not(:disabled),
+.design-engineering .dropzone.dragging {
+  background: #f8f5ef;
+  border-color: var(--accent);
+}
+.design-engineering .upload-icon {
+  display: none;
+}
+.design-engineering .inspect-action {
+  padding: 16px;
+}
+.design-engineering .reference-strip {
+  padding: 14px 16px;
+  background: #f8f9fa;
+}
+.design-engineering .reference-small {
+  width: 64px;
+  height: 64px;
+  border-radius: 0;
+}
+.design-engineering .profiles-layout {
+  grid-template-columns: 310px minmax(0, 1fr);
+  border-color: #bac3ca;
+  border-radius: 0;
+}
+.design-engineering .library {
+  background: #f5f7f8;
+}
+.design-engineering .profile-item {
+  border-radius: 0;
+}
+.design-engineering .profile-item.selected {
+  background: #e5eaee;
+  border-left-color: #657580;
+}
+.design-engineering .profile-thumb {
+  border-radius: 0;
+}
+.design-engineering .ai-description {
+  border-radius: 0;
+  border-color: #bac3ca;
+  border-top: 3px solid #657580;
+  padding: 22px 24px;
+}
+.design-engineering .ai-description h2 {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.design-engineering .ai-report-summary {
+  font-size: 16px;
+}
+.design-engineering .workspace-footer {
+  color: #697680;
+  font-size: 12px;
+}
+.design-engineering
+  :is(button, a, input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+@media (min-width: 761px) and (max-width: 1150px) {
+  .design-engineering.with-navigation:not(.navigation-collapsed) {
+    --navigation-width: 216px;
+  }
+  .design-engineering.with-navigation .inspection-layout {
+    grid-template-columns: minmax(0, 1fr) 310px;
+  }
+}
+@media (min-width: 761px) and (max-width: 1050px) {
+  .design-engineering.with-navigation:not(.navigation-collapsed)
+    .inspection-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .design-engineering:not(.navigation-collapsed) .result-sidebar {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+  .design-engineering.with-navigation:not(.navigation-collapsed)
+    .profiles-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 900px) {
+  .design-engineering .setup-facts > div:not(:first-child) {
+    display: none;
+  }
+}
+@media (max-width: 760px) {
+  .design-engineering.navigation-collapsed
+    :is(.navigation-wordmark, .navigation-label, .navigation-profile) {
+    display: block;
+  }
+  .design-engineering.navigation-collapsed .workspace-nav-item {
+    justify-content: flex-start;
+    padding: 14px;
+  }
+  .design-engineering.navigation-collapsed .navigation-brand-row {
+    justify-content: space-between;
+    padding: 0;
+  }
+  .design-engineering main {
+    width: 100%;
+    margin: 0;
+    padding: 24px 16px 0;
+  }
+  .design-engineering.with-navigation .inspection-layout {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .design-engineering .result-sidebar {
+    display: block;
+    height: auto;
+    border-left: 0;
+    max-height: none;
+  }
+  .design-engineering .engineer-panel {
+    border-left: 0;
+  }
+  .design-engineering .inspection-controls {
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 16px;
+    align-items: flex-start;
+  }
+  .design-engineering .profile-selector {
+    max-width: none;
+    flex-basis: 100%;
+  }
+  .design-engineering .image-frame {
+    height: 440px;
+    aspect-ratio: auto;
+    min-height: 0;
+  }
+  .design-engineering .image-stage.split .image-frame {
+    height: 280px;
+    aspect-ratio: auto;
+    min-height: 0;
+  }
+  .design-engineering .upload-stage {
+    padding: 20px;
+    min-height: 400px;
+  }
+  .design-engineering .viewer-toolbar {
+    padding: 12px;
+    height: auto;
+    flex-wrap: wrap;
+  }
+  .design-engineering .segmented {
+    min-height: 36px;
+  }
+  .design-engineering .profiles-layout {
+    grid-template-columns: 1fr;
+  }
+  .design-engineering .ai-description {
+    padding: 22px 20px;
+  }
+  .design-engineering .page-heading {
+    flex-wrap: wrap;
+    gap: 18px;
+  }
+  .design-engineering .mobile-workspace-bar {
+    background: #222b32;
+    color: #fff;
+    border-color: #33414b;
+  }
+  .design-engineering .mobile-workspace-bar .icon-button,
+  .design-engineering .mobile-navigation-close {
+    color: #d2dbe1;
+  }
+  .design-engineering .mobile-workspace-bar > span:last-child {
+    color: #bac5cd;
+  }
+  .design-engineering .workspace-navigation {
+    position: fixed;
+    inset: var(--comparison-height, 0px) auto 0 0;
+    width: 270px;
+    height: auto;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0 16px 20px;
+    gap: 15px;
+    overflow-y: auto;
+  }
+  .design-engineering .navigation-brand-row {
+    justify-content: space-between;
+    min-height: 80px;
+  }
+  .design-engineering .workspace-navigation nav {
+    display: grid;
+    align-self: stretch;
+  }
+  .design-engineering .workspace-nav-item {
+    padding: 14px;
+    min-height: 48px;
+    border-bottom: 0;
+    border-left: 2px solid transparent;
+  }
+  .design-engineering .workspace-nav-item.active {
+    border-left-color: #c28c51;
+  }
+  .design-engineering .navigation-profile {
+    margin: 12px 0 0;
+    padding: 20px 14px 0;
+    border-top: 1px solid #44515a;
+    max-width: none;
+  }
+  .design-engineering .navigation-profile strong {
+    white-space: normal;
+  }
+  .design-engineering .navigation-profile .navigation-section-label {
+    display: block;
+    padding: 0;
+    color: #a7b3bc;
+  }
+}
+
+/* The result and independent review stay together in the page's normal flow. */
+.design-engineering .heading-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.design-engineering .decision-panel .decision {
+  font-size: 26px;
+  line-height: 1.15;
+  font-weight: 600;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.design-engineering .result-version,
+.design-engineering .result-note {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.design-engineering .result-note {
+  margin-top: 4px;
+}
+.design-engineering .ai-description-link {
+  display: inline-block;
+  margin-top: 14px;
+  font-size: 14px;
+  text-underline-offset: 3px;
+}
+.design-engineering .ai-description {
+  scroll-margin-top: 84px;
+}
+.design-engineering .sidebar-section > summary {
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.design-engineering .display-options {
+  padding-top: 18px;
+}
+.design-engineering .inspection-details .detail-list {
+  margin-top: 16px;
+}
+.design-engineering .profile-source {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+.design-engineering .workflow-sequence {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  margin: 20px 0 8px;
+  padding: 0 0 20px;
+  list-style: none;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+  color: var(--muted);
+}
+.design-engineering .workflow-sequence li {
+  display: flex;
+  gap: 8px;
+}
+.design-engineering .workflow-sequence span {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.design-engineering .workflow-step {
+  padding-block: 18px;
+}
+.design-engineering .workflow-step h3 {
+  font-size: 16px;
+  font-weight: 700;
+}
+.design-engineering .workflow-step .section-copy {
+  max-width: 75ch;
+  font-size: 14px;
+}
+.design-engineering.with-navigation .inspection-layout.comparison-open {
+  grid-template-columns: minmax(0, 1fr);
+}
+.design-engineering .comparison-open .image-stage.split .image-frame {
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  aspect-ratio: var(--inspection-aspect, 1.3333);
+}
+.design-engineering .comparison-open .result-sidebar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-left: 0;
+  border-top: 1px solid var(--line);
+  align-items: start;
+}
+.design-engineering .comparison-open .engineer-panel {
+  grid-column: 2;
+  grid-row: 1 / span 4;
+  border-left: 1px solid var(--line);
+  border-bottom: 0;
+}
+.design-engineering
+  .comparison-open
+  :is(.decision-panel, .update-panel, .display-panel, .inspection-details) {
+  grid-column: 1;
+}
+@media (max-width: 760px) {
+  .design-engineering .comparison-open .image-stage.split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .design-engineering .comparison-open .result-sidebar {
+    display: block;
+  }
+  .design-engineering .comparison-open .engineer-panel {
+    border-left: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .design-engineering .heading-actions {
+    width: 100%;
+  }
+  .design-engineering .heading-actions .button {
+    flex: 1;
+  }
+  .design-engineering .viewer-statusbar {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}

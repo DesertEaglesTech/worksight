@@ -50,6 +50,7 @@ test("operator creates a profile, inspects, reviews and updates", async ({
   ).toBeVisible();
   await expect(page.locator(".result-facts")).toBeVisible();
   await expect(page.locator(".result-facts")).toContainText("Not reported");
+  await page.locator(".display-panel summary").click();
   await page.getByLabel("Heatmap opacity").focus();
   for (let i = 0; i < 25; i++)
     await page.getByLabel("Heatmap opacity").press("ArrowLeft");
@@ -74,6 +75,16 @@ test("operator creates a profile, inspects, reviews and updates", async ({
   await expect(
     page.getByAltText("Similar known-good reference", { exact: true }),
   ).toBeVisible();
+  await page.getByRole("button", { name: "Zoom in", exact: true }).click();
+  const transforms = await page
+    .locator(".image-transform")
+    .evaluateAll((elements) =>
+      elements.map((element) => (element as HTMLElement).style.transform),
+    );
+  expect(transforms).toHaveLength(2);
+  expect(transforms[0]).toEqual(transforms[1]);
+  expect(transforms[0]).toContain("scale(1.25)");
+  await page.getByRole("button", { name: "Fit", exact: true }).click();
   await page.screenshot({
     path: "test-results/inspection-desktop.png",
     fullPage: true,
@@ -94,7 +105,7 @@ test("operator creates a profile, inspects, reviews and updates", async ({
     .getByRole("button", { name: "Update profile", exact: true })
     .click();
   await expect(page.getByText("v2 is ready", { exact: true })).toBeVisible();
-  await expect(page.locator(".result-facts")).toContainText("v1");
+  await expect(page.locator(".result-version")).toContainText("v1");
   await expect(
     page.getByLabel("Reference profile", { exact: true }),
   ).toHaveValue(/.+/);
@@ -109,7 +120,7 @@ test("operator creates a profile, inspects, reviews and updates", async ({
   await page
     .getByRole("button", { name: "Run inspection", exact: true })
     .click();
-  await expect(page.locator(".result-facts")).toContainText("v2");
+  await expect(page.locator(".result-version")).toContainText("v2");
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({
     path: "test-results/inspection-mobile.png",

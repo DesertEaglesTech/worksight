@@ -103,6 +103,7 @@ export const backendJobSchema = z.object({
       version_id: identifier.optional(),
       inspection_id: identifier.optional(),
       evaluation_id: identifier.optional(),
+      report_id: identifier.optional(),
       state: z.string().optional(),
       gate: gateSchema.optional(),
     })
@@ -147,3 +148,55 @@ export type BackendProfile = z.infer<typeof backendProfileSchema>;
 export type BackendVersion = z.infer<typeof backendVersionSchema>;
 export type BackendFeedback = z.infer<typeof backendFeedbackSchema>;
 export type Evaluation = z.infer<typeof evaluationSchema>;
+
+export const reportAvailabilitySchema = z.object({
+  status: z.string(),
+  report: z
+    .object({
+      enabled: z.boolean(),
+      provider: z.literal("AMD Token Factory"),
+      models: z.array(z.string()),
+    })
+    .optional(),
+});
+const reportBase = z.object({
+  id: identifier,
+  inspection_id: identifier,
+  profile_id: identifier,
+  created_at: timestamp,
+  assistive_only: z.literal(true),
+  model_decision: z.enum(["normal", "anomaly", "review"]),
+  inputs: z.array(z.enum(["original", "heatmap_overlay", "reference"])),
+});
+export const assistiveReportSchema = z.discriminatedUnion("status", [
+  reportBase.extend({ status: z.enum(["queued", "running"]), error: z.null() }),
+  reportBase.extend({ status: z.literal("failed"), error: z.string() }),
+  reportBase.extend({
+    status: z.literal("ready"),
+    error: z.null(),
+    finished_at: timestamp,
+    summary: z.string(),
+    observations: z.array(z.string()).max(8),
+    suggested_check: z.string().nullable(),
+    heatmap_consistency: z.enum([
+      "consistent",
+      "partly_consistent",
+      "inconsistent",
+      "unclear",
+    ]),
+    model: z.string(),
+    served_model: z.string().nullable(),
+    provider: z.literal("AMD Token Factory"),
+    latency_ms: z.number().nonnegative(),
+    usage: z.object({
+      prompt_tokens: z.number().int().nonnegative().nullable(),
+      completion_tokens: z.number().int().nonnegative().nullable(),
+      total_tokens: z.number().int().nonnegative().nullable(),
+    }),
+    failed_attempts: z.array(
+      z.object({ model: z.string(), error: z.string() }),
+    ),
+    finish_reason: z.string().nullable(),
+  }),
+]);
+export type AssistiveReport = z.infer<typeof assistiveReportSchema>;

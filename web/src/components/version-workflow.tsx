@@ -185,6 +185,23 @@ export default function VersionWorkflow({
           Refresh versions
         </button>
       </div>
+      <ol className="workflow-sequence" aria-label="Profile update steps">
+        <li>
+          <span>1</span> Freeze validation set
+        </li>
+        <li>
+          <span>2</span> Select confirmed parts
+        </li>
+        <li>
+          <span>3</span> Build candidate
+        </li>
+        <li>
+          <span>4</span> Evaluate
+        </li>
+        <li>
+          <span>5</span> Apply if gate passes
+        </li>
+      </ol>
       {loading && (
         <p className="section-copy" role="status">
           Loading versions and engineer feedback…
@@ -285,31 +302,37 @@ export default function VersionWorkflow({
         )}
         <div className="feedback-options">
           {eligible.map((f) => (
-            <label className="feedback-option" key={f.id}>
-              <input
-                type="checkbox"
-                disabled={disabled}
-                checked={feedbackIds.includes(f.id)}
-                onChange={(e) =>
-                  setFeedbackIds((ids) =>
-                    e.target.checked
-                      ? [...ids, f.id]
-                      : ids.filter((id) => id !== f.id),
-                  )
-                }
-              />
-              <img
-                src={assetUrl(f.image_url)}
-                alt="Engineer-confirmed normal part"
-              />
-              <span>
-                <strong>{f.comment || "Confirmed normal"}</strong>
-                <small>
-                  {new Date(f.created_at).toLocaleString("en-GB")} · Inspection{" "}
-                  {f.inspection_id}
-                </small>
-              </span>
-            </label>
+            <div className="feedback-option" key={f.id}>
+              <label className="feedback-choice">
+                <input
+                  type="checkbox"
+                  disabled={disabled}
+                  checked={feedbackIds.includes(f.id)}
+                  onChange={(e) =>
+                    setFeedbackIds((ids) =>
+                      e.target.checked
+                        ? [...ids, f.id]
+                        : ids.filter((id) => id !== f.id),
+                    )
+                  }
+                />
+                <img
+                  src={assetUrl(f.image_url)}
+                  alt="Engineer-confirmed normal part"
+                />
+                <span>
+                  <strong>Confirmed normal part</strong>
+                  <small>
+                    {new Date(f.created_at).toLocaleString("en-GB")}
+                  </small>
+                </span>
+              </label>
+              <details className="feedback-details">
+                <summary>Review details</summary>
+                <p>{f.comment || "No note added."}</p>
+                <small>Inspection {f.inspection_id}</small>
+              </details>
+            </div>
           ))}
         </div>
         <button

@@ -10,8 +10,10 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Menu,
+  Moon,
   Plus,
   RefreshCw,
+  Sun,
   TriangleAlert,
   X,
 } from "lucide-react";
@@ -32,6 +34,9 @@ import { waitForJob } from "@/lib/jobs";
 import FileDrop from "./file-drop";
 import InspectionViewer from "./inspection-viewer";
 import VersionWorkflow from "./version-workflow";
+import AiDescription from "./ai-description";
+import type { WorkspaceDesign } from "./design-preview";
+import { loadSavedExample } from "@/lib/saved-example";
 
 const decisionLabel: Record<Decision, string> = {
   pass: "Pass",
@@ -97,11 +102,42 @@ function Photo({
   );
 }
 
-export default function Workspace({ mode }: { mode: Mode }) {
+export default function Workspace({
+  mode,
+  design = "current",
+  initialTheme = "light",
+  exampleInspectionId,
+  exampleSource,
+}: {
+  mode: Mode;
+  design?: WorkspaceDesign;
+  initialTheme?: "light" | "dark";
+  exampleInspectionId?: string;
+  exampleSource?: string;
+}) {
+  const [theme, setTheme] = useState(initialTheme);
   const api = useMemo(
     () => (mode === "demo" ? createDemoApi() : createBackendApi()),
     [mode],
   );
+  const [savedExample, setSavedExample] = useState<Awaited<
+    ReturnType<typeof loadSavedExample>
+  > | null>(null);
+  const [exampleError, setExampleError] = useState("");
+  useEffect(() => {
+    if (mode !== "live" || !exampleInspectionId) return;
+    const c = new AbortController();
+    setSavedExample(null);
+    setExampleError("");
+    void loadSavedExample(api, exampleInspectionId, c.signal)
+      .then((record) => {
+        if (!c.signal.aborted) setSavedExample(record);
+      })
+      .catch((e) => {
+        if (!c.signal.aborted) setExampleError(message(e));
+      });
+    return () => c.abort();
+  }, [api, exampleInspectionId, mode]);
   const [profileQuery, setProfileQuery] = useState("");
   const [menuCollapsed, setMenuCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -377,10 +413,34 @@ export default function Workspace({ mode }: { mode: Mode }) {
     });
   }
   const canOperate = !!capabilities && !loading && !busy && !unavailable;
+  const themeButton =
+    design === "engineering" || design === "current" ? (
+      <button
+        type="button"
+        className="theme-toggle"
+        aria-label={
+          theme === "light" ? "Switch to dark theme" : "Switch to light theme"
+        }
+        title={
+          theme === "light" ? "Switch to dark theme" : "Switch to light theme"
+        }
+        onClick={() => {
+          const next = theme === "light" ? "dark" : "light";
+          setTheme(next);
+          document.cookie = `worksight_theme=${next}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
+        }}
+      >
+        {theme === "light" ? (
+          <Moon size={16} aria-hidden="true" />
+        ) : (
+          <Sun size={16} aria-hidden="true" />
+        )}
+      </button>
+    ) : null;
 
   return (
     <div
-      className={`app-shell with-navigation ${menuCollapsed ? "navigation-collapsed" : ""} ${mobileMenuOpen ? "navigation-open" : ""}`}
+      className={`app-shell with-navigation ${menuCollapsed ? "navigation-collapsed" : ""} ${mobileMenuOpen ? "navigation-open" : ""} design-${design}${(design === "engineering" || design === "current") && theme === "dark" ? " theme-dark" : ""}`}
     >
       <a className="skip-link" href="#main">
         Skip to workspace
@@ -400,6 +460,7 @@ export default function Workspace({ mode }: { mode: Mode }) {
         <span>
           {screen === "inspect" ? "Part inspection" : "Reference samples"}
         </span>
+        {themeButton}
       </header>
       {mobileMenuOpen && (
         <button
@@ -513,6 +574,7 @@ export default function Workspace({ mode }: { mode: Mode }) {
             <span>Collapse menu</span>
           </button>
         </div>
+        {design === "engineering" && themeButton}
       </aside>
       <main id="main" inert={mobileMenuOpen}>
         <div className="page-heading">
@@ -526,17 +588,67 @@ export default function Workspace({ mode }: { mode: Mode }) {
                 : "Manage the known-good images used to prepare each part profile."}
             </p>
           </div>
-          <button
-            className="button primary"
-            disabled={!canOperate}
-            onClick={() => {
-              setFormError("");
-              setShowCreate(true);
-            }}
-          >
-            <Plus size={17} />
-            New profile
-          </button>
+          <div className="heading-actions">
+            {mode === "live" && exampleInspectionId && (
+              <button
+                className="button secondary"
+                disabled={!canOperate || !savedExample}
+                title={
+                  exampleError ||
+                  "Open saved images and the completed AI description without generating again."
+                }
+                onClick={() =>
+                  void action("Opening saved inspection", async (signal) => {
+                    const record = await loadSavedExample(
+                      api,
+                      exampleInspectionId,
+                      signal,
+                    );
+                    const items = await api.profiles(signal);
+                    if (
+                      !items.some((p) => p.id === record.inspection.profile_id)
+                    )
+                      throw new Error(
+                        "The saved inspection's profile is unavailable.",
+                      );
+                    if (signal.aborted) return;
+                    setProfiles(items);
+                    setSelectedId(record.inspection.profile_id);
+                    setScreen("inspect");
+                    setInspection(record.inspection);
+                    setFiles([]);
+                    setSamples([]);
+                    setView("overlay");
+                    setHumanDecision(
+                      record.inspection.feedback?.human_decision ?? "review",
+                    );
+                    setComment(record.inspection.feedback?.comment ?? "");
+                    setUpdatedVersion(null);
+                    setVersions(null);
+                    setComparison(null);
+                    setSavedExample(record);
+                    setNotice(
+                      "Saved inspection loaded. No new AI request was sent.",
+                    );
+                  })
+                }
+              >
+                Open saved inspection
+              </button>
+            )}
+            <button
+              className={`button ${design === "current" ? "primary" : "secondary"}`}
+              disabled={!canOperate}
+              onClick={() => {
+                setFormError("");
+                setShowCreate(true);
+              }}
+            >
+              <Plus size={17} />
+              New profile
+            </button>
+            {design === "current" && themeButton}
+          </div>
         </div>
         {unavailable && (
           <div className="alert error">
@@ -711,6 +823,12 @@ export default function Workspace({ mode }: { mode: Mode }) {
                         {selected.status}
                       </span>
                     </div>
+                    {savedExample?.inspection.profile_id === selectedId &&
+                      exampleSource && (
+                        <p className="profile-source">
+                          Source: {exampleSource}
+                        </p>
+                      )}
                     <p className="section-copy">
                       {selected.description ||
                         (demo
@@ -1129,7 +1247,9 @@ export default function Workspace({ mode }: { mode: Mode }) {
                 </button>
               </div>
             )}
-            <div className="inspection-layout">
+            <div
+              className={`inspection-layout ${inspection && view === "split" ? "comparison-open" : ""}`}
+            >
               <section className="inspection-main" aria-label="Image workspace">
                 <div className="viewer-toolbar">
                   <h2>{inspection ? "Inspection result" : "Part image"}</h2>
@@ -1194,7 +1314,12 @@ export default function Workspace({ mode }: { mode: Mode }) {
                 )}
                 <div className="inspect-action">
                   <div>
-                    <strong>{files[0]?.name ?? "No image selected"}</strong>
+                    <strong>
+                      {files[0]?.name ??
+                        (inspection
+                          ? "Saved inspection image"
+                          : "No image selected")}
+                    </strong>
                     <small>
                       {inspection
                         ? `Result uses profile v${inspection.profile_version}`
@@ -1273,18 +1398,6 @@ export default function Workspace({ mode }: { mode: Mode }) {
                   {inspection ? (
                     <>
                       <dl className="result-facts">
-                        <div>
-                          <dt>Profile version</dt>
-                          <dd>v{inspection.profile_version}</dd>
-                        </div>
-                        <div>
-                          <dt>Processing time</dt>
-                          <dd>
-                            {inspection.processing_ms === null
-                              ? "Not reported"
-                              : `${inspection.processing_ms.toLocaleString()} ms`}
-                          </dd>
-                        </div>
                         {inspection.anomaly_score !== undefined && (
                           <div>
                             <dt>Anomaly score</dt>
@@ -1297,32 +1410,33 @@ export default function Workspace({ mode }: { mode: Mode }) {
                             <dd>{inspection.threshold.toFixed(4)}</dd>
                           </div>
                         )}
+                        {inspection.anomaly_score === undefined && (
+                          <div>
+                            <dt>Processing time</dt>
+                            <dd>
+                              {inspection.processing_ms === null
+                                ? "Not reported"
+                                : `${inspection.processing_ms} ms`}
+                            </dd>
+                          </div>
+                        )}
                       </dl>
-                      {inspection.threshold_status && (
-                        <p className="small-note">
-                          {inspection.threshold_status ===
-                          "heuristic_not_probability"
-                            ? "Heuristic anomaly threshold, not a calibrated probability."
-                            : inspection.threshold_status}
+                      <p className="result-version">
+                        Inspected with profile v{inspection.profile_version}
+                      </p>
+                      {inspection.threshold_status ===
+                        "heuristic_not_probability" && (
+                        <p className="result-note">
+                          Anomaly score is not a probability.
                         </p>
                       )}
-                      {inspection.runtime && (
-                        <>
-                          <span
-                            className={`runtime-badge ${inspection.runtime.amd_gpu ? "amd" : ""}`}
-                          >
-                            {inspection.runtime.amd_gpu
-                              ? `AMD GPU · ${inspection.runtime.device_name}`
-                              : inspection.runtime.device === "cpu"
-                                ? "CPU"
-                                : inspection.runtime.device_name}
-                          </span>
-                          <p className="small-note">
-                            Inference time covers preprocessing, encoding and
-                            retrieval. It excludes loading, rendering and
-                            network.
-                          </p>
-                        </>
+                      {api.reports && (
+                        <a
+                          className="text-button ai-description-link"
+                          href="#ai-description"
+                        >
+                          View AI description
+                        </a>
                       )}
                       {inspection.matches_reference_image && (
                         <p className="reference-warning" role="alert">
@@ -1341,29 +1455,6 @@ export default function Workspace({ mode }: { mode: Mode }) {
                     </div>
                   )}
                 </section>
-                <section className="sidebar-section display-panel">
-                  <div className="section-heading">
-                    <h2>Image display</h2>
-                  </div>
-                  <div className="opacity-controls">
-                    <label htmlFor="opacity">Heatmap opacity</label>
-                    <output htmlFor="opacity">{opacity}%</output>
-                    <input
-                      id="opacity"
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={opacity}
-                      disabled={!inspection?.heatmap_url || view === "original"}
-                      onChange={(e) => setOpacity(Number(e.target.value))}
-                    />
-                  </div>
-                  <p className="small-note">
-                    {view === "original"
-                      ? "Select Heatmap or Compare to adjust the overlay."
-                      : "Lower opacity to see the part surface under the heatmap."}
-                  </p>
-                </section>
                 <section className="sidebar-section engineer-panel">
                   <div className="section-heading">
                     <h2>Engineer review</h2>
@@ -1374,9 +1465,7 @@ export default function Workspace({ mode }: { mode: Mode }) {
                   {inspection && capabilities.features.feedback ? (
                     <form onSubmit={(e) => void submitFeedback(e)}>
                       <p className="section-copy">
-                        Confirm the part separately from the model result.
-                        {!demo &&
-                          " Once saved, the decision and note cannot be edited in this version."}
+                        Confirm the part independently of the model.
                       </p>
                       <label className="field-label" htmlFor="human-decision">
                         Human decision
@@ -1405,6 +1494,11 @@ export default function Workspace({ mode }: { mode: Mode }) {
                         disabled={!!busy || (!demo && !!inspection.feedback)}
                         onChange={(e) => setComment(e.target.value)}
                       />
+                      {!demo && !inspection.feedback && (
+                        <p className="small-note">
+                          Saved reviews cannot be edited.
+                        </p>
+                      )}
                       <button
                         className="button primary full"
                         type="submit"
@@ -1483,9 +1577,57 @@ export default function Workspace({ mode }: { mode: Mode }) {
                     )}
                   </section>
                 )}
-                <details className="sidebar-section inspection-details" open>
+                <details className="sidebar-section display-panel">
+                  <summary>Image display</summary>
+                  <div className="display-options">
+                    <div className="opacity-controls">
+                      <label htmlFor="opacity">Heatmap opacity</label>
+                      <output htmlFor="opacity">{opacity}%</output>
+                      <input
+                        id="opacity"
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={opacity}
+                        disabled={
+                          !inspection?.heatmap_url || view === "original"
+                        }
+                        onChange={(e) => setOpacity(Number(e.target.value))}
+                      />
+                    </div>
+                    <p className="small-note">
+                      {view === "original"
+                        ? "Select Heatmap or Compare to adjust the overlay."
+                        : "Lower opacity to see the part surface under the heatmap."}
+                    </p>
+                  </div>
+                </details>
+                <details className="sidebar-section inspection-details">
                   <summary>Inspection details</summary>
                   <dl className="detail-list">
+                    {inspection && (
+                      <>
+                        <div>
+                          <dt>Profile version</dt>
+                          <dd>v{inspection.profile_version}</dd>
+                        </div>
+                        <div>
+                          <dt>Processing time</dt>
+                          <dd>
+                            {inspection.processing_ms === null
+                              ? "Not reported"
+                              : `${inspection.processing_ms.toLocaleString("en-GB", { maximumFractionDigits: 1 })} ms`}
+                          </dd>
+                        </div>
+                      </>
+                    )}
+                    {savedExample?.inspection.profile_id === selectedId &&
+                      exampleSource && (
+                        <div>
+                          <dt>Source</dt>
+                          <dd>{exampleSource}</dd>
+                        </div>
+                      )}
                     <div>
                       <dt>Profile</dt>
                       <dd>{selected?.name ?? "Not selected"}</dd>
@@ -1498,7 +1640,12 @@ export default function Workspace({ mode }: { mode: Mode }) {
                     )}
                     <div>
                       <dt>File</dt>
-                      <dd>{files[0]?.name ?? "Not uploaded"}</dd>
+                      <dd>
+                        {files[0]?.name ??
+                          (inspection
+                            ? "Saved image · original filename unavailable"
+                            : "Not uploaded")}
+                      </dd>
                     </div>
                     {files[0] && (
                       <div>
@@ -1519,9 +1666,42 @@ export default function Workspace({ mode }: { mode: Mode }) {
                       </dd>
                     </div>
                   </dl>
+                  {inspection?.runtime && (
+                    <span
+                      className={`runtime-badge ${inspection.runtime.amd_gpu ? "amd" : ""}`}
+                    >
+                      {inspection.runtime.amd_gpu
+                        ? `AMD GPU · ${inspection.runtime.device_name}`
+                        : inspection.runtime.device === "cpu"
+                          ? "CPU"
+                          : inspection.runtime.device_name}
+                    </span>
+                  )}
+                  {inspection?.threshold_status && (
+                    <p className="small-note">
+                      {inspection.threshold_status ===
+                      "heuristic_not_probability"
+                        ? "Heuristic anomaly threshold; not a calibrated probability."
+                        : inspection.threshold_status}
+                    </p>
+                  )}
+                  {inspection?.runtime && (
+                    <p className="small-note">
+                      Inference time includes preprocessing, encoding and
+                      retrieval. Loading, rendering and network are excluded.
+                    </p>
+                  )}
                 </details>
               </aside>
             </div>
+            {inspection && api.reports && (
+              <AiDescription
+                key={`${inspection.id}:${savedExample?.inspection.id === inspection.id ? savedExample.report.id : ""}`}
+                api={api}
+                inspection={inspection}
+                disabled={!!busy}
+              />
+            )}
           </>
         )}
         {busy && (
@@ -1580,7 +1760,7 @@ export default function Workspace({ mode }: { mode: Mode }) {
             id="profile-name"
             required
             maxLength={demo ? 100 : 120}
-            placeholder="e.g. Bearing housing · top view"
+            placeholder="e.g. PCB module · top view"
             value={name}
             disabled={!!busy}
             onChange={(e) => setName(e.target.value)}
@@ -1602,9 +1782,8 @@ export default function Workspace({ mode }: { mode: Mode }) {
             </>
           ) : (
             <p className="small-note">
-              This creates an unsent draft in this tab. Upload references and
-              build it to save the profile. Descriptions are not yet stored by
-              the service.
+              Name the part and camera view. Upload references and build to save
+              this draft. Reloading discards an unsubmitted draft.
             </p>
           )}
           {formError && (

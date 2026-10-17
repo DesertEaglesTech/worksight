@@ -985,6 +985,9 @@
                   "evaluation_id": {
                     "type": "string"
                   },
+                  "report_id": {
+                    "type": "string"
+                  },
                   "state": {
                     "type": "string"
                   },

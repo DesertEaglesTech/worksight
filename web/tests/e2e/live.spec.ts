@@ -6,10 +6,45 @@ test.skip(
 );
 const manifestPath =
   process.env.WORKSIGHT_E2E_IMAGES || "../work/live-qa/visa-files.json";
+test("opens the configured saved inspection and AI report without a model request", async ({
+  page,
+}) => {
+  const posts: string[] = [];
+  page.on("request", (request) => {
+    if (request.method() === "POST") posts.push(request.url());
+  });
+  await page.goto("/");
+  const open = page.getByRole("button", {
+    name: "Open saved inspection",
+    exact: true,
+  });
+  test.skip(
+    (await open.count()) === 0,
+    "Configure WORKSIGHT_EXAMPLE_INSPECTION_ID on the web server.",
+  );
+  await expect(open).toBeEnabled();
+  await open.click();
+  await expect(page.locator(".ai-report-summary")).toBeVisible();
+  await expect(page.locator(".ai-report-attribution")).toContainText(
+    "AMD Token Factory",
+  );
+  await expect(page.locator(".result-facts")).toContainText("Anomaly score");
+  const reportId = await page
+    .locator(".ai-report-content")
+    .getAttribute("data-report-id");
+  await open.click();
+  await expect(page.locator(".ai-report-content")).toHaveAttribute(
+    "data-report-id",
+    reportId!,
+  );
+  expect(posts).toEqual([]);
+});
 test("live CPU/AMD flow persists profiles, inspections, reviews and evaluated versions", async ({
   page,
 }) => {
-  test.setTimeout(180_000);
+  test.setTimeout(
+    process.env.WORKSIGHT_E2E_AI_REPORT === "1" ? 360_000 : 180_000,
+  );
   test.skip(
     !existsSync(manifestPath),
     "Prepare a manifest with references[], normal[] and anomaly[] absolute file paths.",
@@ -67,7 +102,9 @@ test("live CPU/AMD flow persists profiles, inspections, reviews and evaluated ve
       page.getByAltText("Similar known-good reference sample", { exact: true }),
     ).toBeVisible();
     await expect(page.locator(".result-facts")).toContainText("Anomaly score");
+    await page.locator(".inspection-details summary").click();
     await expect(page.locator(".runtime-badge")).toBeVisible();
+    await page.locator(".inspection-details summary").click();
   }
   await inspect(images.normal[0]);
   await page.getByLabel("Human decision", { exact: true }).selectOption("pass");
@@ -81,6 +118,44 @@ test("live CPU/AMD flow persists profiles, inspections, reviews and evaluated ve
     page.getByLabel("Human decision", { exact: true }),
   ).toBeDisabled();
   await expect(page.locator(".recorded-review")).toContainText("Pass");
+  // Opt in explicitly: sends public QA images to the configured hosted provider.
+  if (process.env.WORKSIGHT_E2E_AI_REPORT === "1") {
+    const description = page.getByRole("region", {
+      name: "AI description (assistive)",
+      exact: true,
+    });
+    const decisionBefore = await page
+      .locator(".decision-panel .decision")
+      .innerText();
+    const requests: string[] = [];
+    page.on("request", (request) => {
+      if (request.method() === "POST" && request.url().endsWith("/report"))
+        requests.push(request.url());
+    });
+    await description
+      .getByRole("button", { name: "Generate description", exact: true })
+      .click();
+    await expect(description.locator(".ai-report-summary")).toBeVisible({
+      timeout: 150_000,
+    });
+    await expect(description.locator(".ai-report-attribution")).toContainText(
+      "Runs on AMD Token Factory",
+    );
+    const reportId = await description
+      .locator(".ai-report-content")
+      .getAttribute("data-report-id");
+    await description
+      .getByRole("button", { name: "Check saved description", exact: true })
+      .click();
+    await expect(description.locator(".ai-report-content")).toHaveAttribute(
+      "data-report-id",
+      reportId!,
+    );
+    await expect(page.locator(".decision-panel .decision")).toHaveText(
+      decisionBefore,
+    );
+    expect(requests).toHaveLength(1);
+  }
   await page.getByRole("button", { name: "New image", exact: true }).click();
   await inspect(images.anomaly[0]);
   await page.getByLabel("Human decision", { exact: true }).selectOption("fail");

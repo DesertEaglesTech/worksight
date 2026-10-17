@@ -1,13 +1,19 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent,
+} from "react";
 import { Minus, Plus, RotateCcw } from "lucide-react";
 import { assetUrl } from "@/lib/api";
 import type { Inspection } from "@/lib/contract";
 
 export type ImageView = "overlay" | "original" | "split";
 
-/** Local display controls only. Original and heatmap share one transform. */
+/** The part, overlay and reference share zoom and pan; their pixels are never recoloured. */
 export default function InspectionViewer({
   inspection,
   view,
@@ -20,6 +26,7 @@ export default function InspectionViewer({
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [dimensions, setDimensions] = useState("");
+  const [aspect, setAspect] = useState(4 / 3);
   const [failed, setFailed] = useState(false);
   const [heatmapFailed, setHeatmapFailed] = useState(false);
   const [referenceFailed, setReferenceFailed] = useState(false);
@@ -33,6 +40,7 @@ export default function InspectionViewer({
     setZoom(1);
     setPan({ x: 0, y: 0 });
     setDimensions("");
+    setAspect(4 / 3);
     setFailed(false);
     setHeatmapFailed(false);
     setReferenceFailed(false);
@@ -49,52 +57,63 @@ export default function InspectionViewer({
     ? assetUrl(inspection.reference_url)
     : "";
   const showHeatmap = view !== "original" && !!heatmap && !heatmapFailed;
+  const transform = {
+    transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+  };
+  const frameEvents = {
+    onPointerDown: (e: PointerEvent<HTMLDivElement>) => {
+      if (zoom <= 1 || e.button !== 0) return;
+      e.currentTarget.setPointerCapture(e.pointerId);
+      drag.current = {
+        x: e.clientX,
+        y: e.clientY,
+        startX: pan.x,
+        startY: pan.y,
+      };
+    },
+    onPointerMove: (e: PointerEvent<HTMLDivElement>) => {
+      if (!drag.current) return;
+      setPan({
+        x: drag.current.startX + e.clientX - drag.current.x,
+        y: drag.current.startY + e.clientY - drag.current.y,
+      });
+    },
+    onPointerUp: () => {
+      drag.current = null;
+    },
+    onPointerCancel: () => {
+      drag.current = null;
+    },
+    onLostPointerCapture: () => {
+      drag.current = null;
+    },
+  };
   return (
     <>
-      <div className={`image-stage ${view === "split" ? "split" : ""}`}>
+      <div
+        className={`image-stage ${view === "split" ? "split" : ""}`}
+        style={{ "--inspection-aspect": aspect } as CSSProperties}
+      >
         <div
           className={`image-frame ${zoom > 1 ? "can-pan" : ""}`}
           style={{ touchAction: zoom > 1 ? "none" : "pan-y" }}
-          onPointerDown={(e) => {
-            if (zoom <= 1 || e.button !== 0) return;
-            e.currentTarget.setPointerCapture(e.pointerId);
-            drag.current = {
-              x: e.clientX,
-              y: e.clientY,
-              startX: pan.x,
-              startY: pan.y,
-            };
-          }}
-          onPointerMove={(e) => {
-            if (!drag.current) return;
-            setPan({
-              x: drag.current.startX + e.clientX - drag.current.x,
-              y: drag.current.startY + e.clientY - drag.current.y,
-            });
-          }}
-          onPointerUp={() => {
-            drag.current = null;
-          }}
-          onPointerCancel={() => {
-            drag.current = null;
-          }}
+          {...frameEvents}
         >
-          <div
-            className="image-transform"
-            style={{
-              transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-            }}
-          >
+          <div className="image-transform" style={transform}>
             {original && !failed ? (
               <img
                 src={original}
                 alt="Inspected part original"
                 draggable={false}
-                onLoad={(e) =>
+                onLoad={(e) => {
+                  setAspect(
+                    e.currentTarget.naturalWidth /
+                      e.currentTarget.naturalHeight,
+                  );
                   setDimensions(
                     `${e.currentTarget.naturalWidth} × ${e.currentTarget.naturalHeight} px`,
-                  )
-                }
+                  );
+                }}
                 onError={() => {
                   setFailed(true);
                   setDimensions("");
@@ -123,17 +142,25 @@ export default function InspectionViewer({
           </span>
         </div>
         {view === "split" && (
-          <div className="image-frame reference-frame">
-            {reference && !referenceFailed ? (
-              <img
-                src={reference}
-                alt="Similar known-good reference"
-                draggable={false}
-                onError={() => setReferenceFailed(true)}
-              />
-            ) : (
-              <div className="image-missing">Similar reference unavailable</div>
-            )}
+          <div
+            className={`image-frame reference-frame ${zoom > 1 ? "can-pan" : ""}`}
+            style={{ touchAction: zoom > 1 ? "none" : "pan-y" }}
+            {...frameEvents}
+          >
+            <div className="image-transform" style={transform}>
+              {reference && !referenceFailed ? (
+                <img
+                  src={reference}
+                  alt="Similar known-good reference"
+                  draggable={false}
+                  onError={() => setReferenceFailed(true)}
+                />
+              ) : (
+                <div className="image-missing">
+                  Similar reference unavailable
+                </div>
+              )}
+            </div>
             <span className="image-caption">Similar reference</span>
           </div>
         )}
