@@ -1,40 +1,58 @@
-# Worksight — submission draft
+# Worksight — submission texts
 
-Status: draft. The current demonstrable artifact is a synthetic UI workflow. Real AMD inference and end-to-end service validation are pending the ML backend. Replace this status only after recording a real run.
+Status (18 October 2026): live product on Railway with the real FastAPI/PyTorch backend. The assistive
+description runs on AMD Token Factory (Gemma-4-31B-IT). The detector itself has not yet run on an AMD
+GPU; `scripts/amd_run.sh` is ready for that. Lengths below are checked against the lablab limits.
 
-## Short description
+## Form fields
 
-Worksight helps quality engineers inspect industrial parts against known-good reference images. Operators create a part profile, upload a new image and review a heatmap alongside a similar reference. Engineer confirmation stays separate from the model decision, so corrections remain visible as the profile evolves.
+- **Selected challenge:** Intelligent Industry
+- **Participation mode:** Online
+- **Demo application platform:** Railway
+- **Application URL:** https://web-production-d9743.up.railway.app
+- **GitHub repository:** https://github.com/DesertEaglesTech/worksight (public, MIT)
 
-## Problem
+## Title (37 characters; limit 5–50)
 
-An inspection result needs context: which reference set was used, where the unusual region is and whether an engineer agrees with the decision. Switching between disconnected tools makes that review difficult to follow.
+Worksight: Few-Shot Visual Inspection
 
-## Product
+## Short description (202 characters; limit 50–255)
 
-The web workspace keeps the inspection image, heatmap and reference comparison together. Upload previews help operators catch the wrong image before submission. Asynchronous jobs show the status actually reported by the service. Results preserve their profile version. Engineer feedback records an independent human decision and note.
+Worksight checks industrial parts against 10–20 photos of good parts: no model training, a defect heatmap in under a second and an AI description from Gemma on AMD. The engineer confirms every decision.
 
-## Implementation
+## Long description (1240 characters; limit 600–2000)
 
-Next.js, TypeScript and Tailwind CSS provide the English operator interface. A shared typed client validates API responses. A same-origin server proxy keeps backend credentials on the server. FastAPI owns durable profiles, uploads, jobs and results. The frontend includes no competing profile store.
+Quality engineers lose time when every new part needs a trained defect model and labelled defects. Worksight needs only 10–20 photos of good parts. A frozen ResNet-18 builds a memory of normal image patches in seconds; a new photo gets an anomaly score, a heatmap of unusual regions and the most similar good reference.
 
-The explicit demo adapter uses generated steel-flange images, an illustrative heatmap and simulated jobs. It returns a fixed result regardless of the upload. It is a UI demonstration, not evidence of defect detection or training.
+The engineer stays in charge. The model decision and the human decision are stored separately. Confirmed-normal parts can build a new profile version, which is activated only if it adds no false positives or false negatives on a frozen validation set, with rollback.
 
-## AMD implementation — awaiting backend evidence
+AMD: an assistive description from Gemma-4-31B-IT on AMD Token Factory explains what looks wrong, using the image, heatmap, reference and the part's own documentation. It never changes the detector's decision. The detector is PyTorch with ROCm-aware device selection and a one-command AMD benchmark script.
 
-The intended ML path belongs to the backend developer. Before submission, document the actual AMD accelerator model, ROCm version, model/feature extractor, commands and a successful inference artifact. Include actual processing duration if the service measured it. No hardware acceleration, accuracy or speed claim is made by this draft.
+Measured on the VisA PCB set (CC BY 4.0, CPU, held-out test, settings chosen on other categories): AUROC 0.88–0.99, recall 44–87% at a 2–6% false-alarm rate, 0.1–0.3 s per inspection on Railway CPU. Batch inspection ranks a whole folder by anomaly score.
 
-## Current scope
+Live demo: web-production-d9743.up.railway.app. Next.js, FastAPI, PyTorch, MIT licence.
 
-Implemented web flow: profile creation, good-sample upload and preview, build polling, inspection, heatmap opacity and reference comparison, independent engineer review, update request and repeat inspection by profile version. Optional version history, metric comparison and restore render only when the backend advertises them.
+## Technology tags
 
-## Remaining integration work
+AMD, ROCm, AMD Token Factory, Gemma, PyTorch, Computer Vision, Anomaly Detection, FastAPI, Next.js, Manufacturing
 
-Confirm the proposed OpenAPI contract with the ML developer, connect the live service and validate one real run from sample upload through inspection and correction. Record actual AMD evidence and replace the synthetic walkthrough with a real-backend recording before claiming an integrated AMD submission.
+## Team idea (lablab team page; replaces the sensor/forecasting text)
 
-## Links to fill at submission
+We are Desert Eagles, a two-person team building Worksight: few-shot visual inspection for quality engineers. A new part is onboarded from 10–20 good photos without training; each inspection returns an anomaly score, a heatmap and the closest good reference, and Gemma on AMD Token Factory explains what looks wrong. The engineer's decision is always recorded separately from the model's.
 
-- Source: https://github.com/DesertEaglesTech/worksight
-- Hosted demo: see deployment status in `docs/verification.md`.
-- Demo walkthrough: `submission/worksight-demo.webm` (silent sequence of actual UI captures with SRT captions, synthetic data).
-- Slides: `submission/worksight-pitch.pptx` when generated.
+## How we use AMD
+
+- **In the product today:** every AI description is generated by Gemma-4-31B-IT served on AMD
+  Instinct GPUs through AMD Token Factory. Server errors get two retries before DeepSeek-V4.1-Flash
+  (also on Token Factory) answers; the report records which model answered.
+- **Detector on AMD GPU:** the PyTorch detector selects a ROCm device and refuses CPU fallback with
+  `WORKSIGHT_REQUIRE_AMD=1`. `bash scripts/amd_run.sh` checks ROCm, runs the API smoke test and the
+  VisA benchmark with `--require-amd`, and saves GPU name, ROCm version, metrics and latency. Add the
+  result here only after a real run.
+
+## Claims we do not make
+
+- The detector has not run on an AMD GPU yet; hosted inference is CPU (`runtime.amd_gpu: false`).
+- No model was trained; this is a PatchCore-inspired baseline, not a PatchCore reproduction.
+- The anomaly score is not a probability. Metrics are VisA PCB on CPU only (`docs/BENCHMARK.md`).
+- Sensor monitoring, failure forecasting and PDF specification extraction are not implemented.

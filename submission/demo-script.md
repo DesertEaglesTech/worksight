@@ -1,29 +1,38 @@
-# Worksight demo script
+# Worksight demo script (live site, 2–3 minutes)
 
-Current recording: a silent sequence assembled from actual UI captures, using synthetic data. It demonstrates product behavior. It is not continuous screen footage and does not show live FastAPI inference, ROCm execution, trained profile improvement or a measured GPU benchmark.
+Record the live site, https://web-production-d9743.up.railway.app, as one continuous screen recording
+with voice. Export MP4 (lablab accepts MP4 or MOV, up to 300 MB, ideally under 5 minutes). Use a clean
+browser window; never show Railway settings, keys or `.env`.
 
-## Spoken script for the final live demonstration
+0:00 — Problem. “Every new part on a line usually needs a trained defect model and labelled defects.
+Worksight starts from 10–20 photos of good parts instead.”
 
-0:00 — “Worksight is an industrial visual inspection workspace. A quality engineer starts by defining a part and camera view.” Create `Bearing housing · top view`.
+0:15 — Profile. Show **Ultrasonic sensor board (VisA pcb1)**: version 1, 20 reference photos, Ready.
+“Building this profile took about nine seconds. No training.” Open Reference samples briefly.
 
-0:15 — “These are parts we have checked as acceptable. We upload them as the reference set and ask the service to prepare the profile.” Show upload previews and build status. For a live recording, use actual good samples.
+0:35 — Inspect. Click **Bent pins**, then **Run inspection**. “The part is compared patch by patch
+with the good references.” Show the Fail decision, anomaly score and threshold. Say once: “the score
+is a distance, not a probability.”
 
-0:35 — “Now we inspect a new part using that profile.” Upload a test image. Show the backend job state without invented progress.
+0:55 — Evidence. Switch Heatmap / Original / Compare. “The heatmap sits on the pins, and the closest
+good reference shows them straight.”
 
-0:50 — “The original image stays visible under the heatmap. Opacity makes it easier to see the surface. Compare shows the similar reference beside it.” Adjust opacity, show Original, then Compare.
+1:15 — AMD + Gemma. Click **Open saved inspection** (a completed description, so no waiting): read the
+Gemma description and point at “Gemma-4-31B-IT · Runs on AMD Token Factory”. “Gemma on AMD explains
+what looks wrong. It never changes the detector's decision.” Generating live is optional: Token Factory
+sometimes falls back to DeepSeek.
 
-1:10 — “The model decision and engineer confirmation are separate records. I can reject this part and explain the visible defect without rewriting what the model predicted.” Save a human decision and note.
+1:35 — Engineer decides. Choose a human decision, add a note, save. “The model's decision and the
+engineer's decision are stored separately.”
 
-1:30 — “When the backend supports corrections, we request a new profile version. The earlier inspection still refers to its original version.” Request update, show the returned version, inspect again and show the new result version. Do not claim improved accuracy unless independently measured.
+1:50 — Good part. Click **Good board**, run it, show a normal result.
 
-1:50 — “This is the quality engineer's review loop. The backend owns the durable records and inference, and the web interface keeps the evidence and human decision together.”
+2:05 — Numbers. Cut to a slide or README table: VisA PCB on CPU, held-out test — AUROC 0.88–0.99,
+recall 44–87% at a 2–6% false-alarm rate, 0.1–0.3 s per inspection. If the AMD run is done, show its
+GPU name and latency.
 
-## Before recording with the real service
+2:20 — Close. “Worksight: onboard a part from good photos, get a heatmap and an explanation, keep the
+engineer in charge.”
 
-- Get contract approval and configure live mode using server secrets.
-- Verify real image provenance and permission to include it in submission materials.
-- Obtain actual AMD hardware/model/ROCm execution evidence from the ML developer.
-- Test the full flow including feedback and update support.
-- Preserve the backend's measured processing time. If absent, show “not reported”.
-- Leave unavailable versions/comparison/restore labelled Planned.
-- Use a clean workspace, hide credentials and do not record server secret settings.
+Do not claim: detector inference on an AMD GPU (unless `scripts/amd_run.sh` ran), model training,
+calibrated confidence, sensor monitoring or failure forecasting.

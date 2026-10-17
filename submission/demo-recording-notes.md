@@ -1,5 +1,7 @@
-# Worksight UI walkthrough
+# Demo recordings
 
-Duration: 67 seconds. Silent WEBM video assembled from actual browser captures of the implemented workflow, plus cover and status slides. This is a sequence of UI captures, not continuous screen footage or a live inference recording. SRT captions describe each scene.
-
-All part images are synthetic. Heatmap, decision and jobs are fixed demo fixtures. No training, AMD GPU execution, accuracy or improvement is demonstrated. Replace with a live-backend recording after integration.
+- `worksight-demo.webm` (67 s, silent) is the old synthetic UI walkthrough: synthetic images, fixed
+  demo heatmap and jobs. **Do not submit it**: lablab needs MP4 or MOV, and it does not show the live
+  backend, real images or the AMD-hosted description.
+- Record the replacement from the live site following [demo-script.md](demo-script.md) and save it as
+  `worksight-demo.mp4`.

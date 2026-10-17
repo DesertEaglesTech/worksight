@@ -1,32 +1,39 @@
-# Implementation status — 17 October 2026
+# Implementation status — 18 October 2026
 
-## Verified locally
+## Live
 
-- 14 automated tests pass: API lifecycle, persistence, normal/defect retrieval, threshold self-match
-  exclusion, heatmap scaling, authentication, duplicate/split checks, candidate evaluation,
-  successful activation/rollback, rejected regression, task failure and restart recovery.
-- Ruff checks and Git whitespace checks pass.
-- Real pretrained ResNet-18 smoke completed on **CPU / Apple arm**, PyTorch 2.14.1,
-  torchvision 0.29.1. Ten synthetic reference images, two separate synthetic inspection fixtures.
-  The normal fixture was classified normal and the scratch fixture anomalous. The overlay was
-  visually inspected. This does not establish industrial accuracy.
-- Benchmark CLI completed on synthetic fixtures; its metrics are pipeline checks, not submission results.
-- Live local server at port 8000 responds to health, OpenAPI and Swagger docs. Model warmup succeeds.
+- Web: https://web-production-d9743.up.railway.app (Next.js, live mode).
+- Backend: FastAPI + PyTorch on Railway CPU (8 vCPU budget), behind the web proxy with a server-side
+  API key. `/health` reports `amd_gpu: false` until the model runs on an AMD GPU.
+- A VisA pcb1 profile (20 references) is ready. "Good board" / "Bent pins" load two VisA test images;
+  "Open saved inspection" shows a bent-pins result with a completed Gemma description.
 
-## Pending external evidence
+## Verified
 
-- AMD notebook/VM allocation and actual ROCm execution. The AMD AI Notebooks login page advertises
-  GPU-powered Jupyter notebooks; the team's logged-in entitlement has not been verified.
-- Real industrial dataset benchmark, separate held-out final test, false-positive analysis.
-- Linux/ROCm container execution.
-- Frontend integration and final demo recording (teammate's work).
+- Backend: 35 pytest tests and Ruff pass. Web: typecheck, 39 vitest tests and `next build` pass
+  (Node 24). Playwright e2e has not run on this Mac.
+- Benchmark (CPU, VisA PCB, held-out test, design chosen on 8 other VisA categories):
+  AUROC 0.88–0.99, recall 44–87% at FPR 2–6%. Details: [BENCHMARK.md](BENCHMARK.md).
+- Live on Railway CPU: inspection 114–330 ms (`inference_ms`), 20-reference profile ~9 s.
+  A 10-image batch (5 normal, 5 defective pcb1) flagged all 5 defects; one normal went to `review`.
+  These are spot checks, not metrics.
+- Clicked through the live site: Bent pins → Run inspection → Fail (score 0.279, threshold 0.094),
+  heatmap on the pins, AI description returned.
+- AI description: Gemma-4-31B-IT on AMD Token Factory answers most requests but returns HTTP 500 in
+  short bursts (provider-side; earlier bodies said CUDA out of memory). Two retries (3 s, 6 s), then
+  DeepSeek-V4.1-Flash. The report shows which model answered.
 
-## Next sequence
+## Not done
 
-1. Sign into AMD AI Notebooks and confirm access to a custom Python/Jupyter GPU runtime.
-2. Run the AMD verification and smoke commands in `docs/AMD_ACCESS.md`.
-3. Obtain a properly licensed real industrial image set, fix splits, run the benchmark without test-set tuning.
-4. Give the frontend teammate `docs/API.md`; integrate profile creation and inspection first.
-5. Evaluate adaptation separately, preserving an untouched final test set.
+- **Detector on an AMD GPU.** No GPU instance yet. `bash scripts/amd_run.sh` runs the smoke test and
+  benchmark with `--require-amd` and saves GPU name, ROCm version, metrics and latency.
+- Submission video in MP4 with the live flow, slides as PDF (current: silent WebM of the old synthetic
+  demo, PPTX).
+- Sensor monitoring, failure forecasting and PDF specification extraction (planned, not built).
 
-Source changes remain local; no commit, push, public deployment or hackathon submission was performed.
+## Known limits
+
+- One process, in-process job queue; a restart fails unfinished work with a clear reason.
+- Threshold is a leave-one-out heuristic, not a calibrated probability; recall on pcb1/pcb3 is ~45%.
+- Three leftover test profiles ("VisA pcb4 (live check)") remain on the hosted demo; there is no
+  delete endpoint.
