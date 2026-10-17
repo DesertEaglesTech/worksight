@@ -14,7 +14,8 @@
   (Node 24). Playwright demo-mode e2e (2 tests) passes on Linux Chromium (Node 22); the two live
   e2e specs need a running backend and were skipped.
 - Benchmark (CPU, VisA PCB, held-out test, design chosen on 8 other VisA categories):
-  AUROC 0.88–0.99, recall 44–87% at FPR 2–6%. Details: [BENCHMARK.md](BENCHMARK.md).
+  AUROC 0.88–0.99, recall 44–87% at FPR 2–6%. Counting the review band, 56–96% of defects and
+  4–13% of good boards reach the engineer. Details: [BENCHMARK.md](BENCHMARK.md).
 - Live on Railway CPU: inspection 114–330 ms (`inference_ms`), 20-reference profile ~9 s.
   A 10-image batch (5 normal, 5 defective pcb1) flagged all 5 defects; one normal went to `review`.
   These are spot checks, not metrics.

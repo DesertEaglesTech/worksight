@@ -42,8 +42,8 @@
   .tag.bad { color: var(--bad); border-color: var(--bad); }
   figure img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; display: block; }
   figcaption { font-size: 14px; color: #8ea39c; margin-top: 10px; }
-  table { border-collapse: collapse; width: 100%; font-size: 20px; }
-  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line); }
+  table { border-collapse: collapse; width: 100%; font-size: 19px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); }
   th { color: var(--muted); font-weight: 500; font-size: 15px; letter-spacing: .06em; text-transform: uppercase; }
   td { color: var(--text); font-variant-numeric: tabular-nums; }
   ul { list-style: none; }
@@ -163,13 +163,14 @@
   <div class="row grow" style="margin-top: 30px; gap: 44px;">
     <div style="flex: 1.35;">
       <table>
-        <tr><th>VisA</th><th>AUROC</th><th>Recall</th><th>False alarms</th><th>p50 latency</th></tr>
-        <tr><td>pcb1</td><td>0.905</td><td>44%</td><td>5%</td><td>250 ms</td></tr>
-        <tr><td>pcb2</td><td>0.884</td><td>59%</td><td>6%</td><td>304 ms</td></tr>
-        <tr><td>pcb3</td><td>0.875</td><td>46%</td><td>4%</td><td>250 ms</td></tr>
-        <tr><td>pcb4</td><td>0.992</td><td>87%</td><td>2%</td><td>194 ms</td></tr>
+        <tr><th rowspan="2">VisA</th><th rowspan="2">AUROC</th><th colspan="2">Score ≥ threshold</th><th colspan="2">Sent to engineer</th></tr>
+        <tr><th>Recall</th><th>False alarms</th><th>Defects</th><th>Good boards</th></tr>
+        <tr><td>pcb1</td><td>0.905</td><td>44%</td><td>5%</td><td><strong>56%</strong></td><td>7%</td></tr>
+        <tr><td>pcb2</td><td>0.884</td><td>59%</td><td>6%</td><td><strong>77%</strong></td><td>13%</td></tr>
+        <tr><td>pcb3</td><td>0.875</td><td>46%</td><td>4%</td><td><strong>58%</strong></td><td>10%</td></tr>
+        <tr><td>pcb4</td><td>0.992</td><td>87%</td><td>2%</td><td><strong>96%</strong></td><td>4%</td></tr>
       </table>
-      <p style="margin-top: 18px; font-size: 15px;">20 references from the official train normals; full official test split (100 normal + 100 defect images per board). Design chosen on 8 other VisA categories. CPU run; not an AMD run.</p>
+      <p style="margin-top: 16px; font-size: 15px;">“Sent to engineer” = anomaly or review (±10% band around the threshold, fixed before the test). 20 references from the official train normals; full official test split (~100 normal + 100 defect images per board). Design chosen on 8 other VisA categories. CPU, p50 194–304 ms; not an AMD run.</p>
     </div>
     <div style="flex: 1; display: flex; flex-direction: column; gap: 16px;">
       <div class="card">
@@ -178,7 +179,7 @@
       </div>
       <div class="card">
         <div class="num">HONEST LIMITS</div>
-        <p style="margin-top: 8px;">Recall is ~45% on pcb1/pcb3 at this threshold. The score is a distance, not a probability: Worksight is a triage tool with a review band, not an autonomous rejecter.</p>
+        <p style="margin-top: 8px;">Above the threshold alone, recall is ~45% on pcb1/pcb3; with the review band 56–58% of defects reach a person. The score is a distance, not a probability: Worksight is a triage tool, not an autonomous rejecter.</p>
       </div>
     </div>
   </div>

@@ -20,7 +20,7 @@ Worksight: Few-Shot Visual Inspection
 
 Worksight checks industrial parts against 10–20 photos of good parts: no model training, a defect heatmap in under a second and an AI description from Gemma on AMD. The engineer confirms every decision.
 
-## Long description (1466 characters; limit 600–2000)
+## Long description (1556 characters; limit 600–2000)
 
 Quality engineers lose time when every new part needs a trained defect model and labelled defects. Worksight needs only 10–20 photos of good parts. A frozen ResNet-18 builds a memory of normal image patches in seconds; a new photo gets an anomaly score, a heatmap of unusual regions and the most similar good reference.
 
@@ -28,7 +28,7 @@ The engineer stays in charge. The model decision and the human decision are stor
 
 Every flagged part also gets an explanation from Gemma-4-31B-IT running on AMD GPUs through AMD Token Factory. Gemma sees the photo, the heatmap overlay, the closest good reference and the part's own documentation, and tells the engineer what looks wrong and what to check. The detector's decision and score are passed in and never changed, and the report shows which model answered. The detector is PyTorch with ROCm-aware device selection and a one-command AMD benchmark script.
 
-Measured on the VisA PCB set (CC BY 4.0, CPU, held-out test, settings chosen on other categories): AUROC 0.88–0.99, recall 44–87% at a 2–6% false-alarm rate, 0.1–0.3 s per inspection on Railway CPU. A new part needs no defect labels and no training run: its profile builds in about 9 s from 20 good photos.
+Measured on the VisA PCB set (CC BY 4.0, CPU, held-out test, settings chosen on other categories): AUROC 0.88–0.99, recall 44–87% at a 2–6% false-alarm rate; with the review band, 56–96% of defects reach the engineer while 4–13% of good boards do. 0.1–0.3 s per inspection on Railway CPU. A new part needs no defect labels and no training run: its profile builds in about 9 s from 20 good photos.
 
 Live demo: web-production-d9743.up.railway.app. Next.js, FastAPI, PyTorch, MIT licence.
 

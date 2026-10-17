@@ -66,6 +66,23 @@ Trade-offs: CPU inspection is ~20× slower than v1 (more patches at higher resol
 reference is ~6× larger (2304 patches × 384 dims), and profiles built with v1 must be rebuilt because
 the encoder signature changed (the API returns 409 for them).
 
+### What reaches the engineer (review band)
+
+The binary table counts only `score >= threshold`. The product's decision has a ±10% `review` band
+around the threshold (`review_margin` 0.1, fixed before the PCB test), and both `review` and
+`anomaly` go to the engineer. Recounted from the same per-image scores in the CPU reports with
+`python scripts/review_band.py data/evidence/visa-cpu/pcb*.json`; nothing re-run or tuned.
+
+| Category | Defects: anomaly / review / normal | Recall, binary | Defects sent to engineer | Good boards sent to engineer |
+|---|---|---|---|---|
+| pcb1 | 35 / 21 / 44 | 44% | 56% | 7% |
+| pcb2 | 44 / 33 / 23 | 59% | 77% | 13% |
+| pcb3 | 37 / 21 / 42 | 46% | 58% | 10% |
+| pcb4 | 74 / 22 / 4 | 87% | 96% | 4% |
+
+This is the triage view: more defects reach a person, at the cost of more good boards to look at.
+It is not a better detector; AUROC is unchanged.
+
 ### More references (measured after the design was fixed)
 
 Same detector, same PCB test, 100 references instead of 20 (`--references 100`, same seed rule).
@@ -85,7 +102,8 @@ references help separation, but the threshold still needs checking per part.
 - AUROC rose on all four boards, most on pcb2 and pcb3, which were weakest.
 - Recall rose from 9–29% to 44–87% while the false-positive rate stayed at 2–6%. Roughly half the
   defects on pcb1 and pcb3 are still missed at this operating point. The API's ±10% `review` band
-  routes borderline scores to the engineer.
+  routes borderline scores to the engineer: with it, 56–96% of defects and 4–13% of good boards
+  reach a person (table above).
 - Leave-one-out scores overstate normal scores because the scored reference is missing from memory;
   that is why the old q95 × 1.2 rule was too strict.
 - Not a PatchCore reproduction. Do not compare these numbers with published PatchCore results on VisA.

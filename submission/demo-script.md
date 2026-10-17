@@ -34,7 +34,7 @@ engineer's decision are stored separately.”
 1:50 — Good part. Click **Good board**, run it, show a normal result.
 
 2:05 — Numbers. Cut to slide 5 of `worksight-pitch.pdf`: VisA PCB on CPU, held-out test — AUROC 0.88–0.99,
-recall 44–87% at a 2–6% false-alarm rate, 0.1–0.3 s per inspection. If the AMD run is done, show its
+recall 44–87% at a 2–6% false-alarm rate; counting the review band, 56–96% of defects reach the engineer. 0.1–0.3 s per inspection. If the AMD run is done, show its
 GPU name and latency.
 
 2:20 — Close. “Worksight: onboard a part from good photos, get a heatmap and an explanation, keep the
