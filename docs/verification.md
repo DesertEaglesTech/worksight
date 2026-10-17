@@ -21,7 +21,7 @@ Date: 2026-10-17. Repository initially contained no application source or backen
 - The stored Playwright operator tests could not run on this restricted Mac: Chromium failed before creating a page due to a MachPort permission error. They are provided for a normal developer/CI environment, not reported as passing.
 - No live FastAPI URL, agreed OpenAPI spec, real part dataset or AMD run artifact was supplied. Real persistence, inference, correction consumption and version restore remain unverified.
 - Dockerfile is provided but a container build was not run here.
-- Hosted demo publication was not completed. A private unpublished Sites project was registered, but automatic approval review rejected sending the short-lived source credential to the required publishing helper. No successful deployment or public URL is claimed.
+- Hosted demo (18 October 2026): https://web-production-d9743.up.railway.app runs in live mode against the FastAPI backend on Railway. Checked: `/health` reports the model loaded on CPU (`amd_gpu: false`) and the assistive report enabled via AMD Token Factory; the VisA pcb1 profile is ready and a saved inspection has a completed report.
 - The presentation was rendered and checked as a PPTX package, not opened in native PowerPoint. The video is a silent sequence of actual UI captures with captions, not continuous live-inference footage.
 
 ## Live acceptance checklist

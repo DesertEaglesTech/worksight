@@ -102,6 +102,20 @@ function Photo({
   );
 }
 
+// VisA pcb1 official test split (CC BY 4.0), never used as references.
+const liveExamples = [
+  {
+    label: "Good board",
+    path: "/examples/visa-pcb1-normal-0011.jpg",
+    name: "visa-pcb1-normal-0011.jpg",
+  },
+  {
+    label: "Bent pins",
+    path: "/examples/visa-pcb1-bent-014.jpg",
+    name: "visa-pcb1-bent-014.jpg",
+  },
+] as const;
+
 export default function Workspace({
   mode,
   design = "current",
@@ -394,17 +408,18 @@ export default function Workspace({
       setNotice("Engineer review saved. The model decision remains unchanged.");
     });
   }
+  async function fetchExample(path: string, name: string) {
+    const response = await fetch(path);
+    if (!response.ok) throw new Error("The example image is unavailable.");
+    const blob = await response.blob();
+    return new File([blob], name, { type: blob.type });
+  }
   async function loadFixture(kind: "sample" | "inspection") {
     await action("Loading example image", async () => {
-      const response = await fetch(
-        `/demo/${kind === "sample" ? "reference" : "defect"}.png`,
-      );
-      if (!response.ok) throw new Error("The example image is unavailable.");
-      const file = new File(
-        [await response.blob()],
-        kind === "sample" ? "bearing-reference.png" : "bearing-gouge.png",
-        { type: "image/png" },
-      );
+      const file =
+        kind === "sample"
+          ? await fetchExample("/demo/reference.png", "bearing-reference.png")
+          : await fetchExample("/demo/defect.png", "bearing-gouge.png");
       if (kind === "sample") setSamples([file]);
       else {
         setFiles([file]);
@@ -412,6 +427,17 @@ export default function Workspace({
       }
     });
   }
+  async function loadLiveExample(example: (typeof liveExamples)[number]) {
+    await action("Loading example image", async () => {
+      setFiles([await fetchExample(example.path, example.name)]);
+      setInspection(null);
+    });
+  }
+  // Real VisA images only match the profile of the saved example inspection.
+  const showLiveExamples =
+    mode === "live" &&
+    !!savedExample &&
+    savedExample.inspection.profile_id === selectedId;
   const canOperate = !!capabilities && !loading && !busy && !unavailable;
   const themeButton =
     design === "engineering" || design === "current" ? (
@@ -1305,6 +1331,24 @@ export default function Workspace({
                       >
                         Use example part image
                       </button>
+                    )}
+                    {showLiveExamples && (
+                      <div className="live-examples">
+                        <span>Try a VisA pcb1 test image:</span>
+                        {liveExamples.map((example) => (
+                          <button
+                            key={example.path}
+                            className="text-button"
+                            disabled={
+                              !canOperate || selected?.status !== "ready"
+                            }
+                            onClick={() => void loadLiveExample(example)}
+                          >
+                            {example.label}
+                          </button>
+                        ))}
+                        <small>VisA · CC BY 4.0</small>
+                      </div>
                     )}
                     <p className="upload-guidance">
                       Match the camera angle, lighting and framing of your

@@ -664,6 +664,16 @@ main {
   align-self: center;
   margin: 14px 0 0;
 }
+.live-examples {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 14px;
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--muted);
+}
 .upload-guidance {
   text-align: center;
   font-size: 13px;
