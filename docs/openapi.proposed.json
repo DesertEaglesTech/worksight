@@ -1,9 +1,9 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Worksight proposed API",
+    "title": "Worksight archived API proposal",
     "version": "1.0.0-proposed",
-    "description": "Awaiting ML developer confirmation. No production endpoint is implied."
+    "description": "Archived pre-integration proposal. These routes are not used by the live adapter; see docs/API.md and docs/api-contract.md. Normalized UI response schemas are included for reference."
   },
   "paths": {
     "/v1/capabilities": {
@@ -659,10 +659,25 @@
               "null"
             ]
           },
+          "local_draft": {
+            "type": "boolean"
+          },
+          "validation_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "active_version_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "updated_at": {
             "type": "string",
             "format": "date-time",
-            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
           }
         },
         "required": [
@@ -701,6 +716,14 @@
                 "items": {
                   "type": "string"
                 }
+              },
+              "max_image_pixels": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "min_reference_files": {
+                "type": "number",
+                "exclusiveMinimum": 0
               }
             },
             "required": [
@@ -797,7 +820,7 @@
           "created_at": {
             "type": "string",
             "format": "date-time",
-            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
           },
           "feedback": {
             "anyOf": [
@@ -821,7 +844,7 @@
                   "created_at": {
                     "type": "string",
                     "format": "date-time",
-                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
                   }
                 },
                 "required": [
@@ -836,6 +859,65 @@
                 "type": "null"
               }
             ]
+          },
+          "version_id": {
+            "type": "string"
+          },
+          "overlay_url": {
+            "type": "string"
+          },
+          "anomaly_score": {
+            "type": "number",
+            "minimum": 0
+          },
+          "threshold": {
+            "type": "number",
+            "minimum": 0
+          },
+          "threshold_status": {
+            "type": "string"
+          },
+          "runtime": {
+            "type": "object",
+            "properties": {
+              "device": {
+                "type": "string"
+              },
+              "device_name": {
+                "type": "string"
+              },
+              "amd_gpu": {
+                "type": "boolean"
+              },
+              "torch_version": {
+                "type": "string"
+              },
+              "torchvision_version": {
+                "type": "string"
+              },
+              "hip_version": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "encoder": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "device",
+              "device_name",
+              "amd_gpu",
+              "torch_version",
+              "torchvision_version",
+              "hip_version",
+              "encoder"
+            ],
+            "additionalProperties": false
+          },
+          "matches_reference_image": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -896,6 +978,35 @@
                   },
                   "inspection_id": {
                     "type": "string"
+                  },
+                  "version_id": {
+                    "type": "string"
+                  },
+                  "evaluation_id": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "type": "string"
+                  },
+                  "gate": {
+                    "type": "object",
+                    "properties": {
+                      "passed": {
+                        "type": "boolean"
+                      },
+                      "improved": {
+                        "type": "boolean"
+                      },
+                      "rule": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "passed",
+                      "improved",
+                      "rule"
+                    ],
+                    "additionalProperties": false
                   }
                 },
                 "additionalProperties": false
@@ -942,6 +1053,27 @@
       "ProfileVersion": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "parent_version_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "evaluation_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "threshold": {
+            "type": "number"
+          },
           "version": {
             "type": "integer",
             "exclusiveMinimum": 0,
@@ -950,7 +1082,7 @@
           "created_at": {
             "type": "string",
             "format": "date-time",
-            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
           },
           "sample_count": {
             "type": "integer",

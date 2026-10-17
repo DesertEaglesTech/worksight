@@ -10,14 +10,12 @@ labelled validation images before explicit activation.
 
 ## Current status
 
-- **Web app** (`web/`, Next.js): the full operator flow works in a clearly labelled **synthetic demo**.
-  A live API adapter and server proxy implement a **proposed** contract
-  ([docs/api-contract.md](docs/api-contract.md)).
-- **Backend** (`backend/`, FastAPI + PyTorch): profiles, inspections, heatmaps, feedback, versions,
-  evaluation gate and rollback are implemented. Its actual contract is [docs/API.md](docs/API.md).
-- **Not yet done:** the web proposal and the backend API differ in paths and request shapes, so live
-  integration needs an adapter. AMD inference has not been run yet; local Mac execution is not AMD
-  evidence. See [docs/PLAN.md](docs/PLAN.md).
+- **Web app** (`web/`, Next.js): live adapter connects to the actual FastAPI API, including
+  transient profile drafts, multipart reference builds, inspections, immutable feedback,
+  validation, candidate evaluation, explicit activation and restore. Demo remains a separate mode.
+- **Backend** (`backend/`, FastAPI + PyTorch): its contract is [docs/API.md](docs/API.md).
+  Web mapping and remaining requests to ML are in [docs/api-contract.md](docs/api-contract.md).
+- **AMD:** local CPU execution is not AMD evidence; target ROCm execution still needs verification.
 
 No GPU status, confidence percentage, benchmark or quality improvement is fabricated. Measured
 results are only in [docs/BENCHMARK.md](docs/BENCHMARK.md).
@@ -38,16 +36,21 @@ Open http://127.0.0.1:3000. The example env selects demo explicitly. Development
 ## Operator flow
 
 1. Click **New profile**, enter a part name and camera view.
-2. Add known-good JPEG, PNG or WebP images, or choose **Use synthetic sample** in demo. Click **Upload samples**, then **Build profile**.
-3. Click **Inspect with this profile**. Upload a new image or choose the synthetic defective part, then **Run inspection**.
+2. Add known-good JPEG, PNG or WebP images, or choose **Use example sample** in demo. Click **Upload samples**, then **Build profile**.
+3. Click **Inspect with this profile**. Upload a new image or choose **Use example part image** in demo, then **Run inspection**.
 4. Adjust heatmap opacity and switch between Heatmap, Original and Compare.
    Use the viewer's zoom controls and Fit button to examine the surface. Drag to pan when zoomed in. Image display settings and engineer review share the right sidebar.
 5. Choose a **Human decision**, add a note and save. The model decision remains unchanged.
-6. **Update profile** when supported. Inspect again to see a result using the new version. Existing inspections keep their original version.
+6. In live mode open **Reference samples → Validation & versions**. Upload a distinct 5+5 validation set and acknowledge that it will be frozen. Select Pass feedback, build a candidate, evaluate, inspect the measured report, then Apply only when the gate passes. Restore uses an approved earlier version. Existing inspections keep the version they originally used.
 
-Demo inspection returns a fixed example regardless of upload content. It demonstrates UI behavior and cannot assess real parts. The interface states this limitation.
+Live **New profile** creates an unsent draft only in the current tab. Stage 3–50 distinct reference
+images (10–20 recommended), then Build to upload and persist them on FastAPI. Reloading loses an
+unsent draft. Existing saved profiles accept new references through validated engineer feedback.
+Live descriptions are unavailable until the backend stores them. Saved live feedback is immutable.
 
-Version history, comparison and rollback are capability-gated and marked **Planned** in the web app until wired to the backend. Demo builds simulate version changes without training. Demo data resets on reload. FastAPI owns all durable live records.
+Demo inspection returns a fixed example regardless of upload content. It demonstrates UI behavior and cannot assess real parts. Demo must not be used for real inspections.
+
+Live history, measured candidate comparison, explicit activation and restore use the backend workflow. These features remain **Planned** in demo. Demo builds simulate version changes without training. Demo data resets on reload. FastAPI owns all durable live records.
 
 ## Connect FastAPI
 
@@ -59,9 +62,9 @@ WORKSIGHT_API_URL=http://127.0.0.1:8000
 WORKSIGHT_API_TOKEN=
 ```
 
-The URL is the backend origin without `/v1`. The optional token stays server-side and must equal the backend's `WORKSIGHT_API_KEY`. Never prefix credentials with `NEXT_PUBLIC_`. Browser calls go through `/api/backend/v1/...`, so this pattern does not require browser-to-FastAPI CORS.
+The URL is the backend origin without `/api/v1`. The optional token stays server-side and must equal the backend's `WORKSIGHT_API_KEY`. Never prefix credentials with `NEXT_PUBLIC_`. Browser calls go through `/api/backend/api/v1/...`, so this pattern does not require browser-to-FastAPI CORS.
 
-See the [API proposal](docs/api-contract.md) and [OpenAPI proposal](docs/openapi.proposed.json), and the backend's actual [API](docs/API.md). Live failures never switch to demo. Without an explicit mode the app shows setup instructions and disables operations.
+See the [web adapter mapping and Requests to ML](docs/api-contract.md), and the backend's actual [API](docs/API.md). The old OpenAPI proposal is archived and does not describe live endpoints. Live failures never switch to demo. Without an explicit mode the app shows setup instructions and disables operations.
 
 ## Web production and deployment
 
@@ -82,6 +85,9 @@ docker run --rm -p 3000:3000 --env-file .env.local worksight-web
 ```
 
 Live deployment belongs on the intended internal network or behind the host's access controls. Application authentication is outside v1 scope. A hosted demo uses synthetic data only.
+
+A verified real-data CPU walkthrough and remaining limitations are recorded in
+[Live adapter verification](docs/live-adapter-verification.md).
 
 ## Web validation
 

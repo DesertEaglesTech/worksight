@@ -1,4 +1,8 @@
 import { expect, test } from "@playwright/test";
+test.skip(
+  process.env.WORKSIGHT_E2E_MODE === "live",
+  "Disposable demo scenario; use live.spec.ts for FastAPI.",
+);
 test("operator creates a profile, inspects, reviews and updates", async ({
   page,
 }) => {

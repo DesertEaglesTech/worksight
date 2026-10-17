@@ -2215,3 +2215,146 @@ td {
   background: #fff0e5;
   color: #b74606;
 }
+
+.draft-notice,
+.reference-warning {
+  margin: 18px 0;
+  padding: 12px 14px;
+  background: #fff7e8;
+  color: #805014;
+  border-left: 3px solid #d99019;
+  font-size: 14px;
+}
+.runtime-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-size: 13px;
+}
+.runtime-badge.amd {
+  color: #9d3504;
+  background: #fff0e5;
+}
+.version-workflow {
+  margin-top: 28px;
+  border-top: 1px solid var(--line);
+  padding-top: 24px;
+}
+.workflow-step {
+  padding: 22px 0;
+  border-bottom: 1px solid var(--line);
+}
+.workflow-step summary {
+  font-size: 16px;
+  font-weight: 600;
+}
+.validation-uploads {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin: 20px 0;
+}
+.validation-uploads .dropzone {
+  min-height: 150px;
+}
+.workflow-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 18px 0;
+  font-size: 14px;
+}
+.workflow-check input,
+.feedback-option input {
+  width: 17px;
+  height: 17px;
+  padding: 0;
+  flex-shrink: 0;
+  margin-top: 3px;
+  accent-color: var(--accent);
+}
+.feedback-options {
+  display: grid;
+  gap: 12px;
+  margin: 20px 0;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.feedback-option {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  cursor: pointer;
+}
+.feedback-option img {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  background: #edf0f2;
+  border: 1px solid var(--line);
+}
+.feedback-option span {
+  min-width: 0;
+}
+.feedback-option strong {
+  display: block;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.feedback-option small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.version-workflow .version-row {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.version-workflow .version-actions {
+  flex-wrap: wrap;
+}
+.workflow-notice {
+  padding: 12px;
+  background: #eef7f0;
+  color: #28613d;
+  font-size: 14px;
+  margin: 16px 0;
+}
+.empty-copy {
+  color: var(--muted);
+  font-size: 14px;
+  margin: 14px 0;
+}
+.evaluation-report {
+  margin-top: 22px;
+}
+.gate-result {
+  padding: 12px;
+  margin: 16px 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+.gate-result.passed {
+  color: #28613d;
+  background: #eef7f0;
+}
+.gate-result.rejected {
+  color: #a03428;
+  background: #fff0ed;
+}
+.metrics-scroll {
+  overflow-x: auto;
+  margin-bottom: 18px;
+}
+.evaluation-report .small-note {
+  margin: 12px 0;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 1150px) {
+  .validation-uploads {
+    grid-template-columns: 1fr;
+  }
+}
