@@ -11,10 +11,10 @@ export function validateFiles(files: File[], limits = defaultLimits): string | n
   if (files.reduce((n, f) => n + f.size, 0) > 50 * 1024 * 1024) return "The combined upload exceeds 50 MB. Upload fewer images at a time.";
   return null;
 }
-export async function validateImages(files: File[]): Promise<void> {
+export async function validateImages(files: File[], limits = defaultLimits): Promise<void> {
   for (const file of files) {
     const url = URL.createObjectURL(file);
-    try { await new Promise<void>((resolve, reject) => { const img = new Image(); img.onload = () => img.naturalWidth > 0 ? resolve() : reject(new Error(`${file.name}: invalid image.`)); img.onerror = () => reject(new Error(`${file.name}: the image could not be decoded. Choose a valid JPEG, PNG or WebP.`)); img.src = url; }); }
+    try { await new Promise<void>((resolve, reject) => { const img = new Image(); img.onload = () => { if (limits.max_image_pixels && img.naturalWidth * img.naturalHeight > limits.max_image_pixels) reject(new Error(`${file.name}: exceeds the ${limits.max_image_pixels / 1_000_000} megapixel limit.`)); else if (img.naturalWidth > 0) resolve(); else reject(new Error(`${file.name}: invalid image.`)); }; img.onerror = () => reject(new Error(`${file.name}: the image could not be decoded. Choose a valid JPEG, PNG or WebP.`)); img.src = url; }); }
     finally { URL.revokeObjectURL(url); }
   }
 }

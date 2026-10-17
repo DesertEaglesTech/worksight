@@ -45,7 +45,7 @@ export default function FileDrop({
       return;
     }
     try {
-      await validateImages(incoming);
+      await validateImages(incoming, limits);
       if (current === revision.current) {
         setError("");
         onChange(next);

@@ -15,7 +15,7 @@ import {
   TriangleAlert,
   X,
 } from "lucide-react";
-import { assetUrl, liveApi } from "@/lib/api";
+import { assetUrl } from "@/lib/api";
 import type {
   Capabilities,
   Decision,
@@ -26,6 +26,7 @@ import type {
   ProfileVersion,
   VersionComparison,
 } from "@/lib/contract";
+import { createBackendApi } from "@/lib/backend-api";
 import { createDemoApi } from "@/lib/demo";
 import { waitForJob } from "@/lib/jobs";
 import FileDrop from "./file-drop";
@@ -97,7 +98,7 @@ function Photo({
 
 export default function Workspace({ mode }: { mode: Mode }) {
   const api = useMemo(
-    () => (mode === "demo" ? createDemoApi() : liveApi),
+    () => (mode === "demo" ? createDemoApi() : createBackendApi()),
     [mode],
   );
   const [profileQuery, setProfileQuery] = useState("");
@@ -258,7 +259,7 @@ export default function Workspace({ mode }: { mode: Mode }) {
       setDescription("");
       setFormError("");
       setNotice(
-        "Profile created. Add known-good samples to prepare it for inspection.",
+        demo ? "Profile created. Add known-good samples to prepare it for inspection." : "Draft created in this tab. Add 3–50 distinct images (10–20 recommended), then build to save it on the server. Reloading discards this unsent draft.",
       );
     });
   }
@@ -271,7 +272,7 @@ export default function Workspace({ mode }: { mode: Mode }) {
       );
       setSamples([]);
       setNotice(
-        "Samples accepted. Build the profile when the reference set is ready.",
+        demo ? "Samples accepted. Build the profile when the reference set is ready." : "Files staged in this tab. Build the profile to upload and save them. Reloading discards unsent files.",
       );
     });
   }
@@ -283,14 +284,15 @@ export default function Workspace({ mode }: { mode: Mode }) {
       async (signal) => {
         const jobId = await api.buildProfile(id);
         const done = await waitForJob(api, jobId, setJob, signal);
-        if (done.result?.profile_id !== id)
+        if (!done.result?.profile_id || (!selected.local_draft && done.result.profile_id !== id))
           throw new Error("The service returned an unexpected profile result.");
         const items = await refreshProfiles();
-        const p = items.find((p) => p.id === id);
+        const p = items.find((p) => p.id === done.result?.profile_id);
         if (!p || p.status !== "ready")
           throw new Error(
             "The build completed, but the profile is not ready. Refresh to check its status.",
           );
+        setSelectedId(p.id);
         setUpdatedVersion(p.version);
         setVersions(null);
         setComparison(null);
@@ -683,7 +685,7 @@ export default function Workspace({ mode }: { mode: Mode }) {
                       </span>
                     </div>
                     <p className="section-copy">
-                      {selected.description || "No description added."}
+                      {selected.description || (demo ? "No description added." : "One part type and camera view per profile.")}
                     </p>
                     <dl className="profile-facts">
                       <div>
@@ -699,10 +701,12 @@ export default function Workspace({ mode }: { mode: Mode }) {
                         </dd>
                       </div>
                       <div>
-                        <dt>Last updated</dt>
+                        <dt>{demo ? "Last updated" : "Version created"}</dt>
                         <dd>{formatDate(selected.updated_at)}</dd>
                       </div>
                     </dl>
+                    {(!demo && !selected.local_draft) ? <p className="section-copy">This profile is saved on the inspection service. Use engineer-confirmed references and validation to prepare a new version.</p> : <>
+                    {!demo && <p className="draft-notice">Unsent draft · stored only in this tab. Reloading discards the name and files. Add 3–50 distinct reference images; 10–20 recommended.</p>}
                     <div className="subsection-heading">
                       <h3>Known-good samples</h3>
                       <p>Use the same part type, camera view and framing.</p>
@@ -750,7 +754,7 @@ export default function Workspace({ mode }: { mode: Mode }) {
                         className="button primary"
                         disabled={
                           !canOperate ||
-                          !selected.sample_count ||
+                          selected.sample_count < (demo ? 1 : 3) ||
                           selected.status === "building"
                         }
                         onClick={() => void buildProfile()}
@@ -760,6 +764,7 @@ export default function Workspace({ mode }: { mode: Mode }) {
                           : "Build profile"}
                       </button>
                     </div>
+                    </>}
                     {selected.status === "ready" && (
                       <button
                         className="button secondary"
@@ -1433,6 +1438,7 @@ export default function Workspace({ mode }: { mode: Mode }) {
             disabled={!!busy}
             onChange={(e) => setName(e.target.value)}
           />
+          {demo ? <>
           <label className="field-label" htmlFor="profile-description">
             Description <span>(optional)</span>
           </label>
@@ -1445,6 +1451,7 @@ export default function Workspace({ mode }: { mode: Mode }) {
             disabled={!!busy}
             onChange={(e) => setDescription(e.target.value)}
           />
+          </> : <p className="small-note">This creates an unsent draft in this tab. Upload references and build it to save the profile. Descriptions are not yet stored by the service.</p>}
           {formError && (
             <p className="field-error" role="alert">
               {formError}

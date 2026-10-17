@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, afterEach } from "vitest";
 import { capabilitiesSchema, inspectionSchema, jobSchema } from "../src/lib/contract";
-import { assetUrl, request, ApiError } from "../src/lib/api";
+import { assetUrl, ApiError } from "../src/lib/api";
+import { backendRequest as request } from "../src/lib/backend-api";
 import { validateFiles } from "../src/lib/files";
 import { allowedRoute, boundedBody, MAX_BODY } from "../src/lib/proxy";
 import { waitForJob } from "../src/lib/jobs";
@@ -15,12 +16,12 @@ describe("operator safety and API boundary", () => {
     expect(jobSchema.safeParse({ id: "j", status: "running", stage: null, progress: 93, result: null, error: null }).success).toBe(false);
   });
   it("accepts only allowed operations and safe asset URLs", () => {
-    expect(allowedRoute("GET", ["v1", "profiles"])).toBe(true);
-    expect(allowedRoute("POST", ["v1", "profiles", "part-1", "build"])).toBe(true);
-    expect(allowedRoute("GET", ["v1", "assets", "a.png"])).toBe(true);
+    expect(allowedRoute("GET", ["api", "v1", "profiles"])).toBe(true);
+    expect(allowedRoute("POST", ["api", "v1", "profiles", "part-1", "candidates"])).toBe(true);
+    expect(allowedRoute("GET", ["api", "v1", "assets", "a".repeat(32) + ".png"])).toBe(true);
     for (const route of [["v1", "..", "admin"], ["https:", "evil"], ["v1", "profiles", "a%2fb"], ["v1", "secrets"]]) expect(allowedRoute("GET", route)).toBe(false);
-    expect(allowedRoute("DELETE", ["v1", "profiles"])).toBe(false);
-    expect(assetUrl("/v1/assets/a.png")).toBe("/api/backend/v1/assets/a.png");
+    expect(allowedRoute("DELETE", ["api", "v1", "profiles"])).toBe(false);
+    expect(assetUrl("/api/v1/assets/" + "a".repeat(32) + ".png")).toBe("/api/backend/api/v1/assets/" + "a".repeat(32) + ".png");
     expect(assetUrl("javascript:alert(1)")).toBe(""); expect(assetUrl("http://example.com/a.png")).toBe("");
   });
   it("rejects unsafe uploads before processing", () => {

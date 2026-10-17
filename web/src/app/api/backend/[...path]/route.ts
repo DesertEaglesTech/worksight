@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { allowedRoute, boundedBody, MAX_BODY } from "@/lib/proxy";
+import { allowedRoute, boundedBody, MAX_BODY, upstreamError } from "@/lib/proxy";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 const fail = (status: number, code: string, message: string) => Response.json({ error: { code, message } }, { status, headers: { "Cache-Control": "no-store" } });
@@ -18,22 +18,20 @@ async function proxy(request: NextRequest, context: { params: Promise<{ path: st
   try {
     const url = new URL(`${base.replace(/\/$/, "")}/${path.join("/")}`);
     if (!["http:", "https:"].includes(url.protocol)) throw new Error("invalid_base");
-    if (path.at(-1) === "compare") { for (const key of ["from", "to"]) { const value = request.nextUrl.searchParams.get(key); if (!value || !/^\d+$/.test(value)) return fail(400, "invalid_version", "Choose valid profile versions."); url.searchParams.set(key, value); } }
     const headers = new Headers();
     if (request.headers.get("content-type")) headers.set("Content-Type", request.headers.get("content-type")!);
     if (process.env.WORKSIGHT_API_TOKEN) headers.set("Authorization", `Bearer ${process.env.WORKSIGHT_API_TOKEN}`);
     const upstream = await fetch(url, { method: request.method, headers, body: body as BodyInit | undefined, cache: "no-store", redirect: "error", signal: AbortSignal.any([request.signal, AbortSignal.timeout(35_000)]) });
-    if (path[1] === "assets") {
+    if (path[2] === "assets") {
       const mime = upstream.headers.get("content-type")?.split(";")[0];
       if (!upstream.ok) return fail(upstream.status, "asset_unavailable", "The inspection image is unavailable.");
-      if (!mime || !["image/png", "image/jpeg", "image/webp"].includes(mime)) return fail(502, "invalid_asset", "The service returned an unsupported image format.");
+      if (!mime || mime !== "image/png") return fail(502, "invalid_asset", "The service returned an unsupported image format.");
       return new Response(upstream.body, { status: upstream.status, headers: { "Content-Type": mime, "Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff" } });
     }
     const data = await upstream.json().catch(() => null);
     if (!upstream.ok) {
       // Do not expose upstream stack traces, credentials, HTML or arbitrary error payloads.
-      const messages: Record<number, string> = { 400: "The service could not accept this request.", 401: "The service credentials need to be checked by the administrator.", 403: "The service denied this operation.", 404: "This record is no longer available.", 409: "The profile changed or is not ready. Refresh and try again.", 413: "The upload exceeds the service limit.", 415: "The service does not support this file type.", 422: "The service could not process these images. Check the files and retry.", 429: "The service is busy. Please try again shortly." };
-      return fail(upstream.status, "backend_error", messages[upstream.status] ?? "The inspection service encountered an error. Try again later.");
+      return fail(upstream.status, "backend_error", upstreamError(upstream.status, data, process.env.WORKSIGHT_API_TOKEN));
     }
     return Response.json(data, { status: upstream.status, headers: { "Cache-Control": "no-store" } });
   } catch { return fail(502, "service_unavailable", "The inspection service is unavailable. Check the connection and try again."); }
