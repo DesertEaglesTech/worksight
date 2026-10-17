@@ -1,7 +1,7 @@
 # Worksight — submission texts
 
-Status (18 October 2026): live product on Railway with the real FastAPI/PyTorch backend. The assistive
-description runs on AMD Token Factory (Gemma-4-31B-IT). The detector itself has not yet run on an AMD
+Status (18 October 2026): live product on Railway with the real FastAPI/PyTorch backend. The
+inspection description runs on AMD Token Factory (Gemma-4-31B-IT). The detector itself has not yet run on an AMD
 GPU; `scripts/amd_run.sh` is ready for that. Lengths below are checked against the lablab limits.
 
 ## Form fields
@@ -20,15 +20,15 @@ Worksight: Few-Shot Visual Inspection
 
 Worksight checks industrial parts against 10–20 photos of good parts: no model training, a defect heatmap in under a second and an AI description from Gemma on AMD. The engineer confirms every decision.
 
-## Long description (1240 characters; limit 600–2000)
+## Long description (1466 characters; limit 600–2000)
 
 Quality engineers lose time when every new part needs a trained defect model and labelled defects. Worksight needs only 10–20 photos of good parts. A frozen ResNet-18 builds a memory of normal image patches in seconds; a new photo gets an anomaly score, a heatmap of unusual regions and the most similar good reference.
 
 The engineer stays in charge. The model decision and the human decision are stored separately. Confirmed-normal parts can build a new profile version, which is activated only if it adds no false positives or false negatives on a frozen validation set, with rollback.
 
-AMD: an assistive description from Gemma-4-31B-IT on AMD Token Factory explains what looks wrong, using the image, heatmap, reference and the part's own documentation. It never changes the detector's decision. The detector is PyTorch with ROCm-aware device selection and a one-command AMD benchmark script.
+Every flagged part also gets an explanation from Gemma-4-31B-IT running on AMD GPUs through AMD Token Factory. Gemma sees the photo, the heatmap overlay, the closest good reference and the part's own documentation, and tells the engineer what looks wrong and what to check. The detector's decision and score are passed in and never changed, and the report shows which model answered. The detector is PyTorch with ROCm-aware device selection and a one-command AMD benchmark script.
 
-Measured on the VisA PCB set (CC BY 4.0, CPU, held-out test, settings chosen on other categories): AUROC 0.88–0.99, recall 44–87% at a 2–6% false-alarm rate, 0.1–0.3 s per inspection on Railway CPU. Batch inspection ranks a whole folder by anomaly score.
+Measured on the VisA PCB set (CC BY 4.0, CPU, held-out test, settings chosen on other categories): AUROC 0.88–0.99, recall 44–87% at a 2–6% false-alarm rate, 0.1–0.3 s per inspection on Railway CPU. A new part needs no defect labels and no training run: its profile builds in about 9 s from 20 good photos.
 
 Live demo: web-production-d9743.up.railway.app. Next.js, FastAPI, PyTorch, MIT licence.
 
@@ -49,6 +49,20 @@ We are Desert Eagles, a two-person team building Worksight: few-shot visual insp
   `WORKSIGHT_REQUIRE_AMD=1`. `bash scripts/amd_run.sh` checks ROCm, runs the API smoke test and the
   VisA benchmark with `--require-amd`, and saves GPU name, ROCm version, metrics and latency. Add the
   result here only after a real run.
+
+## Partner prize: Google (Gemma)
+
+Gemma-4-31B-IT on AMD Token Factory is the primary model for every inspection report; it receives
+the inspected photo, heatmap overlay, closest good reference, detector decision and the part's
+documentation. DeepSeek-V4.1-Flash answers only after two failed Gemma attempts, and the report
+records which model answered. Show a Gemma answer in the video and slides.
+
+## Files to upload
+
+- Cover image: `submission/worksight-cover.png` (1280×720, real VisA images)
+- Slide presentation: `submission/worksight-pitch.pdf` (7 slides)
+- Video presentation: `submission/worksight-demo.mp4` once recorded ([script](demo-script.md));
+  never the old `worksight-demo.webm`
 
 ## Claims we do not make
 

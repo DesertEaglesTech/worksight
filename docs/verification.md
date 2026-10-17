@@ -18,11 +18,11 @@ Date: 2026-10-17. Repository initially contained no application source or backen
 ## Limits of those checks
 
 - Demo jobs, decisions and version changes are simulated. The synthetic images and illustrative heatmap are fixtures, not ML results.
-- The stored Playwright operator tests could not run on this restricted Mac: Chromium failed before creating a page due to a MachPort permission error. They are provided for a normal developer/CI environment, not reported as passing.
+- The stored Playwright operator tests could not run on this restricted Mac: Chromium failed before creating a page due to a MachPort permission error. On Linux (Chromium 1194, Node 22, video recording off) both demo-mode specs pass; the two live specs need a running backend and were skipped.
 - No live FastAPI URL, agreed OpenAPI spec, real part dataset or AMD run artifact was supplied. Real persistence, inference, correction consumption and version restore remain unverified.
 - Dockerfile is provided but a container build was not run here.
 - Hosted demo (18 October 2026): https://web-production-d9743.up.railway.app runs in live mode against the FastAPI backend on Railway. Checked: `/health` reports the model loaded on CPU (`amd_gpu: false`) and the assistive report enabled via AMD Token Factory; the VisA pcb1 profile is ready and a saved inspection has a completed report.
-- The presentation was rendered and checked as a PPTX package, not opened in native PowerPoint. The video is a silent sequence of actual UI captures with captions, not continuous live-inference footage.
+- The pitch (`submission/worksight-pitch.pdf`, 7 slides) and cover (`submission/worksight-cover.png`) are rendered from HTML in `submission/pitch/` with headless Chromium; pages were checked as images. The old `worksight-demo.webm` is a silent sequence of synthetic demo-mode UI captures, not live-inference footage.
 
 ## Live acceptance checklist
 
