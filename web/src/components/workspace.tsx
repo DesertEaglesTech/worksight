@@ -1744,6 +1744,42 @@ export default function Workspace({
                 )}
               </section>
               <aside className="result-sidebar" aria-label="Inspection review">
+                {inspection && (
+                  <div className="verify-strip" aria-label={t("verify.title")}>
+                    {(
+                      [
+                        ["verify.algo", "done"],
+                        [
+                          "verify.ai",
+                          aiState === "ready"
+                            ? "done"
+                            : aiState === "pending"
+                              ? "pending"
+                              : "todo",
+                        ],
+                        ["verify.human", inspection.feedback ? "done" : "todo"],
+                      ] as const
+                    )
+                      .filter(([key]) => key !== "verify.ai" || api.reports)
+                      .map(([key, state]) => (
+                        <span key={key} className={`verify-chip ${state}`}>
+                          {state === "done" ? (
+                            <CheckCircle2 size={15} aria-hidden="true" />
+                          ) : state === "pending" ? (
+                            <LoaderCircle
+                              size={15}
+                              className="spin"
+                              aria-hidden="true"
+                            />
+                          ) : (
+                            <span className="verify-dot" aria-hidden="true" />
+                          )}
+                          <strong>{t(key)}</strong>
+                          <span>{t(`verify.${state}`)}</span>
+                        </span>
+                      ))}
+                  </div>
+                )}
                 <section className="sidebar-section decision-panel">
                   <div className="section-heading">
                     <h2>{t("panel.model")}</h2>
@@ -1836,89 +1872,6 @@ export default function Workspace({
                     <div className="awaiting">
                       <h3>{t("result.awaiting")}</h3>
                       <p>{t("result.awaitingText")}</p>
-                    </div>
-                  )}
-                </section>
-                <section className="sidebar-section engineer-panel">
-                  <div className="section-heading">
-                    <h2>{t("panel.engineer")}</h2>
-                    {inspection?.feedback && (
-                      <span className="saved-tag">{t("review.saved")}</span>
-                    )}
-                  </div>
-                  {inspection && capabilities.features.feedback ? (
-                    <form onSubmit={(e) => void submitFeedback(e)}>
-                      <p className="section-copy">{t("review.intro")}</p>
-                      <label className="field-label" htmlFor="human-decision">
-                        {t("review.human")}
-                      </label>
-                      <select
-                        id="human-decision"
-                        value={humanDecision}
-                        disabled={!!busy || (!demo && !!inspection.feedback)}
-                        onChange={(e) =>
-                          setHumanDecision(e.target.value as Decision)
-                        }
-                      >
-                        <option value="review">{t("review.optReview")}</option>
-                        <option value="pass">{t("review.optPass")}</option>
-                        <option value="fail">{t("review.optFail")}</option>
-                      </select>
-                      <label className="field-label" htmlFor="review-comment">
-                        {t("review.note")} <span>{t("review.optional")}</span>
-                      </label>
-                      <textarea
-                        id="review-comment"
-                        placeholder={t("review.placeholder")}
-                        maxLength={2000}
-                        rows={3}
-                        value={comment}
-                        disabled={!!busy || (!demo && !!inspection.feedback)}
-                        onChange={(e) => setComment(e.target.value)}
-                      />
-                      {!demo && !inspection.feedback && (
-                        <p className="small-note">{t("review.locked")}</p>
-                      )}
-                      <button
-                        className="button primary full"
-                        type="submit"
-                        disabled={
-                          !canOperate || (!demo && !!inspection.feedback)
-                        }
-                      >
-                        {inspection.feedback
-                          ? demo
-                            ? "Update review"
-                            : t("review.done")
-                          : t("review.save")}
-                      </button>
-                      {inspection.feedback && (
-                        <div className="recorded-review">
-                          <span>Recorded human decision</span>
-                          <DecisionTag
-                            value={inspection.feedback.human_decision}
-                            label={t(
-                              `tag.${inspection.feedback.human_decision}`,
-                            )}
-                          />
-                          <p>
-                            {inspection.feedback.comment || "No note added."}
-                          </p>
-                          <small>
-                            Saved{" "}
-                            {formatTimestamp(inspection.feedback.created_at)}
-                          </small>
-                        </div>
-                      )}
-                    </form>
-                  ) : (
-                    <div className="awaiting">
-                      <p>
-                        {inspection
-                          ? "Engineer feedback is not supported by the current service."
-                          : t("review.after")}
-                      </p>
-                      {inspection && <span className="planned">Planned</span>}
                     </div>
                   )}
                 </section>
@@ -2088,6 +2041,85 @@ export default function Workspace({
                 onState={setAiState}
               />
             )}
+            <div className="engineer-card">
+              <section className="sidebar-section engineer-panel">
+                <div className="section-heading">
+                  <h2>{t("panel.engineer")}</h2>
+                  {inspection?.feedback && (
+                    <span className="saved-tag">{t("review.saved")}</span>
+                  )}
+                </div>
+                {inspection && capabilities.features.feedback ? (
+                  <form onSubmit={(e) => void submitFeedback(e)}>
+                    <p className="section-copy">{t("review.intro")}</p>
+                    <label className="field-label" htmlFor="human-decision">
+                      {t("review.human")}
+                    </label>
+                    <select
+                      id="human-decision"
+                      value={humanDecision}
+                      disabled={!!busy || (!demo && !!inspection.feedback)}
+                      onChange={(e) =>
+                        setHumanDecision(e.target.value as Decision)
+                      }
+                    >
+                      <option value="review">{t("review.optReview")}</option>
+                      <option value="pass">{t("review.optPass")}</option>
+                      <option value="fail">{t("review.optFail")}</option>
+                    </select>
+                    <label className="field-label" htmlFor="review-comment">
+                      {t("review.note")} <span>{t("review.optional")}</span>
+                    </label>
+                    <textarea
+                      id="review-comment"
+                      placeholder={t("review.placeholder")}
+                      maxLength={2000}
+                      rows={3}
+                      value={comment}
+                      disabled={!!busy || (!demo && !!inspection.feedback)}
+                      onChange={(e) => setComment(e.target.value)}
+                    />
+                    {!demo && !inspection.feedback && (
+                      <p className="small-note">{t("review.locked")}</p>
+                    )}
+                    <button
+                      className="button primary full"
+                      type="submit"
+                      disabled={!canOperate || (!demo && !!inspection.feedback)}
+                    >
+                      {inspection.feedback
+                        ? demo
+                          ? "Update review"
+                          : t("review.done")
+                        : t("review.save")}
+                    </button>
+                    {inspection.feedback && (
+                      <div className="recorded-review">
+                        <span>Recorded human decision</span>
+                        <DecisionTag
+                          value={inspection.feedback.human_decision}
+                          label={t(`tag.${inspection.feedback.human_decision}`)}
+                        />
+                        <p>{inspection.feedback.comment || "No note added."}</p>
+                        <small>
+                          Saved{" "}
+                          {formatTimestamp(inspection.feedback.created_at)}
+                        </small>
+                      </div>
+                    )}
+                  </form>
+                ) : (
+                  <div className="awaiting">
+                    <p>
+                      {inspection
+                        ? "Engineer feedback is not supported by the current service."
+                        : t("review.after")}
+                    </p>
+                    {inspection && <span className="planned">Planned</span>}
+                  </div>
+                )}
+              </section>
+            </div>
           </>
         )}
         {busy && (

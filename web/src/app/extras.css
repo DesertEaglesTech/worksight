@@ -676,3 +676,74 @@
   color: var(--muted);
   font-size: 12px;
 }
+
+/* Result panel without inner dividers; the engineer review sits last, under the AI description. */
+.design-current .result-sidebar {
+  grid-template-columns: minmax(0, 1fr);
+}
+.design-current .result-sidebar .sidebar-section,
+.design-current .report-download {
+  border-top: 0;
+  border-bottom: 0;
+}
+.design-current
+  .result-sidebar
+  .sidebar-section:is(.display-panel, .inspection-details) {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+.design-current .engineer-card {
+  margin-top: 16px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.design-current .engineer-card .engineer-panel {
+  border: 0;
+  max-width: 760px;
+}
+.verify-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 16px 24px 0;
+}
+.verify-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.verify-chip strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.verify-chip.done {
+  border-color: #b9dcc4;
+  background: #eef7f1;
+  color: #2f7a4a;
+}
+.verify-chip.done svg {
+  color: #2f7a4a;
+}
+.verify-chip.pending svg {
+  color: var(--accent);
+}
+.verify-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--muted);
+}
+.theme-dark .verify-chip.done {
+  background: transparent;
+  border-color: #3f6b50;
+  color: #8fd1a5;
+}
+.theme-dark .verify-chip.done svg {
+  color: #8fd1a5;
+}
