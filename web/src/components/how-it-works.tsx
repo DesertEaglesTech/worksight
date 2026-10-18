@@ -4,6 +4,7 @@ import {
   MessageSquareText,
   ScanSearch,
   UserCheck,
+  X,
 } from "lucide-react";
 import type { T } from "@/lib/i18n";
 
@@ -34,7 +35,7 @@ const steps = [
   },
 ] as const;
 
-export function HowItWorks({ t }: { t?: T }) {
+export function HowItWorks({ t, onClose }: { t?: T; onClose?: () => void }) {
   return (
     <section className="how-it-works" aria-label="How Worksight works">
       <div className="how-heading">
@@ -43,6 +44,16 @@ export function HowItWorks({ t }: { t?: T }) {
           <Cpu size={14} aria-hidden="true" />
           {t ? t("how.note") : "Explanations by Gemma on AMD Token Factory"}
         </span>
+        {onClose && (
+          <button
+            className="icon-button how-close"
+            aria-label={t ? t("how.hide") : "Hide this panel"}
+            title={t ? t("how.hide") : "Hide this panel"}
+            onClick={onClose}
+          >
+            <X size={18} />
+          </button>
+        )}
       </div>
       <ol>
         {steps.map(({ icon: Icon, title, text, keys }, i) => (

@@ -151,6 +151,11 @@ export default function Workspace({
   const [lang, setLang] = useState<Lang>("en");
   const [guest, setGuest] = useState(true);
   const [guideHidden, setGuideHidden] = useState(false);
+  const [howHidden, setHowHidden] = useState(false);
+  // The AI description starts by itself only for an inspection run in this session.
+  const [freshInspectionId, setFreshInspectionId] = useState<string | null>(
+    null,
+  );
   const [toolsRefresh, setToolsRefresh] = useState(0);
   const t = useMemo(() => translator(lang), [lang]);
   // Browser-only preferences; storage may be unavailable (private mode), so defaults stay usable.
@@ -160,6 +165,7 @@ export default function Workspace({
       if (isLang(stored)) setLang(stored);
       setGuest(localStorage.getItem("worksight_guest") === "1");
       setGuideHidden(localStorage.getItem("worksight_guide_hidden") === "1");
+      setHowHidden(localStorage.getItem("worksight_how_hidden") === "1");
     } catch {
       /* keep defaults */
     }
@@ -506,6 +512,7 @@ export default function Workspace({
     if (!done.result?.inspection_id)
       throw new Error("The service did not return an inspection ID.");
     const result = await api.inspection(done.result.inspection_id);
+    setFreshInspectionId(result.id);
     setInspection(result);
     setHumanDecision(result.feedback?.human_decision ?? "review");
     setComment(result.feedback?.comment ?? "");
@@ -1456,7 +1463,15 @@ export default function Workspace({
           </div>
         ) : (
           <>
-            <HowItWorks t={t} />
+            {!howHidden && (
+              <HowItWorks
+                t={t}
+                onClose={() => {
+                  setHowHidden(true);
+                  remember("worksight_how_hidden", "1");
+                }}
+              />
+            )}
             {showLiveExamples && !inspection && !guideHidden && (
               <QuickStart
                 t={t}
@@ -2059,6 +2074,7 @@ export default function Workspace({
                 inspection={inspection}
                 disabled={!!busy}
                 t={t}
+                autoStart={freshInspectionId === inspection.id}
               />
             )}
           </>

@@ -124,11 +124,14 @@ export default function AiDescription({
   inspection,
   disabled,
   t = english,
+  autoStart = false,
 }: {
   api: WorksightApi;
   inspection: Inspection;
   disabled: boolean;
   t?: T;
+  // Request a description as soon as the saved state is known, for a freshly run inspection.
+  autoStart?: boolean;
 }) {
   const reports = api.reports!;
   const [report, setReport] = useState<AssistiveReport | null>(null);
@@ -137,6 +140,7 @@ export default function AiDescription({
   const [phase, setPhase] = useState(t("ai.phase.checking"));
   const [error, setError] = useState("");
   const [job, setJob] = useState<Job | null>(null);
+  const [autoStarted, setAutoStarted] = useState(false);
   const controller = useRef<AbortController | null>(null);
   const inFlight = useRef(false);
   const failedRequest = useRef(false);
@@ -152,7 +156,7 @@ export default function AiDescription({
       reports.availability(signal),
       reports.latest(inspection.id, signal),
     ]);
-    if (signal.aborted) return;
+    if (signal.aborted) return null;
     setEnabled(available.enabled);
     if (latest) {
       const saved = accept(latest);
@@ -162,12 +166,17 @@ export default function AiDescription({
       }
     } else setReport(null);
     if (!signal.aborted) failedRequest.current = false;
+    return { enabled: available.enabled, saved: !!latest };
   }
   useEffect(() => {
     const current = new AbortController();
     controller.current = current;
     inFlight.current = true;
+    let loaded: Awaited<ReturnType<typeof load>> = null;
     void load(current.signal)
+      .then((value) => {
+        loaded = value;
+      })
       .catch((e) => {
         if (!current.signal.aborted) {
           setError(e.message);
@@ -178,6 +187,10 @@ export default function AiDescription({
         if (!current.signal.aborted) {
           setWorking(false);
           inFlight.current = false;
+          if (autoStart && loaded?.enabled && !loaded.saved) {
+            setAutoStarted(true);
+            void generate(true);
+          }
         }
       });
     return () => {
@@ -211,8 +224,8 @@ export default function AiDescription({
       }
     }
   }
-  async function generate() {
-    if (inFlight.current || !enabled || failedRequest.current) return;
+  async function generate(available = enabled) {
+    if (inFlight.current || !available || failedRequest.current) return;
     const current = new AbortController();
     controller.current?.abort();
     controller.current = current;
@@ -293,6 +306,9 @@ export default function AiDescription({
         </button>
       </div>
       <p className="ai-sharing-note">{t("ai.sharing")}</p>
+      {autoStarted && (working || report?.status !== "ready") && (
+        <p className="small-note">{t("ai.auto")}</p>
+      )}
       {working && (
         <div className="ai-report-progress" role="status" aria-live="polite">
           <LoaderCircle className="spin" size={20} />

@@ -662,3 +662,11 @@
 .design-current .workspace-navigation small {
   font-size: 12px;
 }
+
+/* How it works can be hidden. */
+.how-heading .how-note {
+  margin-left: auto;
+}
+.how-heading .how-close {
+  margin: -6px -10px -6px 0;
+}
