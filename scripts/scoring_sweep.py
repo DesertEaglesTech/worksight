@@ -14,6 +14,9 @@ leave-one-out threshold rules but are not used to choose. PCB categories are sco
 with worksight.benchmark.
 
   python scripts/scoring_sweep.py --manifests data/datasets/manifests-dev --device cpu
+
+Finished (augmentation, category) pairs are kept in sweep.partial.json; rerun the same command to
+continue after an interruption.
 """
 
 import argparse
@@ -98,83 +101,94 @@ def image_scores(dist: torch.Tensor, grid, k: int, sigmas) -> dict:
     return {sigma: top1(gaussian(base, sigma)) for sigma in sigmas}
 
 
+def run_category(encoder, path, aug, kmax):
+    """Scores one development category with one reference bank; returns {(k, sigma): result}."""
+    manifest = json.loads(path.read_text())
+    refs = [load(path.parent / r) for r in manifest["references"]]
+    ref_feats, owners, grid = [], [], None
+    for i, image in enumerate(refs):
+        for view in (image, *(augment(image, op) for op in AUGS[aug])):
+            feats, grid = encoder.extract(view)
+            ref_feats.append(feats)
+            owners.append(np.full(len(feats), i, dtype=np.int32))
+    owners = np.concatenate(owners)
+    bank = torch.from_numpy(np.concatenate(ref_feats)).to(encoder.device)
+    loo = {}  # (k, sigma) -> leave-one-reference-out scores
+    for i in range(len(refs)):
+        feats = ref_feats[i * (1 + len(AUGS[aug]))]
+        d = knn(feats, bank[torch.from_numpy(owners != i).to(encoder.device)], kmax)
+        for k in KS:
+            for sigma, s in image_scores(d, grid, k, SIGMAS).items():
+                loo.setdefault((k, sigma), []).append(s)
+    test, labels = {}, []
+    for j, item in enumerate(manifest["test"], 1):
+        d = knn(encoder.extract(load(path.parent / item["path"]))[0], bank, kmax)
+        labels.append(item["label"] == "anomaly")
+        for k in KS:
+            for sigma, s in image_scores(d, grid, k, SIGMAS).items():
+                test.setdefault((k, sigma), []).append(s)
+        if j % 50 == 0:
+            print(f"  {path.stem} [{aug}]: {j}/{len(manifest['test'])} test images", flush=True)
+    labels = np.array(labels)
+    out = {}
+    for (k, sigma), scores in test.items():
+        scores = np.array(scores)
+        rules = {}
+        for rule, fn in RULES.items():
+            predicted = scores >= fn(np.array(loo[(k, sigma)]))
+            rules[rule] = (float(predicted[~labels].mean()), float(predicted[labels].mean()))
+        out[(k, sigma)] = (float(roc_auc_score(labels, scores)), rules)
+    return out
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifests", required=True, type=Path)
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--augs", nargs="+", default=list(AUGS), choices=list(AUGS))
-    parser.add_argument("--output", type=Path, help="optional JSON with per-category results")
+    parser.add_argument("--output", type=Path, default=Path("sweep.json"))
     args = parser.parse_args()
     paths = sorted(args.manifests.glob("*.json"))
     if not paths or any("pcb" in p.stem for p in paths):
         raise SystemExit("Provide only non-PCB development manifests")
+    # Finished (aug, category) results survive an interruption; a rerun skips them.
+    partial_path = args.output.with_suffix(".partial.json")
+    partial = json.loads(partial_path.read_text()) if partial_path.exists() else {}
     encoder = VisualEncoder(args.device)
     kmax = max(KS)
-    # results[(aug, k, sigma)][category] = (auroc, {rule: (fpr, recall)})
-    results: dict = {}
-    for path in paths:
-        manifest = json.loads(path.read_text())
-        refs = [load(path.parent / r) for r in manifest["references"]]
-        test_feats, labels, grid = [], [], None
-        for item in manifest["test"]:
-            feats, grid = encoder.extract(load(path.parent / item["path"]))
-            test_feats.append(feats)
-            labels.append(item["label"] == "anomaly")
-        labels = np.array(labels)
-        for aug in args.augs:
-            ref_feats, owners = [], []
-            for i, image in enumerate(refs):
-                for view in (image, *(augment(image, op) for op in AUGS[aug])):
-                    feats, _ = encoder.extract(view)
-                    ref_feats.append(feats)
-                    owners.append(np.full(len(feats), i, dtype=np.int32))
-            bank_np = np.concatenate(ref_feats)
-            owners = np.concatenate(owners)
-            bank = torch.from_numpy(bank_np).to(encoder.device)
-            loo = {}  # (k, sigma) -> list of leave-one-reference-out scores
-            originals = [ref_feats[i * (1 + len(AUGS[aug]))] for i in range(len(refs))]
-            for i, feats in enumerate(originals):
-                d = knn(feats, bank[torch.from_numpy(owners != i).to(encoder.device)], kmax)
-                for k in KS:
-                    for sigma, s in image_scores(d, grid, k, SIGMAS).items():
-                        loo.setdefault((k, sigma), []).append(s)
-            test = {}
-            for feats in test_feats:
-                d = knn(feats, bank, kmax)
-                for k in KS:
-                    for sigma, s in image_scores(d, grid, k, SIGMAS).items():
-                        test.setdefault((k, sigma), []).append(s)
-            for (k, sigma), scores in test.items():
-                scores = np.array(scores)
-                rules = {}
-                for rule, fn in RULES.items():
-                    predicted = scores >= fn(np.array(loo[(k, sigma)]))
-                    rules[rule] = (
-                        float(predicted[~labels].mean()),
-                        float(predicted[labels].mean()),
-                    )
-                results.setdefault((aug, k, sigma), {})[path.stem] = (
-                    float(roc_auc_score(labels, scores)),
-                    rules,
-                )
-            print(f"{path.stem}: {aug} done", flush=True)
+    # Cheapest bank first, so a complete no-augmentation comparison exists early.
+    for aug in args.augs:
+        for n, path in enumerate(paths, 1):
+            key = f"{aug}|{path.stem}"
+            if key in partial:
+                continue
+            result = run_category(encoder, path, aug, kmax)
+            partial[key] = {f"{k}|{sigma}": value for (k, sigma), value in result.items()}
+            partial_path.write_text(json.dumps(partial) + "\n")
+            print(f"{path.stem}: {aug} done ({n}/{len(paths)})", flush=True)
+    categories = [p.stem for p in paths]
     rows = []
-    for (aug, k, sigma), by_cat in results.items():
-        aurocs = [v[0] for v in by_cat.values()]
-        rule_means = {
-            rule: tuple(float(np.mean([v[1][rule][j] for v in by_cat.values()])) for j in (0, 1))
-            for rule in RULES
-        }
-        rows.append(
-            {
-                "aug": aug,
-                "k": k,
-                "sigma": sigma,
-                "dev_auroc": float(np.mean(aurocs)),
-                "rules_fpr_recall": rule_means,
-                "per_category_auroc": {c: v[0] for c, v in by_cat.items()},
-            }
-        )
+    for aug in args.augs:
+        if not all(f"{aug}|{c}" in partial for c in categories):
+            continue
+        for variant in partial[f"{aug}|{categories[0]}"]:
+            by_cat = {c: partial[f"{aug}|{c}"][variant] for c in categories}
+            k, sigma = variant.split("|")
+            rows.append(
+                {
+                    "aug": aug,
+                    "k": int(k),
+                    "sigma": float(sigma),
+                    "dev_auroc": float(np.mean([v[0] for v in by_cat.values()])),
+                    "rules_fpr_recall": {
+                        rule: [
+                            float(np.mean([v[1][rule][j] for v in by_cat.values()])) for j in (0, 1)
+                        ]
+                        for rule in RULES
+                    },
+                    "per_category_auroc": {c: v[0] for c, v in by_cat.items()},
+                }
+            )
     rows.sort(key=lambda r: -r["dev_auroc"])
     best = rows[0]["dev_auroc"]
     simple = sorted(
@@ -192,8 +206,7 @@ def main():
     print(
         f"Selected by the fixed rule: {json.dumps({k: simple[k] for k in ('aug', 'k', 'sigma')})}"
     )
-    if args.output:
-        args.output.write_text(json.dumps({"rows": rows, "selected": simple}, indent=2) + "\n")
+    args.output.write_text(json.dumps({"rows": rows, "selected": simple}, indent=2) + "\n")
 
 
 if __name__ == "__main__":

@@ -22,3 +22,7 @@ __pycache__/
 .ruff_cache/
 data/
 work/
+
+# scripts/scoring_sweep.py output
+sweep.json
+sweep.partial.json
