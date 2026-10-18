@@ -6,6 +6,7 @@ import {
   History as HistoryIcon,
   Settings as SettingsIcon,
   ChevronDown,
+  CircleHelp,
   Download,
   LoaderCircle,
   Layers3,
@@ -46,6 +47,7 @@ import { loadSavedExample } from "@/lib/saved-example";
 import { isLang, translator, type Lang } from "@/lib/i18n";
 import ProfileTools, { DocumentsPanel } from "./profile-tools";
 import { LanguageSelect, QuickStart, Settings, Tutorial } from "./onboarding";
+import GuidedTour from "./guided-tour";
 
 const decisionLabel: Record<Decision, string> = {
   pass: "Pass",
@@ -169,6 +171,14 @@ export default function Workspace({
     setTheme(next);
     document.cookie = `worksight_theme=${next}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
   }
+  function startTour() {
+    setScreen("inspect");
+    setInspection(null);
+    setFiles([]);
+    setJob(null);
+    setNotice("");
+    setTourOpen(true);
+  }
   function closeTutorial() {
     setTutorialOpen(false);
     setGuest(true);
@@ -238,6 +248,7 @@ export default function Workspace({
     "inspect" | "profiles" | "history" | "settings"
   >("inspect");
   const [tutorialOpen, setTutorialOpen] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [selectedId, setSelectedId] = useState("");
   const [capabilities, setCapabilities] = useState<Capabilities | null>(null);
@@ -800,6 +811,17 @@ export default function Workspace({
               <Plus size={17} />
               {t("button.newProfile")}
             </button>
+            {mode === "live" && (
+              <button
+                className="icon-button tour-help"
+                aria-label={t("tour.g.help")}
+                title={t("tour.g.help")}
+                disabled={!canOperate}
+                onClick={startTour}
+              >
+                <CircleHelp size={18} />
+              </button>
+            )}
             <LanguageSelect lang={lang} onChange={chooseLang} t={t} />
             {design === "current" && themeButton}
           </div>
@@ -882,6 +904,7 @@ export default function Workspace({
             theme={theme}
             onTheme={applyTheme}
             onTutorial={() => setTutorialOpen(true)}
+            onTour={mode === "live" ? startTour : undefined}
             onReset={() => {
               try {
                 localStorage.clear();
@@ -2100,6 +2123,15 @@ export default function Workspace({
             setFormError("");
             setShowCreate(true);
           }}
+          onGuide={startTour}
+        />
+      )}
+      {tourOpen && screen === "inspect" && (
+        <GuidedTour
+          t={t}
+          hasFile={files.length > 0}
+          hasInspection={!!inspection}
+          onClose={() => setTourOpen(false)}
         />
       )}
     </div>

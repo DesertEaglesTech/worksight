@@ -41,6 +41,7 @@ export function Tutorial({
   onGood,
   onSaved,
   onCreate,
+  onGuide,
 }: {
   t: T;
   lang: Lang;
@@ -52,6 +53,7 @@ export function Tutorial({
   onGood: () => void;
   onSaved: () => void;
   onCreate: () => void;
+  onGuide: () => void;
 }) {
   const [step, setStep] = useState(0);
   const last = 2;
@@ -91,6 +93,13 @@ export function Tutorial({
           <>
             <h1 id="welcome-title">{t("tour.try.title")}</h1>
             <p>{t("tour.try.body")}</p>
+            <button
+              className="button primary tour-guide"
+              disabled={!canTry}
+              onClick={() => run(onGuide)}
+            >
+              {t("tour.g.start")} <ArrowRight size={18} />
+            </button>
             <div className="tour-choices">
               <button
                 className="tour-choice"
@@ -201,6 +210,7 @@ export function Settings({
   theme,
   onTheme,
   onTutorial,
+  onTour,
   onReset,
 }: {
   t: T;
@@ -209,6 +219,7 @@ export function Settings({
   theme: "light" | "dark";
   onTheme: (theme: "light" | "dark") => void;
   onTutorial: () => void;
+  onTour?: () => void;
   onReset: () => void;
 }) {
   return (
@@ -235,9 +246,16 @@ export function Settings({
       <section className="settings-card">
         <h2>{t("settings.tutorial")}</h2>
         <p>{t("settings.tutorialText")}</p>
-        <button className="button secondary" onClick={onTutorial}>
-          {t("settings.tutorialButton")}
-        </button>
+        <div className="settings-actions">
+          <button className="button secondary" onClick={onTutorial}>
+            {t("settings.tutorialButton")}
+          </button>
+          {onTour && (
+            <button className="button primary" onClick={onTour}>
+              {t("tour.g.help")}
+            </button>
+          )}
+        </div>
       </section>
       <section className="settings-card">
         <h2>{t("settings.session")}</h2>

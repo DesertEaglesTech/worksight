@@ -183,6 +183,37 @@ const en = {
   "nav.sharedDemo": "Shared demo workspace",
   "nav.ready": "Ready",
   "nav.notBuilt": "Not built",
+  "tour.g.start": "Show me step by step",
+  "tour.g.help": "Guided tour",
+  "tour.g.menu.t": "This is the menu",
+  "tour.g.menu.x":
+    "Part inspection: check a part. Reference samples: the good photos of each part. History: every past check. Settings: language, theme and this tour.",
+  "tour.g.profile.t": "1. The part profile",
+  "tour.g.profile.x":
+    "Worksight compares every new photo with this profile. It was built from 20 photos of good circuit boards in about 9 seconds. It is already selected, so you can go on.",
+  "tour.g.pick.t": "2. Pick a picture",
+  "tour.g.pick.x":
+    "Click a test board. Bent pins has a defect, Good board has none. You can also drop your own photo into the box above.",
+  "tour.g.run.t": "3. Run the inspection",
+  "tour.g.run.x": "Click Run inspection. The result appears in about a second.",
+  "tour.g.view.t": "4. Where is the problem?",
+  "tour.g.view.x":
+    "Red areas on the Heatmap are where the part differs from every good photo. Compare puts it next to the most similar good board. Original shows the photo alone.",
+  "tour.g.result.t": "5. The model's answer",
+  "tour.g.result.x":
+    "Fail means the anomaly score is above the threshold, Pass means it is below, Needs review means it is close. The score is a distance, not a probability. You can download the report as PDF, DOCX or TXT.",
+  "tour.g.review.t": "6. Your decision",
+  "tour.g.review.x":
+    "You decide, not the model. Choose Pass, Fail or Needs review, add a note and save. It is stored separately and cannot be edited later.",
+  "tour.g.ai.t": "7. Ask Gemma why",
+  "tour.g.ai.x":
+    "Generate description sends the photo, heatmap and closest good reference to Gemma on AMD Token Factory. It explains what looks wrong and what to check. It never changes the result.",
+  "tour.g.done.t": "That’s it",
+  "tour.g.done.x":
+    "Check the other board, look at History, or create your own profile with New profile. You can restart this tour any time with the ? button or in Settings.",
+  "tour.g.waiting": "Waiting for you to do this step…",
+  "tour.g.skipStep": "Skip this step",
+  "tour.g.finish": "Finish",
 };
 
 export type Key = keyof typeof en;
@@ -363,6 +394,38 @@ const it: Dict = {
   "nav.sharedDemo": "Area demo condivisa",
   "nav.ready": "Pronto",
   "nav.notBuilt": "Non creato",
+  "tour.g.start": "Mostrami passo per passo",
+  "tour.g.help": "Visita guidata",
+  "tour.g.menu.t": "Questo è il menu",
+  "tour.g.menu.x":
+    "Ispezione pezzo: controlla un pezzo. Campioni di riferimento: le foto conformi di ogni pezzo. Cronologia: tutti i controlli. Impostazioni: lingua, tema e questa visita.",
+  "tour.g.profile.t": "1. Il profilo del pezzo",
+  "tour.g.profile.x":
+    "Worksight confronta ogni nuova foto con questo profilo, creato da 20 foto di schede conformi in circa 9 secondi. È già selezionato: puoi proseguire.",
+  "tour.g.pick.t": "2. Scegli un’immagine",
+  "tour.g.pick.x":
+    "Fai clic su una scheda di test. Pin piegati ha un difetto, Scheda conforme no. Puoi anche trascinare una tua foto nel riquadro sopra.",
+  "tour.g.run.t": "3. Avvia l’ispezione",
+  "tour.g.run.x":
+    "Fai clic su Avvia ispezione. Il risultato arriva in circa un secondo.",
+  "tour.g.view.t": "4. Dov’è il problema?",
+  "tour.g.view.x":
+    "Le zone rosse della mappa di calore indicano dove il pezzo differisce da tutte le foto conformi. Confronta lo mette accanto alla scheda conforme più simile. Originale mostra solo la foto.",
+  "tour.g.result.t": "5. La risposta del modello",
+  "tour.g.result.x":
+    "Non conforme significa punteggio sopra la soglia, Conforme sotto, Da rivedere vicino alla soglia. Il punteggio è una distanza, non una probabilità. Puoi scaricare il report in PDF, DOCX o TXT.",
+  "tour.g.review.t": "6. La tua decisione",
+  "tour.g.review.x":
+    "Decidi tu, non il modello. Scegli Conforme, Non conforme o Da rivedere, aggiungi una nota e salva. Viene salvata a parte e non è modificabile.",
+  "tour.g.ai.t": "7. Chiedi a Gemma perché",
+  "tour.g.ai.x":
+    "Genera descrizione invia foto, mappa di calore e riferimento conforme a Gemma su AMD Token Factory, che spiega cosa non va e cosa controllare. Non cambia mai il risultato.",
+  "tour.g.done.t": "Fatto",
+  "tour.g.done.x":
+    "Prova l’altra scheda, guarda la Cronologia o crea un profilo con Nuovo profilo. Puoi riavviare la visita con il pulsante ? o dalle Impostazioni.",
+  "tour.g.waiting": "In attesa che tu completi questo passo…",
+  "tour.g.skipStep": "Salta questo passo",
+  "tour.g.finish": "Fine",
 };
 
 const de: Dict = {
@@ -539,6 +602,38 @@ const de: Dict = {
   "nav.sharedDemo": "Gemeinsamer Demo-Bereich",
   "nav.ready": "Bereit",
   "nav.notBuilt": "Nicht erstellt",
+  "tour.g.start": "Schritt für Schritt zeigen",
+  "tour.g.help": "Geführte Tour",
+  "tour.g.menu.t": "Das ist das Menü",
+  "tour.g.menu.x":
+    "Teileprüfung: ein Teil prüfen. Referenzmuster: die Gutteil-Fotos jedes Teils. Verlauf: alle früheren Prüfungen. Einstellungen: Sprache, Darstellung und diese Tour.",
+  "tour.g.profile.t": "1. Das Teileprofil",
+  "tour.g.profile.x":
+    "Worksight vergleicht jedes neue Foto mit diesem Profil. Es entstand in etwa 9 Sekunden aus 20 Fotos einwandfreier Platinen. Es ist bereits ausgewählt.",
+  "tour.g.pick.t": "2. Ein Bild wählen",
+  "tour.g.pick.x":
+    "Klicken Sie auf eine Testplatine. Verbogene Pins hat einen Fehler, Gutplatine keinen. Sie können auch ein eigenes Foto oben ablegen.",
+  "tour.g.run.t": "3. Prüfung starten",
+  "tour.g.run.x":
+    "Auf Prüfung starten klicken. Das Ergebnis erscheint nach etwa einer Sekunde.",
+  "tour.g.view.t": "4. Wo ist das Problem?",
+  "tour.g.view.x":
+    "Rote Bereiche der Heatmap zeigen, wo das Teil von allen Gutteil-Fotos abweicht. Vergleichen stellt die ähnlichste Gutplatine daneben. Original zeigt nur das Foto.",
+  "tour.g.result.t": "5. Die Antwort des Modells",
+  "tour.g.result.x":
+    "Schlecht heißt: Anomaliewert über der Schwelle, Gut: darunter, Prüfung nötig: knapp daran. Der Wert ist ein Abstand, keine Wahrscheinlichkeit. Den Bericht gibt es als PDF, DOCX oder TXT.",
+  "tour.g.review.t": "6. Ihre Entscheidung",
+  "tour.g.review.x":
+    "Sie entscheiden, nicht das Modell. Gut, Schlecht oder Prüfung nötig wählen, Notiz hinzufügen, speichern. Das wird getrennt gespeichert und ist später nicht änderbar.",
+  "tour.g.ai.t": "7. Gemma nach dem Grund fragen",
+  "tour.g.ai.x":
+    "Beschreibung erzeugen sendet Foto, Heatmap und ähnlichste Gutreferenz an Gemma auf AMD Token Factory. Gemma erklärt, was auffällt und was zu prüfen ist, und ändert das Ergebnis nie.",
+  "tour.g.done.t": "Fertig",
+  "tour.g.done.x":
+    "Die andere Platine prüfen, den Verlauf ansehen oder mit Neues Profil ein eigenes Profil anlegen. Die Tour startet jederzeit über ? oder die Einstellungen.",
+  "tour.g.waiting": "Warten, bis Sie diesen Schritt ausführen …",
+  "tour.g.skipStep": "Schritt überspringen",
+  "tour.g.finish": "Fertig",
 };
 
 const fr: Dict = {
@@ -717,6 +812,38 @@ const fr: Dict = {
   "nav.sharedDemo": "Espace de démonstration partagé",
   "nav.ready": "Prêt",
   "nav.notBuilt": "Non construit",
+  "tour.g.start": "Montrez-moi pas à pas",
+  "tour.g.help": "Visite guidée",
+  "tour.g.menu.t": "Voici le menu",
+  "tour.g.menu.x":
+    "Inspection de pièce : contrôler une pièce. Échantillons de référence : les photos conformes de chaque pièce. Historique : tous les contrôles. Paramètres : langue, thème et cette visite.",
+  "tour.g.profile.t": "1. Le profil de la pièce",
+  "tour.g.profile.x":
+    "Worksight compare chaque nouvelle photo à ce profil, construit en 9 secondes environ à partir de 20 photos de cartes conformes. Il est déjà sélectionné.",
+  "tour.g.pick.t": "2. Choisissez une image",
+  "tour.g.pick.x":
+    "Cliquez sur une carte de test. Broches tordues a un défaut, Carte conforme n’en a pas. Vous pouvez aussi déposer votre photo dans le cadre au-dessus.",
+  "tour.g.run.t": "3. Lancez l’inspection",
+  "tour.g.run.x":
+    "Cliquez sur Lancer l’inspection. Le résultat arrive en une seconde environ.",
+  "tour.g.view.t": "4. Où est le problème ?",
+  "tour.g.view.x":
+    "Les zones rouges de la carte thermique montrent où la pièce diffère de toutes les photos conformes. Comparer la place à côté de la carte conforme la plus proche. Original montre la photo seule.",
+  "tour.g.result.t": "5. La réponse du modèle",
+  "tour.g.result.x":
+    "Non conforme : score au-dessus du seuil ; Conforme : en dessous ; À revoir : proche du seuil. Le score est une distance, pas une probabilité. Le rapport se télécharge en PDF, DOCX ou TXT.",
+  "tour.g.review.t": "6. Votre décision",
+  "tour.g.review.x":
+    "C’est vous qui décidez, pas le modèle. Choisissez Conforme, Non conforme ou À revoir, ajoutez une note et enregistrez. C’est stocké à part et non modifiable.",
+  "tour.g.ai.t": "7. Demandez à Gemma pourquoi",
+  "tour.g.ai.x":
+    "Générer la description envoie la photo, la carte thermique et la référence conforme la plus proche à Gemma sur AMD Token Factory, qui explique quoi vérifier. Le résultat ne change jamais.",
+  "tour.g.done.t": "C’est tout",
+  "tour.g.done.x":
+    "Testez l’autre carte, consultez l’Historique ou créez votre profil avec Nouveau profil. Relancez la visite avec le bouton ? ou dans les Paramètres.",
+  "tour.g.waiting": "En attente de cette action…",
+  "tour.g.skipStep": "Passer cette étape",
+  "tour.g.finish": "Terminer",
 };
 
 const zh: Dict = {
@@ -876,6 +1003,37 @@ const zh: Dict = {
   "nav.sharedDemo": "共享演示工作区",
   "nav.ready": "可用",
   "nav.notBuilt": "未建立",
+  "tour.g.start": "一步一步带我操作",
+  "tour.g.help": "引导教程",
+  "tour.g.menu.t": "这是菜单",
+  "tour.g.menu.x":
+    "零件检测：检测零件。参考样本：每种零件的合格照片。历史记录：所有检测。设置：语言、外观和本教程。",
+  "tour.g.profile.t": "1. 零件档案",
+  "tour.g.profile.x":
+    "Worksight 会把每张新照片与该档案比对。它由 20 张合格电路板照片在约 9 秒内建立，已为您选好，可以继续。",
+  "tour.g.pick.t": "2. 选择一张图片",
+  "tour.g.pick.x":
+    "点击一块测试电路板。“引脚弯曲”有缺陷，“合格电路板”没有。也可以把自己的照片拖到上方框内。",
+  "tour.g.run.t": "3. 开始检测",
+  "tour.g.run.x": "点击“开始检测”，约一秒后显示结果。",
+  "tour.g.view.t": "4. 问题在哪里？",
+  "tour.g.view.x":
+    "热力图中的红色区域表示零件与所有合格照片不同的地方。“对比”会把它和最相似的合格电路板并排显示。“原图”只显示照片。",
+  "tour.g.result.t": "5. 模型的结论",
+  "tour.g.result.x":
+    "“不合格”表示异常分数高于阈值，“合格”表示低于阈值，“需复核”表示接近阈值。分数是距离而不是概率。报告可下载为 PDF、DOCX 或 TXT。",
+  "tour.g.review.t": "6. 您的判定",
+  "tour.g.review.x":
+    "由您决定，而不是模型。选择合格、不合格或需复核，添加备注并保存。它会单独保存，之后无法修改。",
+  "tour.g.ai.t": "7. 让 Gemma 解释原因",
+  "tour.g.ai.x":
+    "“生成说明”会把照片、热力图和最相似的合格参考发送给 AMD Token Factory 上的 Gemma，由它说明哪里异常、需要检查什么。它从不改变结果。",
+  "tour.g.done.t": "完成",
+  "tour.g.done.x":
+    "试试另一块电路板、查看历史记录，或通过“新建档案”创建自己的档案。随时可以用 ? 按钮或在设置中重新开始本教程。",
+  "tour.g.waiting": "等待您完成这一步…",
+  "tour.g.skipStep": "跳过此步",
+  "tour.g.finish": "完成",
 };
 
 const hi: Dict = {
@@ -1048,6 +1206,38 @@ const hi: Dict = {
   "nav.sharedDemo": "साझा डेमो कार्यक्षेत्र",
   "nav.ready": "तैयार",
   "nav.notBuilt": "नहीं बनी",
+  "tour.g.start": "मुझे क़दम-दर-क़दम दिखाएँ",
+  "tour.g.help": "गाइडेड टूर",
+  "tour.g.menu.t": "यह मेनू है",
+  "tour.g.menu.x":
+    "पुर्ज़े की जाँच: पुर्ज़ा जाँचें। संदर्भ नमूने: हर पुर्ज़े की सही तस्वीरें। इतिहास: पिछली सभी जाँचें। सेटिंग्स: भाषा, रूप और यह टूर।",
+  "tour.g.profile.t": "1. पुर्ज़े की प्रोफ़ाइल",
+  "tour.g.profile.x":
+    "Worksight हर नई तस्वीर की तुलना इस प्रोफ़ाइल से करता है। यह 20 सही सर्किट बोर्ड की तस्वीरों से लगभग 9 सेकंड में बनी है। यह पहले से चुनी हुई है।",
+  "tour.g.pick.t": "2. एक तस्वीर चुनें",
+  "tour.g.pick.x":
+    "किसी परीक्षण बोर्ड पर क्लिक करें। मुड़े हुए पिन में दोष है, सही बोर्ड में नहीं। आप ऊपर वाले बॉक्स में अपनी तस्वीर भी डाल सकते हैं।",
+  "tour.g.run.t": "3. जाँच शुरू करें",
+  "tour.g.run.x":
+    "जाँच शुरू करें पर क्लिक करें। लगभग एक सेकंड में परिणाम आएगा।",
+  "tour.g.view.t": "4. समस्या कहाँ है?",
+  "tour.g.view.x":
+    "हीटमैप पर लाल हिस्से दिखाते हैं कि पुर्ज़ा सभी सही तस्वीरों से कहाँ अलग है। तुलना करें उसे सबसे मिलते-जुलते सही बोर्ड के पास दिखाता है। मूल केवल तस्वीर दिखाता है।",
+  "tour.g.result.t": "5. मॉडल का जवाब",
+  "tour.g.result.x":
+    "फ़ेल का मतलब विसंगति स्कोर सीमा से ऊपर, पास का मतलब नीचे, समीक्षा चाहिए का मतलब पास-पास। स्कोर एक दूरी है, संभावना नहीं। रिपोर्ट PDF, DOCX या TXT में डाउनलोड करें।",
+  "tour.g.review.t": "6. आपका निर्णय",
+  "tour.g.review.x":
+    "निर्णय आपका है, मॉडल का नहीं। पास, फ़ेल या समीक्षा चाहिए चुनें, टिप्पणी जोड़ें और सहेजें। यह अलग से सहेजा जाता है और बाद में बदला नहीं जा सकता।",
+  "tour.g.ai.t": "7. Gemma से कारण पूछें",
+  "tour.g.ai.x":
+    "विवरण बनाएँ तस्वीर, हीटमैप और सबसे मिलता-जुलता सही संदर्भ AMD Token Factory पर Gemma को भेजता है। वह बताता है क्या ग़लत दिखता है और क्या जाँचना है। परिणाम कभी नहीं बदलता।",
+  "tour.g.done.t": "बस इतना ही",
+  "tour.g.done.x":
+    "दूसरा बोर्ड जाँचें, इतिहास देखें या नई प्रोफ़ाइल से अपनी प्रोफ़ाइल बनाएँ। यह टूर कभी भी ? बटन या सेटिंग्स से फिर शुरू करें।",
+  "tour.g.waiting": "आपके यह क़दम पूरा करने की प्रतीक्षा…",
+  "tour.g.skipStep": "यह क़दम छोड़ें",
+  "tour.g.finish": "समाप्त करें",
 };
 
 const dictionaries: Record<Lang, Dict> = { en, it, de, fr, zh, hi };

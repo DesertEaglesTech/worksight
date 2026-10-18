@@ -505,3 +505,74 @@
 .design-current .navigation-guest + .navigation-toggle {
   border-top: 0;
 }
+
+/* Guided tour: a highlight over the real control and a card next to it. Clicks pass through. */
+.guided-tour {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+}
+.guided-tour-spot {
+  position: fixed;
+  border-radius: 10px;
+  box-shadow:
+    0 0 0 3px var(--accent),
+    0 0 0 9999px rgb(20 26 31 / 0.45);
+  transition:
+    top 0.2s,
+    left 0.2s,
+    width 0.2s,
+    height 0.2s;
+}
+.guided-tour-card {
+  position: fixed;
+  pointer-events: auto;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 16px 40px rgb(0 0 0 / 0.25);
+  max-width: calc(100vw - 24px);
+}
+.guided-tour-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.guided-tour-card h2 {
+  margin: 0;
+  font-size: 17px;
+}
+.guided-tour-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+  font-size: 14px;
+}
+.guided-tour-card .guided-tour-wait {
+  color: var(--accent);
+  font-weight: 600;
+}
+.guided-tour-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+.tour-guide {
+  align-self: flex-start;
+}
+.settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
