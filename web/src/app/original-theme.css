@@ -263,7 +263,8 @@
     display: none;
   }
   .design-current .mobile-workspace-bar > span:last-of-type {
-    color: #bac5cd;
+    /* Theme token: #bac5cd suited only the dark bar and nearly vanished on white. */
+    color: var(--muted);
   }
 }
 @media (max-width: 480px) {
