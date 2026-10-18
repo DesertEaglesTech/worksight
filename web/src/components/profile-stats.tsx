@@ -55,49 +55,49 @@ export function ProfileStats({
   if (!stats) return null;
   const { onboarding, inspections, engineer_review } = stats;
   const agreement = engineer_review.agreement;
+  const facts = [
+    {
+      label: "Build time",
+      value:
+        onboarding?.build_ms != null
+          ? `${(onboarding.build_ms / 1000).toFixed(1)} s`
+          : "—",
+      note: onboarding
+        ? `${onboarding.reference_count} photos, no training`
+        : undefined,
+    },
+    {
+      label: "Median inference",
+      value:
+        inspections.inference_ms_p50 === null
+          ? "—"
+          : `${Math.round(inspections.inference_ms_p50)} ms`,
+      note: "server",
+    },
+    {
+      label: "Inspections",
+      value: String(inspections.count),
+      note: `${inspections.decisions.anomaly} anomaly · ${inspections.decisions.review} review`,
+    },
+    {
+      label: "Engineer agreement",
+      value: agreement.compared
+        ? `${agreement.agree}/${agreement.compared}`
+        : "—",
+      note: agreement.compared ? "reviewed parts" : "no reviews yet",
+    },
+  ];
   return (
-    <section className="profile-stats" aria-label="Measured profile figures">
-      <div>
-        <span>Onboarding</span>
-        <strong>
-          {onboarding
-            ? onboarding.build_ms
-              ? `${onboarding.reference_count} photos · ${(onboarding.build_ms / 1000).toFixed(1)} s`
-              : `${onboarding.reference_count} photos`
-            : "—"}
-        </strong>
-        <small>No model training</small>
-      </div>
-      <div>
-        <span>Inspections</span>
-        <strong>{inspections.count}</strong>
-        <small>
-          {inspections.decisions.normal} normal · {inspections.decisions.review}{" "}
-          review · {inspections.decisions.anomaly} anomaly
-        </small>
-      </div>
-      <div>
-        <span>Median inference</span>
-        <strong>
-          {inspections.inference_ms_p50 === null
-            ? "—"
-            : `${Math.round(inspections.inference_ms_p50)} ms`}
-        </strong>
-        <small>Measured on the server</small>
-      </div>
-      <div>
-        <span>Engineer agreement</span>
-        <strong>
-          {agreement.compared
-            ? `${agreement.agree} of ${agreement.compared}`
-            : "No reviews yet"}
-        </strong>
-        <small>
-          {agreement.rate === null
-            ? "Model vs engineer on reviewed parts"
-            : `${Math.round(agreement.rate * 100)}% on reviewed parts`}
-        </small>
-      </div>
+    <section className="profile-stats" aria-label="Measured on this profile">
+      {facts.map((f) => (
+        <div key={f.label}>
+          <span>{f.label}</span>
+          <strong>
+            {f.value}
+            {f.note && <small> · {f.note}</small>}
+          </strong>
+        </div>
+      ))}
     </section>
   );
 }
