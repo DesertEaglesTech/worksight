@@ -2,13 +2,13 @@
 <html><head><meta charset="utf-8"><title>Worksight Showreel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700&family=Noto+Sans+JP:wght@700&family=Noto+Sans+SC:wght@700&family=Noto+Sans+Devanagari:wght@700&display=block" rel="stylesheet">
-<style>html,body{margin:0;background:#0B0D11;overflow:hidden}canvas{display:block}</style>
+<style>html,body{margin:0;background:#F5F8FD;overflow:hidden}canvas{display:block}</style>
 </head><body><canvas id="c" width="1920" height="1080"></canvas>
 <script>
 const W = 1920, H = 1080, BEAT = 0.5, BAR = 2;
 const c = document.getElementById("c"), x = c.getContext("2d");
-const C = { bg: "#0B0D11", panel: "#151920", line: "#262B35", ink: "#F3F0E8", muted: "#8A919C",
-  orange: "#FF6B1A", blue: "#4C7DFF", green: "#3DDC97", red: "#FF4D5E", yellow: "#FFC24B", amd: "#ED1C24" };
+const C = { bg: "#F5F8FD", panel: "#FFFFFF", line: "#D6DFEE", ink: "#0B1B3F", muted: "#5B6B86",
+  orange: "#1F5BFF", blue: "#3B82F6", green: "#0E9F6E", red: "#E5384F", yellow: "#C98500", amd: "#ED1C24" };
 const SANS = "'Space Grotesk', Inter, sans-serif", MONO = "'JetBrains Mono', monospace";
 const CJK = "'Space Grotesk', 'Noto Sans SC', 'Noto Sans JP', 'Noto Sans Devanagari', sans-serif";
 
@@ -80,16 +80,16 @@ function background(t) {
   const g = 48, off = (t * 12) % g;
   for (let gx = -g; gx < W + g; gx += g) for (let gy = -g; gy < H + g; gy += g) {
     const px = gx + off, py = gy + off * 0.5; const d = Math.hypot(px - W / 2, py - H / 2) / 1100;
-    x.fillStyle = `rgba(243,240,232,${0.07 * (1 - d) + pulse * 0.04})`; x.fillRect(px, py, 2, 2);
+    x.fillStyle = `rgba(31,91,255,${0.10 * (1 - d) + pulse * 0.06})`; x.fillRect(px, py, 2, 2);
   }
   x.restore();
-  const v = x.createRadialGradient(W / 2, H / 2, 300, W / 2, H / 2, 1200); v.addColorStop(0, "rgba(0,0,0,0)"); v.addColorStop(1, "rgba(0,0,0,0.55)");
+  const v = x.createRadialGradient(W / 2, H / 2, 300, W / 2, H / 2, 1200); v.addColorStop(0, "rgba(31,91,255,0)"); v.addColorStop(1, "rgba(31,91,255,0.07)");
   x.fillStyle = v; x.fillRect(0, 0, W, H);
 }
 const SCENES = [
-  [0, 16, "Intro"], [16, 48, "The problem"], [48, 80, "The insight"], [80, 112, "How it works"], [112, 128, "Closest reference"],
+  [0, 16, "Intro"], [16, 48, "The problem"], [48, 80, "The insight"], [80, 112, "How it works"], [112, 128, "Searching every board"],
   [128, 160, "Gemma on AMD"], [160, 192, "The product"], [192, 208, "The engineer decides"], [208, 240, "Benchmarks"],
-  [240, 256, "The code"], [256, 272, "Tech stack"], [272, 288, "Market and roadmap"], [288, 300, "Worksight"],
+  [240, 256, "The code"], [256, 272, "Tech stack"], [272, 288, "Business value"], [288, 300, "Worksight"],
 ];
 function hud(t) {
   if (t < 3 || t > 297) return;
@@ -114,7 +114,7 @@ function wipes(t) {
     x.save(); x.fillStyle = C.orange; x.beginPath();
     const xs = lerp(-w - 400, W + 400, e);
     x.moveTo(xs, 0); x.lineTo(xs + w, 0); x.lineTo(xs + w - 300, H); x.lineTo(xs - 300, H); x.fill();
-    x.fillStyle = C.ink; x.fillRect(xs + w + 20, 0, 14, H);
+    x.fillStyle = "#0B1B3F"; x.fillRect(xs + w + 20, 0, 14, H);
     x.restore();
   }
 }
@@ -129,7 +129,7 @@ function sIntro(t) {
   // inspection grid opening from the line
   const gk = eOut(P(t, 2.2, 4.4)), ga = Math.min(gk, 1 - P(t, 7, 9));
   if (ga > 0) {
-    x.save(); x.strokeStyle = "rgba(255,107,26,0.35)"; x.lineWidth = 1; x.globalAlpha = ga;
+    x.save(); x.strokeStyle = "rgba(31,91,255,0.25)"; x.lineWidth = 1; x.globalAlpha = ga;
     for (let i = -12; i <= 12; i++) { const yy = H / 2 + i * 40 * gk; x.beginPath(); x.moveTo(W / 2 - 650, yy); x.lineTo(W / 2 + 650, yy); x.stroke(); }
     for (let i = -16; i <= 16; i++) { const xx = W / 2 + i * 40; x.beginPath(); x.moveTo(xx, H / 2 - 480 * gk); x.lineTo(xx, H / 2 + 480 * gk); x.stroke(); }
     x.restore();
@@ -147,7 +147,7 @@ function sIntro(t) {
   const sk = P(t, 6.2, 8.6);
   if (sk > 0 && sk < 1) {
     const sx = lerp(W / 2 - total / 2 - 40, W / 2 + total / 2 + 40, eIO(sk));
-    const gr = x.createLinearGradient(sx - 140, 0, sx, 0); gr.addColorStop(0, "rgba(255,107,26,0)"); gr.addColorStop(1, "rgba(255,107,26,0.45)");
+    const gr = x.createLinearGradient(sx - 140, 0, sx, 0); gr.addColorStop(0, "rgba(31,91,255,0)"); gr.addColorStop(1, "rgba(31,91,255,0.35)");
     x.fillStyle = gr; x.fillRect(sx - 140, by - size - 10, 140, size + 40); x.fillStyle = C.orange; x.fillRect(sx, by - size - 30, 3, size + 80);
   }
   const hk = P(t, 7.4, 8.4);
@@ -269,7 +269,7 @@ function sHow(t) {
     for (let j = 0; j < gy; j++) for (let i = 0; i < gx; i++) {
       const idx = j * gx + i, on = idx / (gx * gy) < gk; if (!on) continue;
       const age = gk - idx / (gx * gy);
-      x.strokeStyle = `rgba(76,125,255,${clamp(0.9 - age * 3, 0.15, 0.9) * (1 - P(t, 99, 100.5))})`; x.lineWidth = 1;
+      x.strokeStyle = `rgba(31,91,255,${clamp(0.9 - age * 3, 0.15, 0.9) * (1 - P(t, 99, 100.5))})`; x.lineWidth = 1;
       x.strokeRect(IX + i * IW / gx, IY + j * IH / gy, IW / gx, IH / gy);
     }
   }
@@ -283,7 +283,7 @@ function sHow(t) {
     text("ResNet-18, frozen", RX, 300, 48); text("layer2 + layer3 features · 384 px · 3×3 average pooling", RX, 350, 24, { w: 400, c: C.muted });
     for (let col = 0; col < 12; col++) for (let r = 0; r < 16; r++) {
       const v = 0.5 + 0.5 * Math.sin(col * 1.7 + r * 0.9 + t * 3);
-      x.fillStyle = `rgba(76,125,255,${0.15 + 0.85 * v * P(t, 87 + col * 0.15, 87.5 + col * 0.15)})`;
+      x.fillStyle = `rgba(31,91,255,${0.15 + 0.85 * v * P(t, 87 + col * 0.15, 87.5 + col * 0.15)})`;
       x.fillRect(RX + col * 54, 420 + r * 26, 44 * (0.3 + 0.7 * v), 18);
     }
     text("every patch becomes a vector", RX, 880, 26, { w: 500, fam: MONO, c: C.blue });
@@ -292,13 +292,13 @@ function sHow(t) {
     const fa = Math.min(P(t, 94.3, 95), 1 - P(t, 100.2, 100.8)); x.globalAlpha = a * fa;
     text("Memory of good patches", RX, 300, 48); text("all patches from the 20 good photos", RX, 350, 24, { w: 400, c: C.muted });
     const cx = RX + 360, cy = 620;
-    for (let i = 0; i < 260; i++) { const r = 240 * Math.sqrt(rand(i)), th = rand(i + 99) * 6.283; x.fillStyle = "rgba(61,220,151,0.75)"; x.fillRect(cx + r * Math.cos(th), cy + r * Math.sin(th) * 0.8, 4, 4); }
+    for (let i = 0; i < 260; i++) { const r = 240 * Math.sqrt(rand(i)), th = rand(i + 99) * 6.283; x.fillStyle = "rgba(14,159,110,0.75)"; x.fillRect(cx + r * Math.cos(th), cy + r * Math.sin(th) * 0.8, 4, 4); }
     for (let k = 0; k < 9; k++) {
       const lk = P(t, 95 + k * 0.4, 95.6 + k * 0.4); if (lk <= 0) continue;
       const sx = IX + IW * (0.2 + 0.6 * rand(k + 40)), sy = IY + IH * (0.2 + 0.7 * rand(k + 50));
       const i = Math.floor(rand(k + 60) * 260), r = 240 * Math.sqrt(rand(i)), th = rand(i + 99) * 6.283;
       const ex = cx + r * Math.cos(th), ey = cy + r * Math.sin(th) * 0.8;
-      x.strokeStyle = k === 7 ? C.red : "rgba(243,240,232,0.6)"; x.lineWidth = k === 7 ? 3 : 1.5;
+      x.strokeStyle = k === 7 ? C.red : "rgba(11,27,63,0.45)"; x.lineWidth = k === 7 ? 3 : 1.5;
       x.beginPath(); x.moveTo(sx, sy); x.lineTo(lerp(sx, ex, eOut(lk)), lerp(sy, ey, eOut(lk))); x.stroke();
     }
     text("cosine distance to the nearest good patch", RX, 940, 26, { w: 500, fam: MONO, c: C.green });
@@ -309,7 +309,7 @@ function sHow(t) {
     const sc = lerp(0, 0.2114, eOut(P(t, 101.5, 104.5)));
     text(sc.toFixed(4), RX, 420, 130, { c: sc > 0.1214 ? C.red : C.ink, fam: SANS });
     const bx = RX, by = 480, bw = 680, max = 0.3;
-    rr(bx, by, bw, 24, 12, C.panel); rr(bx, by, bw * sc / max, 24, 12, sc > 0.1214 ? C.red : C.blue);
+    rr(bx, by, bw, 24, 12, C.line); rr(bx, by, bw * sc / max, 24, 12, sc > 0.1214 ? C.red : C.blue);
     const tx = bx + bw * 0.1214 / max; x.fillStyle = C.ink; x.fillRect(tx - 1, by - 18, 3, 60);
     text("threshold 0.1214", tx, by + 80, 22, { w: 500, fam: MONO, align: "center", c: C.muted });
     text("mean + 2 sd of leave-one-out scores on the good photos", RX, 620, 22, { w: 400, c: C.muted });
@@ -334,8 +334,8 @@ function sCompare(t) {
   x.save(); x.beginPath(); x.rect(X, Y, w * split, h); x.clip(); img("overlay", X, Y, w, h); x.restore();
   x.fillStyle = C.ink; x.fillRect(X + w * split - 2, Y - 20, 4, h + 40);
   rr(X + w * split - 22, Y + h / 2 - 22, 44, 44, 22, C.ink); text("⇆", X + w * split, Y + h / 2 + 9, 26, { align: "center", c: C.bg });
-  chip("INSPECTED · HEATMAP", X + 20, Y + 20, { size: 18, fill: "rgba(11,13,17,0.75)", stroke: C.red });
-  chip("CLOSEST GOOD", X + w - 210, Y + 20, { size: 18, fill: "rgba(11,13,17,0.75)", stroke: C.green });
+  chip("INSPECTED · HEATMAP", X + 20, Y + 20, { size: 18, fill: "rgba(255,255,255,0.9)", stroke: C.red });
+  chip("CLOSEST GOOD", X + w - 210, Y + 20, { size: 18, fill: "rgba(255,255,255,0.9)", stroke: C.green });
   x.restore();
 }
 const GEMMA = {
@@ -352,7 +352,7 @@ function sGemma(t) {
   inputs.forEach(([label, im], i) => {
     const k = eExpo(P(t, 129 + i * 0.35, 130 + i * 0.35)); const yy = 320 + i * 160;
     x.globalAlpha = a * k; rr(150 - (1 - k) * 80, yy, 330, 130, 14, C.panel, C.line);
-    if (im) img(im, 162 - (1 - k) * 80, yy + 12, 140, 106); else { rr(162, yy + 12, 140, 106, 8, "#1E232B"); for (let l = 0; l < 5; l++) { x.fillStyle = C.muted; x.fillRect(180, yy + 30 + l * 16, 100 - (l % 2) * 30, 6); } }
+    if (im) img(im, 162 - (1 - k) * 80, yy + 12, 140, 106); else { rr(162, yy + 12, 140, 106, 8, "#EEF2F9"); for (let l = 0; l < 5; l++) { x.fillStyle = C.muted; x.fillRect(180, yy + 30 + l * 16, 100 - (l % 2) * 30, 6); } }
     text(label, 320 - (1 - k) * 80, yy + 74, 24, { w: 500 });
     const fk = P(t, 131 + i * 0.3, 132.5 + i * 0.3);
     if (fk > 0) {
@@ -389,7 +389,7 @@ function sGemma(t) {
     block("VISIBLE OBSERVATION", GEMMA.obs, C.red, k0); block("CHECK FIRST", GEMMA.check, C.yellow, k0 + 2.4); block("REQUIREMENT FROM PART DOCS", GEMMA.req, C.green, k0 + 4.6);
   }
   const lk = P(t, 153.5, 154.5);
-  if (lk > 0) { x.globalAlpha = a * lk; rr(0, 960, W, 120, 0, "rgba(11,13,17,0.9)"); riseWords("It explains. It never changes the decision.", W / 2, 1015, 40, 153.5, t, { align: "center", c: C.orange }); }
+  if (lk > 0) { x.globalAlpha = a * lk; rr(0, 960, W, 120, 0, "rgba(245,248,253,0.95)"); riseWords("It explains. It never changes the decision.", W / 2, 1015, 40, 153.5, t, { align: "center", c: C.orange }); }
   x.restore();
 }
 function wrap(s, size, maxW, weight = 400) {
@@ -398,9 +398,9 @@ function wrap(s, size, maxW, weight = 400) {
   if (line) out.push(line); return out;
 }
 function browser(n, X, Y, w, h, zoom, fx, fy, a) {
-  x.save(); x.globalAlpha *= a; rr(X, Y, w, h + 46, 16, "#1E232B", C.line);
+  x.save(); x.globalAlpha *= a; rr(X, Y, w, h + 46, 16, "#E9EEF7", C.line);
   [C.red, C.yellow, C.green].forEach((col, i) => { x.beginPath(); x.arc(X + 26 + i * 22, Y + 23, 6, 0, 7); x.fillStyle = col; x.fill(); });
-  rr(X + 110, Y + 10, w - 220, 26, 13, "#13161C"); text("web-production-d9743.up.railway.app", X + w / 2, Y + 29, 16, { w: 400, fam: MONO, align: "center", c: C.muted });
+  rr(X + 110, Y + 10, w - 220, 26, 13, "#FFFFFF"); text("web-production-d9743.up.railway.app", X + w / 2, Y + 29, 16, { w: 400, fam: MONO, align: "center", c: C.muted });
   x.beginPath(); x.rect(X, Y + 46, w, h); x.clip();
   const i = IM[n]; if (i && i.width) {
     const s = w / i.width * zoom; const iw = i.width * s, ih = i.height * s;
@@ -476,7 +476,7 @@ function sBench(t) {
     riseWords("AUROC by board", 150, 210, 80, 222.6, t);
     BENCH.forEach((row, g) => {
       const cx = 330 + g * 420, cy = 560, r = 150; const k = eOut(P(t, 223.2 + g * 0.4, 225.5 + g * 0.4));
-      x.lineWidth = 22; x.strokeStyle = C.panel; x.beginPath(); x.arc(cx, cy, r, 0, 7); x.stroke();
+      x.lineWidth = 22; x.strokeStyle = C.line; x.beginPath(); x.arc(cx, cy, r, 0, 7); x.stroke();
       x.strokeStyle = g === 3 ? C.green : C.blue; x.lineCap = "round"; x.beginPath(); x.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + 6.283 * row[4] * k); x.stroke(); x.lineCap = "butt";
       text((row[4] * k).toFixed(3), cx, cy + 22, 64, { align: "center" }); text(row[0], cx, cy + r + 80, 32, { align: "center", w: 500, c: C.muted });
     });
@@ -535,7 +535,7 @@ function sCode(t) {
   text("backend/src/worksight/detector.py", 160, 210, 20, { w: 400, fam: MONO, c: C.muted });
   x.save(); x.beginPath(); x.rect(120, 240, 1000, 720); x.clip();
   const scroll = (t - 240) * 26;
-  CODE.forEach((ln, i) => { const yy = 290 + i * 40 - scroll + 120; if (yy > 200 && yy < 1000) { text(String(i + 1).padStart(2, " "), 150, yy, 22, { w: 400, fam: MONO, c: "#4A505B" }); codeLine(ln, 210, yy); } });
+  CODE.forEach((ln, i) => { const yy = 290 + i * 40 - scroll + 120; if (yy > 200 && yy < 1000) { text(String(i + 1).padStart(2, " "), 150, yy, 22, { w: 400, fam: MONO, c: "#9AA6BB" }); codeLine(ln, 210, yy); } });
   x.restore();
   const stats = [["74", "commits"], ["81", "automated tests"], ["20k+", "lines of code"], ["126", "files"], ["7", "languages in the UI"], ["2", "days of building"]];
   stats.forEach(([v, l], i) => {
@@ -559,7 +559,7 @@ function sStack(t) {
   layers.forEach(([n, d, col], i) => {
     const k = eExpo(P(t, 257 + i * 0.7, 258.2 + i * 0.7)); const yy = 830 - i * 120 - (1 - k) * 200; const xx = 300 + i * 40;
     x.globalAlpha = a * k;
-    x.fillStyle = "rgba(0,0,0,0.35)"; x.beginPath(); x.moveTo(xx + 20, yy + 96); x.lineTo(xx + 1300, yy + 96); x.lineTo(xx + 1340, yy + 70); x.lineTo(xx + 60, yy + 70); x.fill();
+    x.fillStyle = "rgba(11,27,63,0.08)"; x.beginPath(); x.moveTo(xx + 20, yy + 96); x.lineTo(xx + 1300, yy + 96); x.lineTo(xx + 1340, yy + 70); x.lineTo(xx + 60, yy + 70); x.fill();
     rr(xx, yy, 1300, 90, 14, C.panel, col, 3);
     x.fillStyle = col; x.fillRect(xx + 24, yy + 30, 30, 30);
     text(n, xx + 80, yy + 57, 34); text(d, xx + 1270, yy + 56, 24, { w: 400, align: "right", c: C.muted });
@@ -601,14 +601,103 @@ function sOutro(t) {
   text("Made entirely in code: canvas animation and a numpy-synthesised score.", W / 2, 1005, 20, { w: 400, align: "center", c: C.muted });
   x.restore();
 }
-const RUN = [[0, 16, sIntro], [16, 48, sProblem], [48, 80, sInsight], [80, 112, sHow], [112, 128, sCompare], [128, 160, sGemma],
-  [160, 192, sProduct], [192, 208, sEngineer], [208, 240, sBench], [240, 256, sCode], [256, 272, sStack], [272, 288, sMarket], [288, 300, sOutro]];
+function board(n, X, Y, w, h, state, k) {
+  img(n, X, Y, w, h);
+  if (state === "ok") { x.strokeStyle = C.green; x.lineWidth = 3; x.strokeRect(X, Y, w, h); x.fillStyle = C.green; x.beginPath(); x.arc(X + w - 16, Y + 16, 11, 0, 7); x.fill(); x.strokeStyle = "#fff"; x.lineWidth = 3; x.beginPath(); x.moveTo(X + w - 21, Y + 16); x.lineTo(X + w - 17, Y + 20); x.lineTo(X + w - 10, Y + 11); x.stroke(); }
+  if (state === "bad") {
+    img("overlay", X, Y, w, h, clamp(k * 2));
+    x.strokeStyle = C.red; x.lineWidth = 5; x.strokeRect(X - 2, Y - 2, w + 4, h + 4);
+    const ph = ((k * 1.5) % 1 + 1) % 1; const r = 30 + 60 * ph; x.strokeStyle = `rgba(229,56,79,${1 - ph})`; x.lineWidth = 3; x.beginPath(); x.arc(X + w * 0.46, Y + h * 0.82, r, 0, 7); x.stroke();
+    rr(X + 6, Y + h - 34, 104, 28, 6, C.red); text("FAIL 0.21", X + 58, Y + h - 14, 16, { align: "center", c: "#fff", fam: MONO });
+  }
+}
+function sSearch(t) {
+  const a = inOut(t, 112, 128); x.save(); x.globalAlpha = a;
+  riseWords("Searching every board", 150, 200, 70, 112.3, t);
+  text("Each photo is compared with the 20 good ones, about 0.3 s per board on a CPU.", 150, 255, 28, { w: 400, c: C.muted, a: P(t, 113, 114) });
+  const cols = 10, rows = 4, bw = 150, bh = 114, gap = 14, gx = (W - (cols * (bw + gap) - gap)) / 2, gy = 320;
+  const bad = new Set([7, 22, 33]); const span = cols * (bw + gap) + 100;
+  const beam = lerp(gx - 60, gx + span - 60, eIO(P(t, 113.6, 124.5)));
+  let seen = 0, flagged = 0;
+  for (let i = 0; i < cols * rows; i++) {
+    const cx = gx + (i % cols) * (bw + gap), cy = gy + Math.floor(i / cols) * (bh + gap);
+    const ap = eOut(P(t, 112.4 + i * 0.02, 113 + i * 0.02)); x.globalAlpha = a * ap;
+    const scanned = beam > cx + bw / 2; if (scanned) { seen++; if (bad.has(i)) flagged++; }
+    board(bad.has(i) ? "part" : "good" + String(i % 20).padStart(2, "0"), cx, cy + (1 - ap) * 40, bw, bh, scanned ? (bad.has(i) ? "bad" : "ok") : null, t - 113);
+  }
+  x.globalAlpha = a;
+  if (t > 113.6 && t < 124.6) {
+    const g = x.createLinearGradient(beam - 160, 0, beam, 0); g.addColorStop(0, "rgba(31,91,255,0)"); g.addColorStop(1, "rgba(31,91,255,0.28)");
+    x.fillStyle = g; x.fillRect(beam - 160, gy - 30, 160, rows * (bh + gap) + 40); x.fillStyle = C.orange; x.fillRect(beam - 2, gy - 40, 4, rows * (bh + gap) + 60);
+  }
+  text(`${seen}`, 150, 960, 90, { c: C.ink }); text("boards inspected", 160 + measure(`${seen}`, 90), 945, 30, { w: 500, c: C.muted });
+  text(`${flagged}`, 900, 960, 90, { c: C.red }); text("anomalies found", 910 + measure(`${flagged}`, 90), 945, 30, { w: 500, c: C.muted });
+  const fk = eBack(P(t, 125, 125.8));
+  if (fk > 0) { x.save(); x.globalAlpha = a * clamp(fk); chip("Only the anomalies reach the engineer", 1270, 905, { size: 26, fill: "#fff", stroke: C.red }); x.restore(); }
+  x.restore();
+}
+function machine(X, Y, s, a) {
+  x.save(); x.globalAlpha *= a; x.translate(X, Y); x.scale(s, s);
+  rr(0, 0, 420, 260, 16, "#E9EEF7", C.ink, 3); rr(30, 30, 150, 110, 8, "#0B1B3F"); for (let i = 0; i < 5; i++) { x.fillStyle = [C.red, C.yellow, C.green, C.orange, C.red][i]; x.beginPath(); x.arc(230 + i * 34, 60, 10, 0, 7); x.fill(); }
+  for (let i = 0; i < 4; i++) { x.fillStyle = C.line; x.fillRect(220, 100 + i * 22, 170, 10); }
+  x.fillStyle = C.ink; x.fillRect(-40, 260, 500, 18); x.fillRect(20, 278, 20, 50); x.fillRect(380, 278, 20, 50);
+  x.restore();
+}
+function camera(X, Y, s, a) {
+  x.save(); x.globalAlpha *= a; x.translate(X, Y); x.scale(s, s);
+  rr(0, 20, 140, 90, 14, C.orange); x.beginPath(); x.arc(70, 65, 30, 0, 7); x.fillStyle = "#fff"; x.fill(); x.beginPath(); x.arc(70, 65, 18, 0, 7); x.fillStyle = C.ink; x.fill(); rr(40, 0, 60, 24, 6, C.orange);
+  rr(190, 0, 120, 150, 10, "#fff", C.ink, 3); for (let i = 0; i < 4; i++) { rr(205, 18 + i * 32, 90, 20, 4, i === 0 ? C.green : C.line); }
+  x.restore();
+}
+function box(X, Y, col) { rr(X, Y, 70, 56, 6, col === "bad" ? "#FCE3E7" : "#EAF1FF", col === "bad" ? C.red : C.orange, 3); x.strokeStyle = col === "bad" ? C.red : C.orange; x.lineWidth = 2; x.beginPath(); x.moveTo(X, Y + 18); x.lineTo(X + 70, Y + 18); x.stroke(); }
+function sValue(t) {
+  const a = inOut(t, 272, 288); x.save(); x.globalAlpha = a;
+  if (t < 280) {
+    const pa = 1 - P(t, 279.5, 280); x.globalAlpha = a * pa;
+    riseWords("No expensive inspection rig.", 150, 210, 70, 272.3, t);
+    text("A camera and a CPU server instead of a dedicated machine.", 150, 265, 28, { w: 400, c: C.muted, a: P(t, 273, 274) });
+    const mk = eExpo(P(t, 272.8, 274)); machine(220, 380 + (1 - mk) * 60, 1, mk);
+    text("Dedicated inspection machine", 220, 760, 30, { a: mk }); text("hardware · integration · set-up per part", 220, 800, 24, { w: 400, c: C.muted, a: mk });
+    const cost = eOut(P(t, 274, 276.5)); rr(220, 840, 560, 26, 13, C.line); if (cost > 0.02) rr(220, 840, 560 * cost, 26, 13, C.red);
+    const sk = eIO(P(t, 277, 277.8)); if (sk > 0) { x.strokeStyle = C.red; x.lineWidth = 8; x.beginPath(); x.moveTo(190, 360); x.lineTo(190 + 640 * sk, 360 + 520 * sk); x.stroke(); }
+    const ck = eBack(P(t, 275.5, 276.4)); if (ck > 0) camera(1120, 430, clamp(ck, 0, 1.15) * 1.3, clamp(ck));
+    text("Worksight", 1120, 760, 30, { a: clamp(ck) }); text("one camera per view · runs on a CPU", 1120, 800, 24, { w: 400, c: C.muted, a: clamp(ck) });
+    const c2 = eOut(P(t, 276.5, 278)); rr(1120, 840, 560, 26, 13, C.line); if (c2 > 0.05) rr(1120, 840, 560 * 0.18 * c2, 26, 13, C.green);
+    text("illustration, not a measured cost", 1680, 905, 18, { w: 400, align: "right", c: C.muted, a: P(t, 277, 278) });
+  } else {
+    x.globalAlpha = a * P(t, 280, 280.4);
+    riseWords("Catch defects before they ship.", 150, 210, 70, 280.3, t);
+    text("Fewer returns, warranty claims and compensation for defective parts.", 150, 265, 28, { w: 400, c: C.muted, a: P(t, 281, 282) });
+    const lanes = [[430, "Without Worksight", false], [740, "With Worksight", true]];
+    for (const [ly, label, ws] of lanes) {
+      text(label, 150, ly - 70, 28, { c: ws ? C.orange : C.muted });
+      x.fillStyle = C.line; x.fillRect(150, ly + 60, 1450, 6);
+      rr(1640, ly - 30, 130, 120, 14, "#fff", C.ink, 3); x.fillStyle = C.ink; x.beginPath(); x.arc(1705, ly + 10, 18, 0, 7); x.fill(); x.fillRect(1680, ly + 34, 50, 34); text("customer", 1705, ly + 120, 20, { w: 500, align: "center", c: C.muted });
+      if (ws) { x.fillStyle = C.orange; x.fillRect(980, ly - 40, 6, 110); text("Worksight", 983, ly - 52, 20, { align: "center", c: C.orange }); }
+      for (let i = 0; i < 6; i++) {
+        const bt = t - 280.6 - i * 0.6; if (bt < 0) continue; const isBad = i === 3;
+        let bx = 150 + bt * 400, by = ly; const tGate = (940 - 150) / 400, tCust = (1560 - 150) / 400;
+        if (ws && isBad && bt > tGate) { const d = bt - tGate; bx = 940 + d * 40; by = ly + d * 160; if (by > ly + 220) continue; }
+        if (!ws && isBad && bt > tCust) { const d = bt - tCust; bx = Math.max(1100, 1560 - d * 420); by = ly - 10 - Math.sin(clamp(d / 1.1) * Math.PI) * 60; }
+        if (bx > 1580 && !(isBad && !ws)) continue;
+        box(bx, by, isBad ? "bad" : "ok");
+        if (!ws && isBad && bt > tCust) { const d = bt - tCust; x.save(); x.globalAlpha = a * clamp(d * 2); chip("return · compensation claim", bx - 60, by - 70, { size: 20, fill: "#fff", stroke: C.red, c: C.red }); x.restore(); }
+        if (ws && isBad && bt > tGate) { x.save(); x.globalAlpha = a * clamp((bt - tGate) * 3); chip("caught on the line", 1010, ly + 120, { size: 20, fill: "#fff", stroke: C.green, c: C.green }); x.restore(); }
+      }
+    }
+    text("AI visual inspection market: about +$27B by 2029 (Technavio)", 150, 1000, 22, { w: 400, fam: MONO, c: C.muted, a: P(t, 284, 285) });
+  }
+  x.restore();
+}
+
+const RUN = [[0, 16, sIntro], [16, 48, sProblem], [48, 80, sInsight], [80, 112, sHow], [112, 128, sSearch], [128, 160, sGemma],
+  [160, 192, sProduct], [192, 208, sEngineer], [208, 240, sBench], [240, 256, sCode], [256, 272, sStack], [272, 288, sValue], [288, 300, sOutro]];
 window.render = function (t) {
   x.setTransform(1, 0, 0, 1, 0, 0); x.globalAlpha = 1; background(t);
   // camera shake on the big hits
   const hit = [16, 48, 80, 128, 208].map(b => Math.exp(-Math.max(0, t - b) * 6) * (t >= b ? 1 : 0)).reduce((s, v) => s + v, 0);
   x.save(); x.translate(Math.sin(t * 90) * 6 * hit, Math.cos(t * 70) * 6 * hit);
   for (const [a0, b0, f] of RUN) if (t >= a0 - 0.5 && t < b0 + 0.5) f(t);
-  x.restore(); hud(t); wipes(t);
+  x.restore(); wipes(t);
 };
 </script></body></html>
