@@ -125,6 +125,7 @@ export default function AiDescription({
   disabled,
   t = english,
   autoStart = false,
+  onState,
 }: {
   api: WorksightApi;
   inspection: Inspection;
@@ -132,6 +133,7 @@ export default function AiDescription({
   t?: T;
   // Request a description as soon as the saved state is known, for a freshly run inspection.
   autoStart?: boolean;
+  onState?: (state: "pending" | "ready" | "none") => void;
 }) {
   const reports = api.reports!;
   const [report, setReport] = useState<AssistiveReport | null>(null);
@@ -283,6 +285,14 @@ export default function AiDescription({
   }
   const pending =
     working || report?.status === "queued" || report?.status === "running";
+  const state = pending
+    ? "pending"
+    : report?.status === "ready"
+      ? "ready"
+      : "none";
+  useEffect(() => {
+    onState?.(state);
+  }, [state, onState]);
   return (
     <section
       id="ai-description"

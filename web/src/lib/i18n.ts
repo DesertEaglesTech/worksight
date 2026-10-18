@@ -48,6 +48,9 @@ const en = {
   "guide.trySaved": "See a result with AI explanation",
   "guide.hide": "Hide guide",
   "how.hide": "Hide this panel",
+  "result.aiPending":
+    "AI description in progress. Download when it is ready to include it.",
+  "result.aiIncluded": "Includes the AI description.",
   "ai.auto": "Started automatically with the inspection.",
   "tools.title": "Profile tools",
   "tools.history": "History",
@@ -299,6 +302,9 @@ const it: Dict = {
   "guide.trySaved": "Vedi un risultato con spiegazione AI",
   "guide.hide": "Nascondi guida",
   "how.hide": "Nascondi questo pannello",
+  "result.aiPending":
+    "Descrizione AI in corso. Scarica quando è pronta per includerla.",
+  "result.aiIncluded": "Include la descrizione AI.",
   "ai.auto": "Avviata automaticamente con l’ispezione.",
   "tools.title": "Strumenti del profilo",
   "tools.history": "Cronologia",
@@ -548,6 +554,9 @@ const de: Dict = {
   "guide.trySaved": "Ergebnis mit KI-Erklärung ansehen",
   "guide.hide": "Anleitung ausblenden",
   "how.hide": "Diesen Bereich ausblenden",
+  "result.aiPending":
+    "KI-Beschreibung läuft. Laden Sie herunter, sobald sie fertig ist, um sie einzuschließen.",
+  "result.aiIncluded": "Enthält die KI-Beschreibung.",
   "ai.auto": "Automatisch mit der Prüfung gestartet.",
   "tools.title": "Profilwerkzeuge",
   "tools.history": "Verlauf",
@@ -799,6 +808,9 @@ const fr: Dict = {
   "guide.trySaved": "Voir un résultat avec explication IA",
   "guide.hide": "Masquer le guide",
   "how.hide": "Masquer ce panneau",
+  "result.aiPending":
+    "Description IA en cours. Téléchargez une fois prête pour l’inclure.",
+  "result.aiIncluded": "Inclut la description IA.",
   "ai.auto": "Lancée automatiquement avec l’inspection.",
   "tools.title": "Outils du profil",
   "tools.history": "Historique",
@@ -1044,6 +1056,8 @@ const zh: Dict = {
   "guide.trySaved": "查看带 AI 解释的结果",
   "guide.hide": "隐藏引导",
   "how.hide": "隐藏此面板",
+  "result.aiPending": "AI 描述生成中，完成后下载即可包含。",
+  "result.aiIncluded": "包含 AI 描述。",
   "ai.auto": "已随检测自动启动。",
   "tools.title": "档案工具",
   "tools.history": "历史记录",
@@ -1274,6 +1288,9 @@ const hi: Dict = {
   "guide.trySaved": "AI व्याख्या के साथ परिणाम देखें",
   "guide.hide": "गाइड छिपाएँ",
   "how.hide": "यह पैनल छिपाएँ",
+  "result.aiPending":
+    "AI विवरण बन रहा है। शामिल करने के लिए तैयार होने पर डाउनलोड करें।",
+  "result.aiIncluded": "AI विवरण शामिल है।",
   "ai.auto": "जाँच के साथ अपने-आप शुरू हुआ।",
   "tools.title": "प्रोफ़ाइल उपकरण",
   "tools.history": "इतिहास",
@@ -1517,6 +1534,9 @@ const ja: Dict = {
   "guide.trySaved": "AI の説明付きの結果を見る",
   "guide.hide": "ガイドを隠す",
   "how.hide": "このパネルを隠す",
+  "result.aiPending":
+    "AI の説明を生成中です。含めるには完成後にダウンロードしてください。",
+  "result.aiIncluded": "AI の説明を含みます。",
   "ai.auto": "検査と同時に自動で開始しました。",
   "tools.title": "プロファイルツール",
   "tools.history": "履歴",

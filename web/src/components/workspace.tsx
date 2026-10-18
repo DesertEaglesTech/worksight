@@ -152,6 +152,7 @@ export default function Workspace({
   const [guest, setGuest] = useState(true);
   const [guideHidden, setGuideHidden] = useState(false);
   const [howHidden, setHowHidden] = useState(false);
+  const [aiState, setAiState] = useState<"pending" | "ready" | "none">("none");
   // The AI description starts by itself only for an inspection run in this session.
   const [freshInspectionId, setFreshInspectionId] = useState<string | null>(
     null,
@@ -1813,6 +1814,15 @@ export default function Workspace({
                               {format.toUpperCase()}
                             </a>
                           ))}
+                          {api.reports && aiState !== "none" && (
+                            <small className="report-ai-state">
+                              {t(
+                                aiState === "pending"
+                                  ? "result.aiPending"
+                                  : "result.aiIncluded",
+                              )}
+                            </small>
+                          )}
                         </div>
                       )}
                       {inspection.matches_reference_image && (
@@ -2075,6 +2085,7 @@ export default function Workspace({
                 disabled={!!busy}
                 t={t}
                 autoStart={freshInspectionId === inspection.id}
+                onState={setAiState}
               />
             )}
           </>

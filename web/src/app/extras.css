@@ -670,3 +670,9 @@
 .how-heading .how-close {
   margin: -6px -10px -6px 0;
 }
+
+.report-download .report-ai-state {
+  flex-basis: 100%;
+  color: var(--muted);
+  font-size: 12px;
+}

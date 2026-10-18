@@ -65,6 +65,7 @@ def _lines(data):
         ("kv", ("Inspected at", i["created_at"])),
         ("kv", ("Profile", f"{profile['name']} (version {data['version_number'] or '?'})")),
         ("kv", ("File", i.get("filename") or "uploaded image")),
+        ("images", None),
         ("h2", "Model result"),
         ("kv", ("Decision", DECISIONS.get(i["decision"], i["decision"]))),
         ("kv", ("Anomaly score", f"{i['anomaly_score']:.4f}")),
@@ -112,9 +113,10 @@ def to_txt(data) -> bytes:
             out.append(f"{value[0]}: {value[1]}")
         elif kind == "li":
             out.append(f"- {value}")
+        elif kind == "images":
+            out.append("Images: " + ", ".join(caption for caption, _ in data["images"]))
         else:
             out.append(value)
-    out += ["", "Images: " + ", ".join(caption for caption, _ in data["images"])]
     return ("\n".join(out) + "\n").encode()
 
 
@@ -135,44 +137,55 @@ def _jpeg(image: Image.Image, side=900) -> io.BytesIO:
     return buffer
 
 
+def _pdf_images(pdf, data, load_image, width):
+    # The three images side by side, so the whole report fits on one page.
+    images = [(caption, load_image(name)) for caption, name in data["images"]]
+    if not images:
+        return
+    gap = 4
+    w = (width - gap * (len(images) - 1)) / len(images)
+    h = max(w * image.height / image.width for _, image in images)
+    top = pdf.get_y() + 2
+    for n, (caption, image) in enumerate(images):
+        x = pdf.l_margin + n * (w + gap)
+        pdf.set_xy(x, top)
+        pdf.set_font("Helvetica", "", 8)
+        pdf.cell(w, 4, _latin1(caption))
+        pdf.image(_jpeg(image), x=x, y=top + 5, w=w, h=w * image.height / image.width)
+    pdf.set_xy(pdf.l_margin, top + 5 + h + 2)
+
+
 def to_pdf(data, load_image) -> bytes:
     pdf = FPDF()
-    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.set_margins(14, 12, 14)
+    pdf.set_auto_page_break(auto=True, margin=12)
     pdf.add_page()
     width = pdf.w - pdf.l_margin - pdf.r_margin
     for kind, value in _lines(data):
         if kind == "h1":
-            pdf.set_font("Helvetica", "B", 18)
-            pdf.multi_cell(width, 9, _latin1(value), new_x="LMARGIN", new_y="NEXT")
-            pdf.ln(2)
+            pdf.set_font("Helvetica", "B", 16)
+            pdf.multi_cell(width, 8, _latin1(value), new_x="LMARGIN", new_y="NEXT")
+            pdf.ln(1)
         elif kind == "h2":
-            pdf.ln(3)
-            pdf.set_font("Helvetica", "B", 13)
-            pdf.multi_cell(width, 7, _latin1(value), new_x="LMARGIN", new_y="NEXT")
-        elif kind == "kv":
-            pdf.set_font("Helvetica", "B", 10)
-            pdf.cell(42, 6, _latin1(value[0]))
-            pdf.set_font("Helvetica", "", 10)
-            pdf.multi_cell(width - 42, 6, _latin1(str(value[1])), new_x="LMARGIN", new_y="NEXT")
-        elif kind == "li":
-            pdf.set_font("Helvetica", "", 10)
-            pdf.multi_cell(width, 6, _latin1(f"- {value}"), new_x="LMARGIN", new_y="NEXT")
-        else:
-            pdf.set_font("Helvetica", "", 10)
+            pdf.ln(2)
+            pdf.set_font("Helvetica", "B", 11)
             pdf.multi_cell(width, 6, _latin1(value), new_x="LMARGIN", new_y="NEXT")
-    pdf.add_page()
-    pdf.set_font("Helvetica", "B", 13)
-    pdf.cell(width, 8, "Images", new_x="LMARGIN", new_y="NEXT")
-    for caption, name in data["images"]:
-        image = load_image(name)
-        w = width * 0.6
-        h = w * image.height / image.width
-        if pdf.get_y() + h + 10 > pdf.h - pdf.b_margin:
-            pdf.add_page()
-        pdf.set_font("Helvetica", "", 10)
-        pdf.cell(width, 6, _latin1(caption), new_x="LMARGIN", new_y="NEXT")
-        pdf.image(_jpeg(image), w=w, h=h)
-        pdf.ln(3)
+            pdf.set_draw_color(220, 220, 220)
+            pdf.line(pdf.l_margin, pdf.get_y(), pdf.l_margin + width, pdf.get_y())
+            pdf.ln(1)
+        elif kind == "kv":
+            pdf.set_font("Helvetica", "B", 9)
+            pdf.cell(36, 5, _latin1(value[0]))
+            pdf.set_font("Helvetica", "", 9)
+            pdf.multi_cell(width - 36, 5, _latin1(str(value[1])), new_x="LMARGIN", new_y="NEXT")
+        elif kind == "li":
+            pdf.set_font("Helvetica", "", 9)
+            pdf.multi_cell(width, 5, _latin1(f"- {value}"), new_x="LMARGIN", new_y="NEXT")
+        elif kind == "images":
+            _pdf_images(pdf, data, load_image, width)
+        else:
+            pdf.set_font("Helvetica", "", 9)
+            pdf.multi_cell(width, 5, _latin1(value), new_x="LMARGIN", new_y="NEXT")
     return bytes(pdf.output())
 
 
@@ -192,12 +205,14 @@ def to_docx(data, load_image) -> bytes:
             p.add_run(str(value[1]))
         elif kind == "li":
             doc.add_paragraph(value, style="List Bullet")
-        else:
+        elif kind == "images" and data["images"]:
+            table = doc.add_table(rows=2, cols=len(data["images"]))
+            for n, (caption, name) in enumerate(data["images"]):
+                table.cell(0, n).paragraphs[0].add_run(caption).bold = True
+                run = table.cell(1, n).paragraphs[0].add_run()
+                run.add_picture(_jpeg(load_image(name)), width=Inches(2.0))
+        elif kind != "images":
             doc.add_paragraph(value)
-    doc.add_heading("Images", level=1)
-    for caption, name in data["images"]:
-        doc.add_paragraph(caption).runs[0].bold = True
-        doc.add_picture(_jpeg(load_image(name)), width=Inches(4.2))
     buffer = io.BytesIO()
     doc.save(buffer)
     return buffer.getvalue()
