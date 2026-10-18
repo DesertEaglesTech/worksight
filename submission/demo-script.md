@@ -20,12 +20,13 @@ images and a training run, and defects are rare. Worksight starts from photos of
 
 ## 0:30–2:30 — Live demo
 
-0:30 — Insight (slide 3), then the live profile **Ultrasonic sensor board (VisA pcb1)**: version 1, 20
-reference photos, Ready. “Twenty good boards, about nine seconds to build, no defect labels, no
-training.”
+0:30 — Insight (slide 3), then open the live site in a fresh browser window: the welcome screen
+explains Worksight in three steps; pick a language to show it (English, Italiano, Deutsch, Français,
+中文, हिन्दी), switch back to English and click **Continue as guest**. Point at **How it works** and the
+profile figures: “Twenty good boards, about nine seconds to build, no defect labels, no training.”
 
-0:50 — Inspect. Click **Bent pins**, then **Run inspection**. Show Fail, the anomaly score and the
-threshold. Say once: “the score is a distance, not a probability.”
+0:50 — Inspect. In **Try it in one click**, click **Inspect a defective board**. Show Fail, the
+anomaly score and the threshold. Say once: “the score is a distance, not a probability.”
 
 1:10 — Evidence. Switch Heatmap / Original / Compare and zoom. “The heatmap sits on the pins; the
 closest good reference shows them straight.”
@@ -38,9 +39,13 @@ explains what looks wrong and what to check. It never changes the detector's dec
 live is optional: Token Factory sometimes falls back to DeepSeek, and the video should show Gemma.
 
 1:55 — Engineer decides. Choose a human decision, add a note, save. “The model's decision and the
-engineer's decision are stored separately.” Then **Good board** → normal result.
+engineer's decision are stored separately.” Then **New image** → **Inspect a good board** → normal result.
 
-2:15 — Safe updates. Open **Reference samples → Validation & versions** without applying anything
+2:05 — Profile tools, under the result: **History** (reopen a past inspection), **Batch inspection**
+(choose both example photos or a folder → ranked by anomaly score), **Part documents** (the part's
+spec that Gemma reads).
+
+2:20 — Safe updates. Open **Reference samples → Validation & versions** without applying anything
 (slide 6 if the panel is empty). “A new version goes live only if it adds no false alarm or missed
 defect on a frozen validation set, and it can be rolled back.”
 
