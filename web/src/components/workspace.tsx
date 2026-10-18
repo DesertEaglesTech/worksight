@@ -4,6 +4,7 @@ import {
   ArrowRight,
   CheckCircle2,
   ChevronDown,
+  Download,
   LoaderCircle,
   Layers3,
   ScanLine,
@@ -32,6 +33,8 @@ import { createBackendApi } from "@/lib/backend-api";
 import { createDemoApi } from "@/lib/demo";
 import { waitForJob } from "@/lib/jobs";
 import FileDrop from "./file-drop";
+import { HowItWorks } from "./how-it-works";
+import { ProfileStats } from "./profile-stats";
 import InspectionViewer from "./inspection-viewer";
 import VersionWorkflow from "./version-workflow";
 import AiDescription from "./ai-description";
@@ -187,6 +190,37 @@ export default function Workspace({
   }, [api, exampleInspectionId, mode]);
   const [profileQuery, setProfileQuery] = useState("");
   const [menuCollapsed, setMenuCollapsed] = useState(false);
+  const menuChosen = useRef(false);
+  // Below 1280px the menu starts collapsed so the image and result keep their room.
+  // An explicit toggle is remembered and wins over the width.
+  useEffect(() => {
+    let saved: string | null = null;
+    try {
+      saved = window.localStorage.getItem("worksight_menu");
+    } catch {}
+    if (saved === "collapsed" || saved === "expanded") {
+      setMenuCollapsed(saved === "collapsed");
+      return;
+    }
+    const narrow = window.matchMedia("(max-width: 1279px)");
+    const apply = () => {
+      if (!menuChosen.current) setMenuCollapsed(narrow.matches);
+    };
+    apply();
+    narrow.addEventListener("change", apply);
+    return () => narrow.removeEventListener("change", apply);
+  }, []);
+  const toggleMenu = () => {
+    menuChosen.current = true;
+    const next = !menuCollapsed;
+    setMenuCollapsed(next);
+    try {
+      window.localStorage.setItem(
+        "worksight_menu",
+        next ? "collapsed" : "expanded",
+      );
+    } catch {}
+  };
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [screen, setScreen] = useState<"inspect" | "profiles">("inspect");
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -675,7 +709,7 @@ export default function Workspace({
             }
             title={menuCollapsed ? "Expand navigation" : "Collapse navigation"}
             aria-expanded={!menuCollapsed}
-            onClick={() => setMenuCollapsed(!menuCollapsed)}
+            onClick={toggleMenu}
           >
             {menuCollapsed ? (
               <PanelLeftOpen size={20} />
@@ -1247,6 +1281,7 @@ export default function Workspace({
           </div>
         ) : (
           <>
+            <HowItWorks />
             {showLiveExamples && !inspection && !guideHidden && (
               <QuickStart
                 t={t}
@@ -1324,6 +1359,12 @@ export default function Workspace({
                 <ArrowRight size={16} />
               </button>
             </section>
+            {!demo && selected?.status === "ready" && (
+              <ProfileStats
+                profileId={selected.id}
+                refreshKey={`${inspection?.id ?? ""}:${inspection?.feedback ? 1 : 0}`}
+              />
+            )}
             {!ready.length && (
               <div className="alert info">
                 <p>
@@ -1377,7 +1418,9 @@ export default function Workspace({
                     />
                   </>
                 ) : (
-                  <div className="upload-stage">
+                  <div
+                    className={`upload-stage ${showLiveExamples ? "with-examples" : ""}`}
+                  >
                     <FileDrop
                       files={files}
                       onChange={(f) => {
@@ -1400,20 +1443,28 @@ export default function Workspace({
                     )}
                     {showLiveExamples && (
                       <div className="live-examples">
-                        <span>Try a VisA pcb1 test image:</span>
-                        {liveExamples.map((example) => (
-                          <button
-                            key={example.path}
-                            className="text-button"
-                            disabled={
-                              !canOperate || selected?.status !== "ready"
-                            }
-                            onClick={() => void loadLiveExample(example)}
-                          >
-                            {example.label}
-                          </button>
-                        ))}
-                        <small>VisA · CC BY 4.0</small>
+                        <span className="live-examples-title">
+                          Or try a VisA pcb1 test board
+                        </span>
+                        <div className="example-thumbs">
+                          {liveExamples.map((example) => (
+                            <button
+                              key={example.path}
+                              className="example-thumb"
+                              disabled={
+                                !canOperate || selected?.status !== "ready"
+                              }
+                              onClick={() => void loadLiveExample(example)}
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={example.path} alt="" loading="lazy" />
+                              <span>{example.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                        <small>
+                          VisA (Amazon) · CC BY 4.0 · not in the profile
+                        </small>
                       </div>
                     )}
                     <p className="upload-guidance">
@@ -1547,6 +1598,24 @@ export default function Workspace({
                         >
                           View AI description
                         </a>
+                      )}
+                      {!demo && (
+                        <div className="report-download">
+                          <span>
+                            <Download size={14} aria-hidden="true" />
+                            Download report
+                          </span>
+                          {(["pdf", "docx", "txt"] as const).map((format) => (
+                            <a
+                              key={format}
+                              className="text-button"
+                              href={`/api/backend/api/v1/inspections/${encodeURIComponent(inspection.id)}/export?format=${format}`}
+                              download
+                            >
+                              {format.toUpperCase()}
+                            </a>
+                          ))}
+                        </div>
                       )}
                       {inspection.matches_reference_image && (
                         <p className="reference-warning" role="alert">

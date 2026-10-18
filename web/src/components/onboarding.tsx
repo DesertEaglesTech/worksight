@@ -93,14 +93,7 @@ export function QuickStart({
 }) {
   return (
     <section className="quick-start" aria-label={t("guide.title")}>
-      <div className="quick-start-text">
-        <h2>{t("guide.title")}</h2>
-        <ol>
-          <li>{t("guide.step1")}</li>
-          <li>{t("guide.step2")}</li>
-          <li>{t("guide.step3")}</li>
-        </ol>
-      </div>
+      <h2>{t("guide.title")}</h2>
       <div className="quick-start-actions">
         <button
           className="button primary"

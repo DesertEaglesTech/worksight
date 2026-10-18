@@ -263,7 +263,8 @@
     display: none;
   }
   .design-current .mobile-workspace-bar > span:last-of-type {
-    color: #bac5cd;
+    /* The page heading right below already names the page. */
+    display: none;
   }
 }
 @media (max-width: 480px) {

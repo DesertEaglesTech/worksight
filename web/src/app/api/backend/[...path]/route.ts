@@ -2,6 +2,8 @@ import { NextRequest } from "next/server";
 import {
   allowedRoute,
   boundedBody,
+  exportFilename,
+  exportTypes,
   forwardedQuery,
   idempotencyKey,
   MAX_BODY,
@@ -78,6 +80,24 @@ async function proxy(
       redirect: "error",
       signal: AbortSignal.any([request.signal, AbortSignal.timeout(35_000)]),
     });
+    if (path.at(-1) === "export" && upstream.ok) {
+      const mime = upstream.headers.get("content-type")?.split(";")[0] ?? "";
+      if (!exportTypes.has(mime))
+        return fail(
+          502,
+          "invalid_export",
+          "The service returned an unexpected file.",
+        );
+      return new Response(upstream.body, {
+        status: 200,
+        headers: {
+          "Content-Type": upstream.headers.get("content-type")!,
+          "Content-Disposition": `attachment; filename="${exportFilename(upstream.headers.get("content-disposition"))}"`,
+          "Cache-Control": "private, no-store",
+          "X-Content-Type-Options": "nosniff",
+        },
+      });
+    }
     if (path[2] === "assets") {
       const mime = upstream.headers.get("content-type")?.split(";")[0];
       if (!upstream.ok)

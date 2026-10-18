@@ -11,7 +11,7 @@ export function allowedRoute(method: string, segments: string[]): boolean {
   const path = segments.join("/");
   const record = "[a-zA-Z0-9_-]+";
   const get = new RegExp(
-    `^api/v1/(profiles|profiles/${record}(/(versions|inspections|feedback|batches|documents|stats|validation|activations))?|jobs/${record}|inspections/${record}(/report)?|evaluations/${record}|batches/${record}|reports/${record}|assets/(?:[0-9a-f]{32}|[0-9a-f]{64})\\.png)$`,
+    `^api/v1/(profiles|profiles/${record}(/(versions|inspections|feedback|batches|documents|stats|validation|activations))?|jobs/${record}|inspections/${record}(/report|/export)?|evaluations/${record}|batches/${record}|reports/${record}|assets/(?:[0-9a-f]{32}|[0-9a-f]{64})\\.png)$`,
   );
   const post = new RegExp(
     `^api/v1/(runtime/warmup|profiles|profiles/${record}/(inspections|validation|candidates|batches|documents)|profiles/${record}/versions/${record}/(evaluate|activate)|inspections/${record}/(feedback|report))$`,
@@ -29,6 +29,7 @@ const queryRules: Record<string, RegExp> = {
   decision: /^(normal|anomaly|review)$/,
   human: /^(none|any|normal|anomaly|unsure)$/,
   refresh: /^(true|false)$/,
+  format: /^(pdf|docx|txt)$/,
 };
 const queryRoutes: [string, RegExp, string[]][] = [
   [
@@ -37,6 +38,7 @@ const queryRoutes: [string, RegExp, string[]][] = [
     ["limit", "cursor", "since", "until", "decision", "human"],
   ],
   ["POST", /^api\/v1\/inspections\/[a-zA-Z0-9_-]+\/report$/, ["refresh"]],
+  ["GET", /^api\/v1\/inspections\/[a-zA-Z0-9_-]+\/export$/, ["format"]],
 ];
 export function forwardedQuery(
   method: string,
@@ -121,4 +123,15 @@ export async function boundedBody(
     offset += c.byteLength;
   });
   return result;
+}
+
+/** Report downloads the proxy passes through as files, by exact media type. */
+export const exportTypes = new Set([
+  "application/pdf",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "text/plain",
+]);
+export function exportFilename(value: string | null): string {
+  const name = value?.match(/filename="([A-Za-z0-9._-]{1,120})"/)?.[1];
+  return name ?? "worksight-inspection-report";
 }
