@@ -576,3 +576,89 @@
   flex-wrap: wrap;
   gap: 8px;
 }
+
+/* Image viewer: no dark bars beside the photo; the frame follows the photo's shape. */
+.design-current .image-stage,
+.design-current .image-frame {
+  background: var(--paper);
+}
+.design-current .image-stage:not(.split) .image-frame {
+  --frame-height: clamp(410px, calc(100dvh - 350px), 840px);
+  width: min(
+    100%,
+    calc(var(--frame-height) * var(--inspection-aspect, 1.3333))
+  );
+  height: auto;
+  aspect-ratio: var(--inspection-aspect, 1.3333);
+  margin: 0 auto;
+}
+
+/* Resizable menu: drag its right edge. */
+.navigation-resizer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--navigation-width) - 3px);
+  width: 7px;
+  z-index: 31;
+  cursor: col-resize;
+  touch-action: none;
+}
+.navigation-resizer:hover,
+.navigation-resizer:focus-visible,
+.navigation-resizer.dragging {
+  background: linear-gradient(
+    to right,
+    transparent 2px,
+    var(--accent) 2px,
+    var(--accent) 4px,
+    transparent 4px
+  );
+  outline: none;
+}
+.navigation-collapsed .navigation-resizer {
+  display: none;
+}
+@media (min-width: 761px) {
+  .design-current.with-navigation.nav-resized:not(.navigation-collapsed) {
+    --navigation-width: var(--nav-user-width);
+  }
+}
+@media (max-width: 760px) {
+  .navigation-resizer {
+    display: none;
+  }
+}
+
+/* One type scale: 28 title · 16 section heading · 14 body and controls · 13/12 secondary. */
+.design-current main h1 {
+  font-size: 28px !important;
+}
+.design-current main h2 {
+  font-size: 16px !important;
+  font-weight: 650;
+}
+.design-current main h3 {
+  font-size: 14px !important;
+  font-weight: 600;
+}
+.design-current
+  main
+  :is(p, li, summary, button, select, option, textarea, input, td, th, a) {
+  font-size: 14px !important;
+}
+.design-current main .ai-description h2 span {
+  font-size: 14px !important;
+}
+.design-current main p.ai-report-summary {
+  font-size: 16px !important;
+}
+.design-current main .how-it-works p {
+  font-size: 13px !important;
+}
+.design-current main .decision {
+  font-size: 22px;
+}
+.design-current .workspace-navigation small {
+  font-size: 12px;
+}

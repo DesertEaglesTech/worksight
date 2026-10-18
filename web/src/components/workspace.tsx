@@ -1,5 +1,12 @@
 "use client";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import {
   ArrowRight,
   CheckCircle2,
@@ -244,6 +251,24 @@ export default function Workspace({
     } catch {}
   };
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // Menu width chosen by dragging its edge; null keeps the default.
+  const [navWidth, setNavWidth] = useState<number | null>(null);
+  const [navDragging, setNavDragging] = useState(false);
+  useEffect(() => {
+    try {
+      const saved = Number(window.localStorage.getItem("worksight_nav_width"));
+      if (saved >= 200 && saved <= 420) setNavWidth(saved);
+    } catch {}
+  }, []);
+  const saveNavWidth = (width: number | null) => {
+    setNavWidth(width);
+    try {
+      if (width === null) window.localStorage.removeItem("worksight_nav_width");
+      else window.localStorage.setItem("worksight_nav_width", String(width));
+    } catch {}
+  };
+  const clampNav = (width: number) =>
+    Math.round(Math.min(420, Math.max(200, width)));
   const [screen, setScreen] = useState<
     "inspect" | "profiles" | "history" | "settings"
   >("inspect");
@@ -603,7 +628,12 @@ export default function Workspace({
 
   return (
     <div
-      className={`app-shell with-navigation ${menuCollapsed ? "navigation-collapsed" : ""} ${mobileMenuOpen ? "navigation-open" : ""} design-${design}${(design === "engineering" || design === "current") && theme === "dark" ? " theme-dark" : ""}`}
+      className={`app-shell with-navigation ${menuCollapsed ? "navigation-collapsed" : ""} ${mobileMenuOpen ? "navigation-open" : ""} design-${design}${(design === "engineering" || design === "current") && theme === "dark" ? " theme-dark" : ""}${navWidth ? " nav-resized" : ""}`}
+      style={
+        navWidth
+          ? ({ "--nav-user-width": `${navWidth}px` } as CSSProperties)
+          : undefined
+      }
     >
       <a className="skip-link" href="#main">
         Skip to workspace
@@ -630,6 +660,38 @@ export default function Workspace({
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
+      <div
+        className={`navigation-resizer ${navDragging ? "dragging" : ""}`}
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="Resize menu"
+        aria-valuemin={200}
+        aria-valuemax={420}
+        aria-valuenow={navWidth ?? 240}
+        tabIndex={0}
+        title="Drag to resize the menu · double-click to reset"
+        onPointerDown={(e) => {
+          e.currentTarget.setPointerCapture(e.pointerId);
+          setNavDragging(true);
+        }}
+        onPointerMove={(e) => {
+          if (navDragging) setNavWidth(clampNav(e.clientX));
+        }}
+        onPointerUp={(e) => {
+          if (!navDragging) return;
+          setNavDragging(false);
+          saveNavWidth(clampNav(e.clientX));
+        }}
+        onDoubleClick={() => saveNavWidth(null)}
+        onKeyDown={(e) => {
+          if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+            e.preventDefault();
+            saveNavWidth(
+              clampNav((navWidth ?? 240) + (e.key === "ArrowLeft" ? -16 : 16)),
+            );
+          }
+        }}
+      />
       <aside
         className="workspace-navigation"
         id="workspace-navigation"
