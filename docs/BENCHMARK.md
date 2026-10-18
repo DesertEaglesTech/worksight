@@ -83,6 +83,25 @@ around the threshold (`review_margin` 0.1, fixed before the PCB test), and both 
 This is the triage view: more defects reach a person, at the cost of more good boards to look at.
 It is not a better detector; AUROC is unchanged.
 
+### Scoring and augmentation sweep (18 October 2026, no change)
+
+`scripts/scoring_sweep.py` on the 8 development categories only (PCB manifests refused), Linux CPU,
+same references. Selection rule fixed before the run: best mean dev AUROC, and a simpler variant
+within 0.003 wins. Before the sweep the current detector reproduced its pcb1 report exactly
+(AUROC 0.9055, recall 0.44, FPR 0.05, threshold 0.1214).
+
+| Variant | Dev AUROC | mean+2sd FPR / recall |
+|---|---|---|
+| **Current: k=1, no smoothing, no augmentation** | **0.864** | 0.06 / 0.59 |
+| Shifted reference views (±4%), k=1 | 0.863 | 0.07 / 0.59 |
+| Mean of 3 nearest patches | 0.863 | 0.06 / 0.59 |
+| Rotated reference views (±5°), k=1 | 0.862 | 0.07 / 0.59 |
+| Gaussian smoothing of the score map, σ = 0.5 / 1 / 2 patches | 0.862 / 0.857 / 0.843 | 0.07 / 0.59 … 0.06 / 0.55 |
+
+Selected: the current detector. None of the 24 variants improved dev AUROC, so the PCB test was not
+re-run and the production detector is unchanged. The existing 3×3 local aggregation already does
+what map smoothing would; reference augmentation adds memory (×3–×5) without better separation.
+
 ### More references (measured after the design was fixed)
 
 Same detector, same PCB test, 100 references instead of 20 (`--references 100`, same seed rule).
