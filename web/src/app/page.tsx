@@ -3,6 +3,7 @@ import type { Mode } from "@/lib/contract";
 import { cookies } from "next/headers";
 import "./original.css";
 import "./original-theme.css";
+import "./extras.css";
 export const dynamic = "force-dynamic";
 export default async function Page() {
   const value = process.env.WORKSIGHT_MODE;

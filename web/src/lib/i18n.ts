@@ -1,0 +1,396 @@
+// Interface languages. Strings not listed here (detailed messages, backend errors) stay in English.
+export const languages = [
+  { code: "en", label: "English" },
+  { code: "it", label: "Italiano" },
+  { code: "de", label: "Deutsch" },
+  { code: "fr", label: "Français" },
+  { code: "zh", label: "中文" },
+  { code: "hi", label: "हिन्दी" },
+] as const;
+
+export type Lang = (typeof languages)[number]["code"];
+
+const en = {
+  "nav.inspect": "Part inspection",
+  "nav.profiles": "Reference samples",
+  "nav.workspace": "Workspace",
+  "nav.selected": "Selected profile",
+  "nav.language": "Language",
+  "nav.guest": "Guest session",
+  "heading.inspect.sub":
+    "Select a reference profile, upload a part image and review the result.",
+  "heading.profiles.sub":
+    "Manage the known-good images used to prepare each part profile.",
+  "button.openSaved": "Open saved inspection",
+  "button.newProfile": "New profile",
+  "button.run": "Run inspection",
+  "button.newImage": "New image",
+  "view.original": "Original",
+  "view.heatmap": "Heatmap",
+  "view.compare": "Compare",
+  "panel.model": "Model result",
+  "panel.engineer": "Engineer review",
+  "panel.image": "Part image",
+  "panel.result": "Inspection result",
+  "welcome.title": "Find defects on a new part from good photos only",
+  "welcome.body":
+    "Worksight learns what a good part looks like from 10–20 photos, marks where a new part differs, and Gemma on AMD explains what to check. The engineer makes the decision.",
+  "welcome.guest": "Continue as guest",
+  "welcome.guestNote":
+    "No sign-up. Guest sessions share one demo workspace; personal accounts are planned.",
+  "guide.title": "Try it in one click",
+  "guide.step1": "A profile learns from 20 good circuit boards",
+  "guide.step2": "Inspect a board: heatmap and the closest good reference",
+  "guide.step3": "Gemma on AMD explains it; you record your decision",
+  "guide.tryDefect": "Inspect a defective board",
+  "guide.tryGood": "Inspect a good board",
+  "guide.trySaved": "See a result with AI explanation",
+  "guide.hide": "Hide guide",
+  "tools.title": "Profile tools",
+  "tools.history": "History",
+  "tools.batch": "Batch inspection",
+  "tools.docs": "Part documents",
+  "history.empty": "No inspections yet for this profile.",
+  "history.open": "Open",
+  "history.refresh": "Refresh",
+  "history.more": "Load more",
+  "history.engineer": "Engineer",
+  "batch.intro":
+    "Inspect a folder of part photos at once. Results are ranked by anomaly score, highest first.",
+  "batch.choose": "Choose images",
+  "batch.run": "Inspect all",
+  "batch.selected": "images selected",
+  "batch.progress": "Processed",
+  "docs.intro":
+    "Add the part's specification or inspection notes (PDF with text, TXT or MD). Gemma uses them when it explains a result; the detector never does.",
+  "docs.upload": "Upload document",
+  "docs.empty": "No documents for this profile yet.",
+  "docs.pages": "pages",
+  "decision.normal": "Normal",
+  "decision.review": "Review",
+  "decision.anomaly": "Anomaly",
+};
+
+export type Key = keyof typeof en;
+type Dict = Record<Key, string>;
+
+const it: Dict = {
+  "nav.inspect": "Ispezione pezzo",
+  "nav.profiles": "Campioni di riferimento",
+  "nav.workspace": "Area di lavoro",
+  "nav.selected": "Profilo selezionato",
+  "nav.language": "Lingua",
+  "nav.guest": "Sessione ospite",
+  "heading.inspect.sub":
+    "Seleziona un profilo di riferimento, carica l’immagine di un pezzo e controlla il risultato.",
+  "heading.profiles.sub":
+    "Gestisci le immagini di pezzi conformi usate per preparare ogni profilo.",
+  "button.openSaved": "Apri ispezione salvata",
+  "button.newProfile": "Nuovo profilo",
+  "button.run": "Avvia ispezione",
+  "button.newImage": "Nuova immagine",
+  "view.original": "Originale",
+  "view.heatmap": "Mappa di calore",
+  "view.compare": "Confronta",
+  "panel.model": "Risultato del modello",
+  "panel.engineer": "Revisione dell’ingegnere",
+  "panel.image": "Immagine del pezzo",
+  "panel.result": "Risultato dell’ispezione",
+  "welcome.title":
+    "Trova i difetti su un nuovo pezzo partendo solo da foto di pezzi conformi",
+  "welcome.body":
+    "Worksight impara com’è un pezzo conforme da 10–20 foto, segna dove un nuovo pezzo è diverso e Gemma su AMD spiega cosa controllare. La decisione spetta all’ingegnere.",
+  "welcome.guest": "Continua come ospite",
+  "welcome.guestNote":
+    "Nessuna registrazione. Le sessioni ospite condividono un’unica area demo; gli account personali sono previsti.",
+  "guide.title": "Provalo con un clic",
+  "guide.step1": "Un profilo impara da 20 schede elettroniche conformi",
+  "guide.step2":
+    "Ispeziona una scheda: mappa di calore e riferimento conforme più simile",
+  "guide.step3": "Gemma su AMD lo spiega; tu registri la tua decisione",
+  "guide.tryDefect": "Ispeziona una scheda difettosa",
+  "guide.tryGood": "Ispeziona una scheda conforme",
+  "guide.trySaved": "Vedi un risultato con spiegazione AI",
+  "guide.hide": "Nascondi guida",
+  "tools.title": "Strumenti del profilo",
+  "tools.history": "Cronologia",
+  "tools.batch": "Ispezione in serie",
+  "tools.docs": "Documenti del pezzo",
+  "history.empty": "Nessuna ispezione per questo profilo.",
+  "history.open": "Apri",
+  "history.refresh": "Aggiorna",
+  "history.more": "Carica altro",
+  "history.engineer": "Ingegnere",
+  "batch.intro":
+    "Ispeziona una cartella di foto in una volta. I risultati sono ordinati per punteggio di anomalia, dal più alto.",
+  "batch.choose": "Scegli immagini",
+  "batch.run": "Ispeziona tutto",
+  "batch.selected": "immagini selezionate",
+  "batch.progress": "Elaborate",
+  "docs.intro":
+    "Aggiungi la specifica del pezzo o le note di ispezione (PDF con testo, TXT o MD). Gemma le usa per spiegare un risultato; il rilevatore mai.",
+  "docs.upload": "Carica documento",
+  "docs.empty": "Nessun documento per questo profilo.",
+  "docs.pages": "pagine",
+  "decision.normal": "Normale",
+  "decision.review": "Da rivedere",
+  "decision.anomaly": "Anomalia",
+};
+
+const de: Dict = {
+  "nav.inspect": "Teileprüfung",
+  "nav.profiles": "Referenzmuster",
+  "nav.workspace": "Arbeitsbereich",
+  "nav.selected": "Ausgewähltes Profil",
+  "nav.language": "Sprache",
+  "nav.guest": "Gastsitzung",
+  "heading.inspect.sub":
+    "Referenzprofil wählen, ein Teilebild hochladen und das Ergebnis prüfen.",
+  "heading.profiles.sub":
+    "Die Gutteil-Bilder verwalten, aus denen jedes Teileprofil erstellt wird.",
+  "button.openSaved": "Gespeicherte Prüfung öffnen",
+  "button.newProfile": "Neues Profil",
+  "button.run": "Prüfung starten",
+  "button.newImage": "Neues Bild",
+  "view.original": "Original",
+  "view.heatmap": "Heatmap",
+  "view.compare": "Vergleichen",
+  "panel.model": "Modellergebnis",
+  "panel.engineer": "Prüfung durch Ingenieur",
+  "panel.image": "Teilebild",
+  "panel.result": "Prüfergebnis",
+  "welcome.title":
+    "Fehler an einem neuen Teil finden – nur mit Fotos von Gutteilen",
+  "welcome.body":
+    "Worksight lernt aus 10–20 Fotos, wie ein Gutteil aussieht, markiert, wo ein neues Teil abweicht, und Gemma auf AMD erklärt, was zu prüfen ist. Die Entscheidung trifft der Ingenieur.",
+  "welcome.guest": "Als Gast fortfahren",
+  "welcome.guestNote":
+    "Keine Registrierung. Gastsitzungen teilen einen Demo-Arbeitsbereich; persönliche Konten sind geplant.",
+  "guide.title": "Mit einem Klick ausprobieren",
+  "guide.step1": "Ein Profil lernt aus 20 einwandfreien Leiterplatten",
+  "guide.step2": "Platine prüfen: Heatmap und ähnlichste Gutreferenz",
+  "guide.step3": "Gemma auf AMD erklärt es; Sie erfassen Ihre Entscheidung",
+  "guide.tryDefect": "Fehlerhafte Platine prüfen",
+  "guide.tryGood": "Einwandfreie Platine prüfen",
+  "guide.trySaved": "Ergebnis mit KI-Erklärung ansehen",
+  "guide.hide": "Anleitung ausblenden",
+  "tools.title": "Profilwerkzeuge",
+  "tools.history": "Verlauf",
+  "tools.batch": "Serienprüfung",
+  "tools.docs": "Teiledokumente",
+  "history.empty": "Noch keine Prüfungen für dieses Profil.",
+  "history.open": "Öffnen",
+  "history.refresh": "Aktualisieren",
+  "history.more": "Mehr laden",
+  "history.engineer": "Ingenieur",
+  "batch.intro":
+    "Einen Ordner mit Teilefotos auf einmal prüfen. Die Ergebnisse sind nach Anomaliewert sortiert, höchster zuerst.",
+  "batch.choose": "Bilder auswählen",
+  "batch.run": "Alle prüfen",
+  "batch.selected": "Bilder ausgewählt",
+  "batch.progress": "Verarbeitet",
+  "docs.intro":
+    "Spezifikation oder Prüfhinweise des Teils hinzufügen (PDF mit Text, TXT oder MD). Gemma nutzt sie bei der Erklärung; der Detektor nie.",
+  "docs.upload": "Dokument hochladen",
+  "docs.empty": "Noch keine Dokumente für dieses Profil.",
+  "docs.pages": "Seiten",
+  "decision.normal": "Normal",
+  "decision.review": "Prüfen",
+  "decision.anomaly": "Anomalie",
+};
+
+const fr: Dict = {
+  "nav.inspect": "Inspection de pièce",
+  "nav.profiles": "Échantillons de référence",
+  "nav.workspace": "Espace de travail",
+  "nav.selected": "Profil sélectionné",
+  "nav.language": "Langue",
+  "nav.guest": "Session invité",
+  "heading.inspect.sub":
+    "Choisissez un profil de référence, importez l’image d’une pièce et examinez le résultat.",
+  "heading.profiles.sub":
+    "Gérez les images de pièces conformes qui servent à préparer chaque profil.",
+  "button.openSaved": "Ouvrir une inspection enregistrée",
+  "button.newProfile": "Nouveau profil",
+  "button.run": "Lancer l’inspection",
+  "button.newImage": "Nouvelle image",
+  "view.original": "Original",
+  "view.heatmap": "Carte thermique",
+  "view.compare": "Comparer",
+  "panel.model": "Résultat du modèle",
+  "panel.engineer": "Revue de l’ingénieur",
+  "panel.image": "Image de la pièce",
+  "panel.result": "Résultat de l’inspection",
+  "welcome.title":
+    "Détectez les défauts d’une nouvelle pièce à partir de photos de pièces conformes",
+  "welcome.body":
+    "Worksight apprend à quoi ressemble une pièce conforme à partir de 10 à 20 photos, signale où une nouvelle pièce diffère, et Gemma sur AMD explique quoi vérifier. L’ingénieur décide.",
+  "welcome.guest": "Continuer en tant qu’invité",
+  "welcome.guestNote":
+    "Sans inscription. Les sessions invité partagent un espace de démonstration ; les comptes personnels sont prévus.",
+  "guide.title": "Essayez en un clic",
+  "guide.step1":
+    "Un profil apprend à partir de 20 cartes électroniques conformes",
+  "guide.step2":
+    "Inspectez une carte : carte thermique et référence conforme la plus proche",
+  "guide.step3": "Gemma sur AMD l’explique ; vous enregistrez votre décision",
+  "guide.tryDefect": "Inspecter une carte défectueuse",
+  "guide.tryGood": "Inspecter une carte conforme",
+  "guide.trySaved": "Voir un résultat avec explication IA",
+  "guide.hide": "Masquer le guide",
+  "tools.title": "Outils du profil",
+  "tools.history": "Historique",
+  "tools.batch": "Inspection par lot",
+  "tools.docs": "Documents de la pièce",
+  "history.empty": "Aucune inspection pour ce profil.",
+  "history.open": "Ouvrir",
+  "history.refresh": "Actualiser",
+  "history.more": "Charger plus",
+  "history.engineer": "Ingénieur",
+  "batch.intro":
+    "Inspectez un dossier de photos en une fois. Les résultats sont classés par score d’anomalie, du plus élevé au plus faible.",
+  "batch.choose": "Choisir des images",
+  "batch.run": "Tout inspecter",
+  "batch.selected": "images sélectionnées",
+  "batch.progress": "Traitées",
+  "docs.intro":
+    "Ajoutez la spécification de la pièce ou des notes d’inspection (PDF avec texte, TXT ou MD). Gemma s’en sert pour expliquer un résultat ; le détecteur jamais.",
+  "docs.upload": "Importer un document",
+  "docs.empty": "Aucun document pour ce profil.",
+  "docs.pages": "pages",
+  "decision.normal": "Normal",
+  "decision.review": "À revoir",
+  "decision.anomaly": "Anomalie",
+};
+
+const zh: Dict = {
+  "nav.inspect": "零件检测",
+  "nav.profiles": "参考样本",
+  "nav.workspace": "工作区",
+  "nav.selected": "当前档案",
+  "nav.language": "语言",
+  "nav.guest": "访客会话",
+  "heading.inspect.sub": "选择参考档案，上传零件图像，然后查看结果。",
+  "heading.profiles.sub": "管理用于建立各零件档案的合格样本图像。",
+  "button.openSaved": "打开已保存的检测",
+  "button.newProfile": "新建档案",
+  "button.run": "开始检测",
+  "button.newImage": "新图像",
+  "view.original": "原图",
+  "view.heatmap": "热力图",
+  "view.compare": "对比",
+  "panel.model": "模型结果",
+  "panel.engineer": "工程师复核",
+  "panel.image": "零件图像",
+  "panel.result": "检测结果",
+  "welcome.title": "只用合格品照片，就能发现新零件的缺陷",
+  "welcome.body":
+    "Worksight 从 10–20 张照片中学习合格零件的样子，标出新零件的差异位置，并由运行在 AMD 上的 Gemma 说明需要检查什么。最终由工程师决定。",
+  "welcome.guest": "以访客身份继续",
+  "welcome.guestNote":
+    "无需注册。访客会话共用一个演示工作区；个人账户正在规划中。",
+  "guide.title": "一键体验",
+  "guide.step1": "档案从 20 块合格电路板中学习",
+  "guide.step2": "检测一块电路板：热力图与最相似的合格参考",
+  "guide.step3": "AMD 上的 Gemma 给出解释，由您记录决定",
+  "guide.tryDefect": "检测一块有缺陷的电路板",
+  "guide.tryGood": "检测一块合格的电路板",
+  "guide.trySaved": "查看带 AI 解释的结果",
+  "guide.hide": "隐藏引导",
+  "tools.title": "档案工具",
+  "tools.history": "历史记录",
+  "tools.batch": "批量检测",
+  "tools.docs": "零件文档",
+  "history.empty": "该档案暂无检测记录。",
+  "history.open": "打开",
+  "history.refresh": "刷新",
+  "history.more": "加载更多",
+  "history.engineer": "工程师",
+  "batch.intro": "一次检测整个文件夹的零件照片。结果按异常分数从高到低排序。",
+  "batch.choose": "选择图像",
+  "batch.run": "全部检测",
+  "batch.selected": "张图像已选择",
+  "batch.progress": "已处理",
+  "docs.intro":
+    "添加零件规格或检验说明（含文本的 PDF、TXT 或 MD）。Gemma 在解释结果时会使用它们；检测模型从不使用。",
+  "docs.upload": "上传文档",
+  "docs.empty": "该档案暂无文档。",
+  "docs.pages": "页",
+  "decision.normal": "正常",
+  "decision.review": "待复核",
+  "decision.anomaly": "异常",
+};
+
+const hi: Dict = {
+  "nav.inspect": "पुर्ज़े की जाँच",
+  "nav.profiles": "संदर्भ नमूने",
+  "nav.workspace": "कार्यक्षेत्र",
+  "nav.selected": "चुनी गई प्रोफ़ाइल",
+  "nav.language": "भाषा",
+  "nav.guest": "अतिथि सत्र",
+  "heading.inspect.sub":
+    "संदर्भ प्रोफ़ाइल चुनें, पुर्ज़े की तस्वीर अपलोड करें और परिणाम देखें।",
+  "heading.profiles.sub":
+    "हर पुर्ज़े की प्रोफ़ाइल बनाने में इस्तेमाल होने वाली सही पुर्ज़ों की तस्वीरें प्रबंधित करें।",
+  "button.openSaved": "सहेजी गई जाँच खोलें",
+  "button.newProfile": "नई प्रोफ़ाइल",
+  "button.run": "जाँच शुरू करें",
+  "button.newImage": "नई तस्वीर",
+  "view.original": "मूल",
+  "view.heatmap": "हीटमैप",
+  "view.compare": "तुलना करें",
+  "panel.model": "मॉडल का परिणाम",
+  "panel.engineer": "इंजीनियर की समीक्षा",
+  "panel.image": "पुर्ज़े की तस्वीर",
+  "panel.result": "जाँच का परिणाम",
+  "welcome.title": "केवल सही पुर्ज़ों की तस्वीरों से नए पुर्ज़े में दोष खोजें",
+  "welcome.body":
+    "Worksight 10–20 तस्वीरों से सीखता है कि सही पुर्ज़ा कैसा दिखता है, नए पुर्ज़े में अंतर की जगह दिखाता है, और AMD पर चलने वाला Gemma बताता है कि क्या जाँचना है। निर्णय इंजीनियर लेता है।",
+  "welcome.guest": "अतिथि के रूप में जारी रखें",
+  "welcome.guestNote":
+    "पंजीकरण की ज़रूरत नहीं। अतिथि सत्र एक साझा डेमो कार्यक्षेत्र इस्तेमाल करते हैं; निजी खाते योजना में हैं।",
+  "guide.title": "एक क्लिक में आज़माएँ",
+  "guide.step1": "प्रोफ़ाइल 20 सही सर्किट बोर्ड से सीखती है",
+  "guide.step2": "बोर्ड जाँचें: हीटमैप और सबसे मिलता-जुलता सही संदर्भ",
+  "guide.step3": "AMD पर Gemma समझाता है; आप अपना निर्णय दर्ज करते हैं",
+  "guide.tryDefect": "दोषपूर्ण बोर्ड जाँचें",
+  "guide.tryGood": "सही बोर्ड जाँचें",
+  "guide.trySaved": "AI व्याख्या के साथ परिणाम देखें",
+  "guide.hide": "गाइड छिपाएँ",
+  "tools.title": "प्रोफ़ाइल उपकरण",
+  "tools.history": "इतिहास",
+  "tools.batch": "बैच जाँच",
+  "tools.docs": "पुर्ज़े के दस्तावेज़",
+  "history.empty": "इस प्रोफ़ाइल के लिए अभी कोई जाँच नहीं है।",
+  "history.open": "खोलें",
+  "history.refresh": "रीफ़्रेश करें",
+  "history.more": "और लोड करें",
+  "history.engineer": "इंजीनियर",
+  "batch.intro":
+    "पुर्ज़ों की तस्वीरों का पूरा फ़ोल्डर एक साथ जाँचें। परिणाम विसंगति स्कोर के अनुसार, सबसे ऊँचे से, क्रम में होते हैं।",
+  "batch.choose": "तस्वीरें चुनें",
+  "batch.run": "सभी जाँचें",
+  "batch.selected": "तस्वीरें चुनी गईं",
+  "batch.progress": "प्रोसेस हुईं",
+  "docs.intro":
+    "पुर्ज़े का विनिर्देश या जाँच नोट जोड़ें (टेक्स्ट वाली PDF, TXT या MD)। परिणाम समझाते समय Gemma इनका उपयोग करता है; डिटेक्टर कभी नहीं।",
+  "docs.upload": "दस्तावेज़ अपलोड करें",
+  "docs.empty": "इस प्रोफ़ाइल के लिए अभी कोई दस्तावेज़ नहीं है।",
+  "docs.pages": "पृष्ठ",
+  "decision.normal": "सामान्य",
+  "decision.review": "समीक्षा",
+  "decision.anomaly": "विसंगति",
+};
+
+const dictionaries: Record<Lang, Dict> = { en, it, de, fr, zh, hi };
+
+export function isLang(value: unknown): value is Lang {
+  return languages.some((l) => l.code === value);
+}
+
+export function translator(lang: Lang) {
+  const dict = dictionaries[lang];
+  return (key: Key) => dict[key] ?? en[key];
+}
+
+export type T = ReturnType<typeof translator>;

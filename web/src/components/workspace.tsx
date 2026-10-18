@@ -37,6 +37,9 @@ import VersionWorkflow from "./version-workflow";
 import AiDescription from "./ai-description";
 import type { WorkspaceDesign } from "./design-preview";
 import { loadSavedExample } from "@/lib/saved-example";
+import { isLang, translator, type Lang } from "@/lib/i18n";
+import ProfileTools from "./profile-tools";
+import { LanguageSelect, QuickStart, Welcome } from "./onboarding";
 
 const decisionLabel: Record<Decision, string> = {
   pass: "Pass",
@@ -130,6 +133,36 @@ export default function Workspace({
   exampleSource?: string;
 }) {
   const [theme, setTheme] = useState(initialTheme);
+  const [lang, setLang] = useState<Lang>("en");
+  const [guest, setGuest] = useState(true);
+  const [guideHidden, setGuideHidden] = useState(false);
+  const [toolsRefresh, setToolsRefresh] = useState(0);
+  const t = useMemo(() => translator(lang), [lang]);
+  // Browser-only preferences; storage may be unavailable (private mode), so defaults stay usable.
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("worksight_lang");
+      if (isLang(stored)) setLang(stored);
+      setGuest(localStorage.getItem("worksight_guest") === "1");
+      setGuideHidden(localStorage.getItem("worksight_guide_hidden") === "1");
+    } catch {
+      /* keep defaults */
+    }
+  }, []);
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+  function remember(key: string, value: string) {
+    try {
+      localStorage.setItem(key, value);
+    } catch {
+      /* not persisted */
+    }
+  }
+  function chooseLang(next: Lang) {
+    setLang(next);
+    remember("worksight_lang", next);
+  }
   const api = useMemo(
     () => (mode === "demo" ? createDemoApi() : createBackendApi()),
     [mode],
@@ -379,20 +412,43 @@ export default function Workspace({
       },
     );
   }
+  async function runInspection(file: File, signal: AbortSignal) {
+    if (!selected) return;
+    setInspection(null);
+    setUpdatedVersion(null);
+    const jobId = await api.inspect(selected.id, file);
+    const done = await waitForJob(api, jobId, setJob, signal);
+    if (!done.result?.inspection_id)
+      throw new Error("The service did not return an inspection ID.");
+    const result = await api.inspection(done.result.inspection_id);
+    setInspection(result);
+    setHumanDecision(result.feedback?.human_decision ?? "review");
+    setComment(result.feedback?.comment ?? "");
+    setView("overlay");
+    setToolsRefresh((n) => n + 1);
+  }
   async function inspect() {
     if (!selected || !files[0]) return;
-    await action("Inspecting image", async (signal) => {
-      setInspection(null);
-      setUpdatedVersion(null);
-      const jobId = await api.inspect(selected.id, files[0]);
-      const done = await waitForJob(api, jobId, setJob, signal);
-      if (!done.result?.inspection_id)
-        throw new Error("The service did not return an inspection ID.");
-      const result = await api.inspection(done.result.inspection_id);
+    const file = files[0];
+    await action("Inspecting image", (signal) => runInspection(file, signal));
+  }
+  async function tryExample(example: (typeof liveExamples)[number]) {
+    await action("Inspecting example", async (signal) => {
+      const file = await fetchExample(example.path, example.name);
+      setFiles([file]);
+      await runInspection(file, signal);
+    });
+  }
+  async function openInspection(id: string) {
+    await action("Opening inspection", async () => {
+      const result = await api.inspection(id);
       setInspection(result);
+      setFiles([]);
       setHumanDecision(result.feedback?.human_decision ?? "review");
       setComment(result.feedback?.comment ?? "");
       setView("overlay");
+      setUpdatedVersion(null);
+      document.getElementById("main")?.scrollIntoView({ behavior: "smooth" });
     });
   }
   async function submitFeedback(e: React.FormEvent) {
@@ -405,6 +461,7 @@ export default function Workspace({
         comment.trim(),
       );
       setInspection(result);
+      setToolsRefresh((n) => n + 1);
       setNotice("Engineer review saved. The model decision remains unchanged.");
     });
   }
@@ -431,6 +488,30 @@ export default function Workspace({
     await action("Loading example image", async () => {
       setFiles([await fetchExample(example.path, example.name)]);
       setInspection(null);
+    });
+  }
+  async function openSaved() {
+    if (!exampleInspectionId) return;
+    await action("Opening saved inspection", async (signal) => {
+      const record = await loadSavedExample(api, exampleInspectionId, signal);
+      const items = await api.profiles(signal);
+      if (!items.some((p) => p.id === record.inspection.profile_id))
+        throw new Error("The saved inspection's profile is unavailable.");
+      if (signal.aborted) return;
+      setProfiles(items);
+      setSelectedId(record.inspection.profile_id);
+      setScreen("inspect");
+      setInspection(record.inspection);
+      setFiles([]);
+      setSamples([]);
+      setView("overlay");
+      setHumanDecision(record.inspection.feedback?.human_decision ?? "review");
+      setComment(record.inspection.feedback?.comment ?? "");
+      setUpdatedVersion(null);
+      setVersions(null);
+      setComparison(null);
+      setSavedExample(record);
+      setNotice("Saved inspection loaded. No new AI request was sent.");
     });
   }
   // Real VisA images only match the profile of the saved example inspection.
@@ -484,7 +565,7 @@ export default function Workspace({
         </button>
         <span className="mobile-brand">worksight</span>
         <span>
-          {screen === "inspect" ? "Part inspection" : "Reference samples"}
+          {screen === "inspect" ? t("nav.inspect") : t("nav.profiles")}
         </span>
         {themeButton}
       </header>
@@ -522,7 +603,7 @@ export default function Workspace({
             <X size={20} />
           </button>
         </div>
-        <div className="navigation-section-label">Workspace</div>
+        <div className="navigation-section-label">{t("nav.workspace")}</div>
         <nav aria-label="Main navigation">
           <button
             className={`workspace-nav-item ${screen === "inspect" ? "active" : ""}`}
@@ -536,7 +617,7 @@ export default function Workspace({
             }}
           >
             <ScanLine size={21} aria-hidden="true" />
-            <span className="navigation-label">Part inspection</span>
+            <span className="navigation-label">{t("nav.inspect")}</span>
           </button>
           <button
             className={`workspace-nav-item ${screen === "profiles" ? "active" : ""}`}
@@ -550,14 +631,14 @@ export default function Workspace({
             }}
           >
             <Layers3 size={21} aria-hidden="true" />
-            <span className="navigation-label">Reference samples</span>
+            <span className="navigation-label">{t("nav.profiles")}</span>
             <span className="navigation-profile-count">
               {capabilities ? profiles.length : "—"}
             </span>
           </button>
         </nav>
         <div className="navigation-profile">
-          <span className="navigation-section-label">Selected profile</span>
+          <span className="navigation-section-label">{t("nav.selected")}</span>
           {selected ? (
             <button
               disabled={!!busy}
@@ -582,7 +663,11 @@ export default function Workspace({
           )}
         </div>
         <div className="navigation-bottom">
-          <p>Industrial visual inspection</p>
+          <p>
+            {mode === "live" && guest
+              ? t("nav.guest")
+              : "Industrial visual inspection"}
+          </p>
           <button
             className="navigation-toggle"
             aria-label={
@@ -606,12 +691,12 @@ export default function Workspace({
         <div className="page-heading">
           <div>
             <h1>
-              {screen === "inspect" ? "Part inspection" : "Reference samples"}
+              {screen === "inspect" ? t("nav.inspect") : t("nav.profiles")}
             </h1>
             <p>
               {screen === "inspect"
-                ? "Select a reference profile, upload a part image and review the result."
-                : "Manage the known-good images used to prepare each part profile."}
+                ? t("heading.inspect.sub")
+                : t("heading.profiles.sub")}
             </p>
           </div>
           <div className="heading-actions">
@@ -623,43 +708,9 @@ export default function Workspace({
                   exampleError ||
                   "Open saved images and the completed AI description without generating again."
                 }
-                onClick={() =>
-                  void action("Opening saved inspection", async (signal) => {
-                    const record = await loadSavedExample(
-                      api,
-                      exampleInspectionId,
-                      signal,
-                    );
-                    const items = await api.profiles(signal);
-                    if (
-                      !items.some((p) => p.id === record.inspection.profile_id)
-                    )
-                      throw new Error(
-                        "The saved inspection's profile is unavailable.",
-                      );
-                    if (signal.aborted) return;
-                    setProfiles(items);
-                    setSelectedId(record.inspection.profile_id);
-                    setScreen("inspect");
-                    setInspection(record.inspection);
-                    setFiles([]);
-                    setSamples([]);
-                    setView("overlay");
-                    setHumanDecision(
-                      record.inspection.feedback?.human_decision ?? "review",
-                    );
-                    setComment(record.inspection.feedback?.comment ?? "");
-                    setUpdatedVersion(null);
-                    setVersions(null);
-                    setComparison(null);
-                    setSavedExample(record);
-                    setNotice(
-                      "Saved inspection loaded. No new AI request was sent.",
-                    );
-                  })
-                }
+                onClick={() => void openSaved()}
               >
-                Open saved inspection
+                {t("button.openSaved")}
               </button>
             )}
             <button
@@ -671,8 +722,9 @@ export default function Workspace({
               }}
             >
               <Plus size={17} />
-              New profile
+              {t("button.newProfile")}
             </button>
+            <LanguageSelect lang={lang} onChange={chooseLang} t={t} />
             {design === "current" && themeButton}
           </div>
         </div>
@@ -1195,6 +1247,20 @@ export default function Workspace({
           </div>
         ) : (
           <>
+            {showLiveExamples && !inspection && !guideHidden && (
+              <QuickStart
+                t={t}
+                disabled={!canOperate || selected?.status !== "ready"}
+                canTrySaved={!!exampleInspectionId && !!savedExample}
+                onDefect={() => void tryExample(liveExamples[1])}
+                onGood={() => void tryExample(liveExamples[0])}
+                onSaved={() => void openSaved()}
+                onHide={() => {
+                  setGuideHidden(true);
+                  remember("worksight_guide_hidden", "1");
+                }}
+              />
+            )}
             <section
               className="inspection-controls"
               aria-label="Inspection setup"
@@ -1278,7 +1344,7 @@ export default function Workspace({
             >
               <section className="inspection-main" aria-label="Image workspace">
                 <div className="viewer-toolbar">
-                  <h2>{inspection ? "Inspection result" : "Part image"}</h2>
+                  <h2>{inspection ? t("panel.result") : t("panel.image")}</h2>
                   {inspection ? (
                     <div className="segmented" aria-label="Image view">
                       {(["original", "overlay", "split"] as const).map((v) => (
@@ -1289,10 +1355,10 @@ export default function Workspace({
                           onClick={() => setView(v)}
                         >
                           {v === "overlay"
-                            ? "Heatmap"
+                            ? t("view.heatmap")
                             : v === "original"
-                              ? "Original"
-                              : "Compare"}
+                              ? t("view.original")
+                              : t("view.compare")}
                         </button>
                       ))}
                     </div>
@@ -1383,7 +1449,7 @@ export default function Workspace({
                         setNotice("");
                       }}
                     >
-                      New image
+                      {t("button.newImage")}
                     </button>
                   ) : (
                     <button
@@ -1395,7 +1461,7 @@ export default function Workspace({
                       }
                       onClick={() => void inspect()}
                     >
-                      Run inspection
+                      {t("button.run")}
                       <ArrowRight size={16} />
                     </button>
                   )}
@@ -1434,7 +1500,7 @@ export default function Workspace({
               <aside className="result-sidebar" aria-label="Inspection review">
                 <section className="sidebar-section decision-panel">
                   <div className="section-heading">
-                    <h2>Model result</h2>
+                    <h2>{t("panel.model")}</h2>
                     {inspection && (
                       <DecisionTag value={inspection.model_decision} />
                     )}
@@ -1501,7 +1567,7 @@ export default function Workspace({
                 </section>
                 <section className="sidebar-section engineer-panel">
                   <div className="section-heading">
-                    <h2>Engineer review</h2>
+                    <h2>{t("panel.engineer")}</h2>
                     {inspection?.feedback && (
                       <span className="saved-tag">Saved</span>
                     )}
@@ -1746,6 +1812,18 @@ export default function Workspace({
                 disabled={!!busy}
               />
             )}
+            {mode === "live" &&
+              selected?.status === "ready" &&
+              !selected.local_draft && (
+                <ProfileTools
+                  key={selected.id}
+                  profileId={selected.id}
+                  t={t}
+                  onOpen={(id) => void openInspection(id)}
+                  disabled={!canOperate}
+                  refreshKey={toolsRefresh}
+                />
+              )}
           </>
         )}
         {busy && (
@@ -1851,6 +1929,17 @@ export default function Workspace({
           </div>
         </form>
       </dialog>
+      {mode === "live" && !guest && (
+        <Welcome
+          t={t}
+          lang={lang}
+          onLang={chooseLang}
+          onContinue={() => {
+            setGuest(true);
+            remember("worksight_guest", "1");
+          }}
+        />
+      )}
     </div>
   );
 }
