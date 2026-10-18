@@ -740,6 +740,10 @@ main {
 .inspect-action {
   flex-wrap: wrap;
 }
+/* The layout frame already draws the bottom edge; a second line here looked twice as thick. */
+.inspection-main > :last-child {
+  border-bottom: 0;
+}
 .inspect-action > div {
   /* Never squeeze the status text into a one-letter column; the button wraps instead. */
   flex: 1 1 180px;
