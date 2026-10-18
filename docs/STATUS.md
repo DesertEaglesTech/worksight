@@ -30,7 +30,7 @@
 - **Detector on an AMD GPU.** No GPU instance yet. `bash scripts/amd_run.sh` runs the smoke test and
   benchmark with `--require-amd` and saves GPU name, ROCm version, metrics and latency.
 - Submission video in MP4 with the live flow and voice (current: silent WebM of the old synthetic
-  demo). Slides and cover are done: `submission/worksight-pitch.pdf`, `submission/worksight-cover.png`.
+  demo). Slides (Slides deck, exported as PDF) and `submission/worksight-cover.png` are done.
 - Sensor monitoring, failure forecasting and PDF specification extraction (planned, not built).
 
 ## Known limits

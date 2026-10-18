@@ -3,33 +3,36 @@
 <head>
 <meta charset="utf-8">
 <title>Worksight cover</title>
-<!-- Source of submission/worksight-cover.png (1280×720). Rebuild: bash submission/pitch/build.sh -->
+<!-- Source of submission/worksight-cover.png (1280×720), matching the Slides deck. Rebuild: bash submission/pitch/build.sh -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=DM+Sans:wght@400;500;700&display=swap">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { width: 1280px; height: 720px; background: #1f2f2b; overflow: hidden; }
-  body { font-family: "Inter", "DejaVu Sans", sans-serif; color: #f3f6f4; display: flex; align-items: center; gap: 56px; padding: 0 64px 0 80px; }
-  .text { flex: 1; }
-  .logo { font-size: 112px; font-weight: 800; letter-spacing: -.03em; line-height: 1; }
-  .sub { font-size: 34px; color: #cdef9a; margin-top: 28px; line-height: 1.25; }
-  .tags { margin-top: 40px; display: flex; flex-wrap: wrap; gap: 10px; }
-  .tags span { font-size: 18px; padding: 7px 16px; border-radius: 99px; border: 1px solid #3a524c; color: #b5c4bf; }
-  .tags span.on { background: #cdef9a; color: #1f2f2b; border-color: #cdef9a; font-weight: 600; }
-  .images { width: 540px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .images figure { position: relative; }
-  .images img { width: 100%; height: 520px; object-fit: cover; border-radius: 12px; display: block; }
-  .images figcaption { position: absolute; left: 12px; bottom: 12px; font-size: 15px; font-weight: 600; padding: 5px 12px; border-radius: 99px; background: rgba(31,47,43,.85); }
-  .pass { color: #cdef9a; } .fail { color: #f29a8a; }
+  html, body { width: 1280px; height: 720px; background: #f5f4f0; overflow: hidden; }
+  body { font-family: "DM Sans", Arial, sans-serif; color: #1b1d20; padding: 64px 72px; display: flex; flex-direction: column; gap: 32px; }
+  .top { display: flex; align-items: flex-end; gap: 40px; }
+  .eyebrow { font-size: 15px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: #b44606; }
+  h1 { font-family: "Space Grotesk", Arial, sans-serif; font-size: 84px; line-height: 1; letter-spacing: -1.5px; margin-top: 14px; }
+  .tag { font-size: 28px; margin-top: 14px; }
+  .meta { margin-left: auto; text-align: right; font-size: 16px; line-height: 1.5; color: #4e5560; }
+  .images { height: 352px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  figure { position: relative; height: 352px; overflow: hidden; border-radius: 12px; }
+  figure img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; display: block; }
+  figcaption { position: absolute; left: 16px; bottom: 16px; font-size: 16px; font-weight: 700; padding: 6px 14px; border-radius: 999px; }
+  .bad { background: #b44606; color: #f5f4f0; } .good { background: #f5f4f0; color: #1b1d20; }
 </style>
 </head>
 <body>
-  <div class="text">
-    <div class="logo">worksight.</div>
-    <div class="sub">Few-shot visual inspection<br>for quality engineers</div>
-    <div class="tags"><span class="on">Gemma on AMD</span><span>Intelligent Industry</span><span>No training</span><span>Human in the loop</span></div>
+  <div class="top">
+    <div>
+      <div class="eyebrow">AMD Developer Hackathon · ACT III · Intelligent Industry</div>
+      <h1>Worksight</h1>
+      <div class="tag">Find defects on a new part from good photos only</div>
+    </div>
+    <div class="meta">Gemma on AMD Token Factory<br>Team Desert Eagles</div>
   </div>
   <div class="images">
-    <figure><img src="../../web/public/examples/visa-pcb1-normal-0011.jpg" alt=""><figcaption class="pass">Good board</figcaption></figure>
-    <figure><img src="../../web/public/examples/visa-pcb1-bent-014.jpg" alt=""><figcaption class="fail">Bent pins</figcaption></figure>
+    <figure><img src="heatmap.jpg" alt=""><figcaption class="bad">Defect · bent pins</figcaption></figure>
+    <figure><img src="refs.jpg" alt=""><figcaption class="good">Learned from 20 good boards</figcaption></figure>
   </div>
 </body>
 </html>

@@ -6,7 +6,7 @@ Reference prompt: “Photorealistic top-down studio inspection reference of a cl
 
 Defect edit prompt: “Preserve the same camera, shape, framing and lighting. Add one deep diagonal gouge on the outer silver flange at two o'clock between the top-right bolt hole and right edge. No other defects or overlays.”
 
-The cover (`worksight-cover.png`) and pitch (`worksight-pitch.pdf`) use only the two VisA images below; they contain no heatmap or model output.
+The cover (`worksight-cover.png`) and the pitch deck use VisA pcb1 images (the 20 profile references and the bent-pins test image below) and read-only screenshots of the live app, including its real heatmap and saved Gemma report.
 
 Workspace screenshots show the actual implemented interface in demo mode. No picture or screenshot proves AMD inference, accuracy or performance.
 

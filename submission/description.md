@@ -68,7 +68,7 @@ pilot on one production line.
 - [ ] Track: Intelligent Industry; technologies tagged (AMD, ROCm, AMD Token Factory, Gemma, …)
 - [ ] Cover image `worksight-cover.png` (16:9)
 - [ ] Video: MP4 or MOV, under 300 MB and 5 minutes, ideally 3½–4 minutes (under 3 scores lower)
-- [ ] Slides: `worksight-pitch.pdf`
+- [ ] Slides: PDF exported from the Slides deck
 - [ ] Public GitHub repository, demo platform (Railway) and application URL
 - [ ] Additional information (above)
 - [ ] Every member: lablab profile with Discord connected, in the team, AMD AI Developer Program
@@ -83,8 +83,9 @@ records which model answered. Show a Gemma answer in the video and slides.
 
 ## Files to upload
 
-- Cover image: `submission/worksight-cover.png` (1280×720, real VisA images)
-- Slide presentation: `submission/worksight-pitch.pdf` (8 slides)
+- Cover image: `submission/worksight-cover.png` (1280×720, real VisA images and the live heatmap)
+- Slide presentation: PDF exported from the Slides deck (10 slides, speaker notes = voice-over):
+  https://claude.ai/artifact/E8GVmQxXCud357zLQgA8k2 (Share › Export; share it with the team first)
 - Video presentation: `submission/worksight-demo.mp4` once recorded ([script](demo-script.md));
   never the old `worksight-demo.webm`
 

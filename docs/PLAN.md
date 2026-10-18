@@ -34,10 +34,10 @@
 
 - [x] Публичный GitHub под MIT
 - [x] Живая ссылка на Railway
-- [x] Обложка 16:9 (1280×720) на реальных фото VisA: `submission/worksight-cover.png` (старая была с надписью «SYNTHETIC DEMO»)
+- [x] Обложка 16:9 (1280×720) в стиле презентации, на реальных фото VisA и живой тепловой карте: `submission/worksight-cover.png`
 - [x] Тексты формы: [submission/description.md](../submission/description.md)
 - [ ] Видео MP4 3½–4 минуты (короче 3 минут рубрика lablab оценивает ниже) с живым сценарием и голосом ([сценарий](../submission/demo-script.md)) · Али
-- [x] Слайды в PDF с актуальными цифрами: `submission/worksight-pitch.pdf`, 8 слайдов (исходник `submission/pitch/`, сборка `bash submission/pitch/build.sh`)
+- [x] Презентация, 10 слайдов, в Slides: https://claude.ai/artifact/E8GVmQxXCud357zLQgA8k2 (PDF и PPTX через Share › Export; в заметках текст для озвучки)
 - [ ] Описание команды на lablab без сенсоров и прогнозов (текст готов в description.md) · Бахтияр
 - [ ] Задеплоить бэкенд и скрыть три тестовых профиля «VisA pcb4 (live check)»: `POST /api/v1/profiles/{id}/archive` с ключом · Бахтияр
 - [ ] Отметить в форме партнёрский приз Google (Gemma), если в форме есть такое поле · Бахтияр
