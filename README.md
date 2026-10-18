@@ -10,6 +10,14 @@ labelled validation images before explicit activation.
 
 ## Current status
 
+**In the live app** (https://web-production-d9743.up.railway.app): a first-visit tutorial and an
+interactive guided tour (the ? button), one-click inspection of real VisA test boards, heatmap /
+compare / original with zoom, an explanation from Gemma on AMD Token Factory, the engineer's own
+decision, History with batch inspection, part documents for Gemma, report export (PDF, DOCX, TXT),
+gated profile versions with rollback, and six interface languages (English, Italiano, Deutsch,
+Français, 中文, हिन्दी). Submission materials are in [submission/](submission/), including the
+narrated demo video.
+
 - **Web app** (`web/`, Next.js): live adapter connects to the actual FastAPI API, including
   transient profile drafts, multipart reference builds, inspections, immutable feedback,
   validation, candidate evaluation, explicit activation and restore. Demo remains a separate mode.

@@ -86,8 +86,8 @@ records which model answered. Show a Gemma answer in the video and slides.
 - Cover image: `submission/worksight-cover.png` (1280×720, real VisA images and the live heatmap)
 - Slide presentation: PDF exported from the Slides deck (10 slides, speaker notes = voice-over):
   https://claude.ai/artifact/E8GVmQxXCud357zLQgA8k2 (Share › Export; share it with the team first)
-- Video presentation: `submission/worksight-demo.mp4` once recorded ([script](demo-script.md));
-  never the old `worksight-demo.webm`
+- Video presentation: `submission/worksight-demo.mp4` (3:40, MP4, narrated; subtitles in
+  `worksight-demo.srt`)
 
 ## Claims we do not make
 

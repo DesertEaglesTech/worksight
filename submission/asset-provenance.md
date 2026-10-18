@@ -10,6 +10,9 @@ The cover (`worksight-cover.png`) and the deck's cover slide use "Production Lin
 
 The other deck slides use VisA pcb1 images (the 20 profile references and the bent-pins test image below) and read-only screenshots of the live app, including its real heatmap and saved Gemma report.
 
+The submission video `worksight-demo.mp4` uses the same cover photo, the VisA images and screen
+recordings of the live app; its voice-over is a synthesized neural voice reading `demo-script.md`.
+
 Workspace screenshots show the actual implemented interface in demo mode. No picture or screenshot proves AMD inference, accuracy or performance.
 
 ## Live example images

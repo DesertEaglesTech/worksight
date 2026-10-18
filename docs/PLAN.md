@@ -36,7 +36,7 @@
 - [x] Живая ссылка на Railway
 - [x] Обложка 16:9 (1280×720) в стиле презентации, на реальных фото VisA и живой тепловой карте: `submission/worksight-cover.png`
 - [x] Тексты формы: [submission/description.md](../submission/description.md)
-- [ ] Видео MP4 3½–4 минуты (короче 3 минут рубрика lablab оценивает ниже) с живым сценарием и голосом ([сценарий](../submission/demo-script.md)) · Али
+- [x] Видео MP4 3:40 с живым сайтом и озвучкой (синтезированный голос): `submission/worksight-demo.mp4`, субтитры `worksight-demo.srt`. Можно переозвучить своим голосом по тому же сценарию
 - [x] Презентация, 10 слайдов, в Slides: https://claude.ai/artifact/E8GVmQxXCud357zLQgA8k2 (PDF и PPTX через Share › Export; в заметках текст для озвучки)
 - [ ] Описание команды на lablab без сенсоров и прогнозов (текст готов в description.md) · Бахтияр
 - [ ] Задеплоить бэкенд и скрыть три тестовых профиля «VisA pcb4 (live check)»: `POST /api/v1/profiles/{id}/archive` с ключом · Бахтияр

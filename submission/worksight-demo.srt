@@ -1,48 +1,203 @@
 1
-00:00:00,000 --> 00:00:04,000
-Worksight. Synthetic UI demo. No ML inference or performance claims.
+00:00:00,000 --> 00:00:03,377
+Hi, we are Desert Eagles, and this is Worksight:
 
 2
-00:00:04,000 --> 00:00:09,000
-Create a profile for the part and camera view.
+00:00:03,377 --> 00:00:10,200
+visual inspection for quality engineers, built on AMD for the AMD Developer Hackathon, Act Three.
 
 3
-00:00:09,000 --> 00:00:14,000
-Preview a verified good sample before uploading it. This example image is synthetic.
+00:00:11,000 --> 00:00:15,100
+Every new part on a production line needs inspection from day one.
 
 4
-00:00:14,000 --> 00:00:19,000
-Upload the sample and build profile v1. The demo simulates the build job.
+00:00:15,100 --> 00:00:20,318
+But a typical defect model needs many labelled photos of defects and a training run.
 
 5
-00:00:19,000 --> 00:00:24,000
-Upload a new part image for inspection. Demo results are fixed regardless of input.
+00:00:20,318 --> 00:00:23,052
+Defects are rare, so that data arrives last.
 
 6
-00:00:24,000 --> 00:00:31,000
-Review the original with an illustrative heatmap. Processing time is not reported.
+00:00:23,052 --> 00:00:26,220
+Worksight starts from photos of good parts instead.
 
 7
-00:00:31,000 --> 00:00:38,000
-Adjust opacity and compare the part against the similar reference.
+00:00:27,020 --> 00:00:28,091
+This is Worksight.
 
 8
-00:00:38,000 --> 00:00:45,000
-Record Fail as the human decision. The model decision remains Needs review.
+00:00:28,091 --> 00:00:30,648
+A first-time visitor gets a short tutorial:
 
 9
-00:00:45,000 --> 00:00:52,000
-Request profile v2. The earlier inspection still uses v1. No quality improvement is claimed.
+00:00:30,648 --> 00:00:35,584
+what Worksight does, a ready example to try, and how to test with their own photos.
 
 10
-00:00:52,000 --> 00:00:58,000
-Inspect again. The new result now refers to profile v2.
+00:00:35,584 --> 00:00:39,391
+The whole interface speaks six languages, from Italian to Hindi.
 
 11
-00:00:58,000 --> 00:01:02,000
-The same inspection workspace adapts to a phone viewport.
+00:00:39,391 --> 00:00:46,290
+And if anything is unclear, the question mark button starts a guided tour that points at each control, step by step.
 
 12
-00:01:02,000 --> 00:01:07,000
-Live FastAPI and AMD validation are pending backend integration.
+00:00:47,090 --> 00:00:52,193
+Our demo profile learned from twenty good circuit boards from the public VisA dataset.
 
+13
+00:00:52,193 --> 00:00:56,643
+It took about nine seconds to build, with no defect labels and no training.
+
+14
+00:00:56,643 --> 00:00:59,136
+One click inspects a board with bent pins.
+
+15
+00:00:59,136 --> 00:01:01,450
+In about a second, Worksight says Fail:
+
+16
+00:01:01,450 --> 00:01:06,256
+the anomaly score is above the threshold, and the heatmap sits right on the pins.
+
+17
+00:01:06,256 --> 00:01:10,766
+Compare puts it next to the closest good board, where the pins are straight.
+
+18
+00:01:10,766 --> 00:01:15,750
+Original shows the photo alone, and the engineer can zoom in to examine the surface.
+
+19
+00:01:16,550 --> 00:01:17,629
+Now the AMD part.
+
+20
+00:01:17,629 --> 00:01:26,708
+Gemma, running on AMD GPUs through AMD Token Factory, sees the photo, the heatmap, the closest good reference and the part's own documentation.
+
+21
+00:01:26,708 --> 00:01:28,549
+It explains what looks wrong:
+
+22
+00:01:28,549 --> 00:01:30,707
+the header pins are bent outwards.
+
+23
+00:01:30,707 --> 00:01:33,247
+And it tells the engineer what to check.
+
+24
+00:01:33,247 --> 00:01:36,040
+Gemma never changes the detector's decision.
+
+25
+00:01:36,840 --> 00:01:38,621
+The engineer stays in charge.
+
+26
+00:01:38,621 --> 00:01:45,497
+They choose Pass, Fail or Needs review and add a note, and their decision is stored separately from the model's.
+
+27
+00:01:45,497 --> 00:01:54,215
+Confirmed good parts can build a new profile version, but it goes live only after it passes a check on a frozen validation set, with rollback.
+
+28
+00:01:54,215 --> 00:01:56,180
+A good board comes back as Pass.
+
+29
+00:01:56,980 --> 00:01:59,025
+History keeps every inspection.
+
+30
+00:01:59,025 --> 00:02:03,576
+Batch inspection checks a whole folder and ranks it by anomaly score.
+
+31
+00:02:03,576 --> 00:02:08,456
+Part documents, like a specification, give Gemma the context of each part.
+
+32
+00:02:08,456 --> 00:02:12,150
+And every report can be downloaded as PDF, Word or text.
+
+33
+00:02:12,950 --> 00:02:22,668
+We measured it on four real circuit board sets from VisA, with a held-out test and every setting chosen on other categories.
+
+34
+00:02:22,668 --> 00:02:25,097
+AUROC is between 0.88 and 0.99.
+
+35
+00:02:25,097 --> 00:02:33,247
+Above the threshold alone, Worksight catches 44 to 87 percent of defects at 2 to 6 percent false alarms.
+
+36
+00:02:33,247 --> 00:02:38,968
+Counting the review band, 56 to 96 percent of defects reach the engineer.
+
+37
+00:02:38,968 --> 00:02:42,730
+Each inspection takes 0.1 to 0.3 seconds on CPU.
+
+38
+00:02:43,530 --> 00:02:48,055
+Today, every AI explanation in the live app runs on AMD GPUs.
+
+39
+00:02:48,055 --> 00:02:52,358
+Next, the detector itself moves to AMD Instinct with ROCm.
+
+40
+00:02:52,358 --> 00:02:56,660
+The benchmark script is ready, but we have not run it yet.
+
+41
+00:02:57,460 --> 00:03:04,085
+Technavio forecasts the AI visual inspection market to grow by about twenty-seven billion dollars by 2029.
+
+42
+00:03:04,085 --> 00:03:09,898
+Most tools start from labelled defects, or are code libraries for machine learning engineers.
+
+43
+00:03:09,898 --> 00:03:14,210
+Worksight starts from good photos and gives the operator a workspace.
+
+44
+00:03:15,010 --> 00:03:15,659
+Our plan:
+
+45
+00:03:15,659 --> 00:03:20,993
+a subscription per camera view, or an on-premises install on AMD hardware.
+
+46
+00:03:20,993 --> 00:03:27,552
+First, a pilot on one line, where we measure engineer minutes per part and escaped defects.
+
+47
+00:03:27,552 --> 00:03:29,066
+We are Desert Eagles:
+
+48
+00:03:29,066 --> 00:03:33,391
+Bakhtiyar, CEO and AI engineer, and Ali, frontend developer.
+
+49
+00:03:33,391 --> 00:03:36,779
+Worksight is open source under the MIT license.
+
+50
+00:03:36,779 --> 00:03:38,869
+Try it at the link on screen.
+
+51
+00:03:38,869 --> 00:03:39,590
+Thank you.
