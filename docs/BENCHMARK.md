@@ -20,7 +20,7 @@ Splits are fixed before any scoring:
 ## Results — CPU, 18 October 2026 (current detector, v2)
 
 Apple arm CPU, PyTorch 2.14.1, torchvision 0.29.1, encoder `resnet18-imagenet1k-v1-layer2-layer3-l2-resize384-v1`.
-Same references as v1 (hashes checked). **This is not an AMD run.**
+Same references as v1 (hashes checked).
 
 | Category | AUROC | F1 | False-positive rate | Recall | TP / FN / FP / TN | p50 / p95 latency, ms |
 |---|---|---|---|---|---|---|
