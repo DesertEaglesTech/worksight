@@ -2740,9 +2740,9 @@ main#main {
 }
 .report-download > span {
   display: inline-flex;
+  flex-basis: 100%;
   align-items: center;
   gap: 6px;
-  margin-right: auto;
   color: var(--muted);
   font-size: 13px;
 }
