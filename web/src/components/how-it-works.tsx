@@ -1,4 +1,10 @@
-import { Images, ScanSearch, Sparkles, UserCheck } from "lucide-react";
+import {
+  Cpu,
+  Images,
+  MessageSquareText,
+  ScanSearch,
+  UserCheck,
+} from "lucide-react";
 
 const steps = [
   {
@@ -12,7 +18,7 @@ const steps = [
     text: "Each part gets an anomaly score, a heatmap and the closest good reference.",
   },
   {
-    icon: Sparkles,
+    icon: MessageSquareText,
     title: "Gemma explains",
     text: "Gemma on AMD Token Factory describes what looks wrong and what to check.",
   },
@@ -29,7 +35,7 @@ export function HowItWorks() {
       <div className="how-heading">
         <h2>How it works</h2>
         <span className="how-note">
-          <Sparkles size={14} aria-hidden="true" />
+          <Cpu size={14} aria-hidden="true" />
           Explanations by Gemma on AMD Token Factory
         </span>
       </div>
