@@ -1,0 +1,20 @@
+00	2.8	This is Worksight. Visual inspection that learns from good parts only.
+01a	17	A new part arrives on the line. Defects are rare, maybe one in a thousand.
+01b	32.5	A typical model needs hundreds of labelled defects, and weeks of labelling. And every new part starts again.
+02a	49	What if you only needed good photos?
+02b	57	Worksight takes twenty photos of good parts and builds a profile in about nine seconds. No defect labels. No training run.
+03a	83.5	Here is how it works. A frozen ResNet-18 turns every patch of the photo into a feature vector.
+03b	94.6	Each patch is matched to its nearest good patch from the profile.
+03c	100.6	The distance becomes a heatmap and an anomaly score. Above the threshold, the part fails.
+04	113	And it does this for every board, in about a third of a second on a CPU. Only the anomalies reach the engineer.
+05a	129	Then Gemma, running on AMD GPUs through AMD Token Factory, looks at the photo, the heatmap, the closest good reference and the part's documents. It explains in plain words what looks wrong and what to check first.
+05b	153.6	It explains. It never changes the decision.
+06a	161	Everything lives on one screen: the heatmap, the closest reference, pass, fail or needs review, Gemma's explanation and a one-page report.
+06b	186.2	With history, batch inspection and seven interface languages.
+07	193	And the engineer always decides. The model's decision and the engineer's decision are stored separately.
+08	209	On four circuit-board sets from the public VisA dataset, AUROC ranges from 0.875 to 0.992. Counting the review band, fifty-six to ninety-six percent of defects reach the engineer. Every number is measured on a held-out test.
+09	241	Seventy-four commits, eighty-one automated tests, built in two days, and fully open source.
+10	257	PyTorch, FastAPI and Next.js, with Gemma on AMD Token Factory, deployed on Railway.
+11a	273	No expensive inspection rig: just a camera and a CPU server.
+11b	280.8	And defects are caught on the line, before they ship, so there are fewer returns and compensation claims.
+12	289	Worksight, by Desert Eagles. Try it at the link on screen.
