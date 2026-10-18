@@ -125,11 +125,12 @@ def _latin1(text: str) -> str:
     return text.encode("latin-1", "replace").decode("latin-1")
 
 
-def _png(image: Image.Image, side=1000) -> io.BytesIO:
+def _jpeg(image: Image.Image, side=900) -> io.BytesIO:
+    # JPEG keeps a 3-image report around a few hundred KB instead of several MB.
     image = image.convert("RGB")
     image.thumbnail((side, side))
     buffer = io.BytesIO()
-    image.save(buffer, format="PNG")
+    image.save(buffer, format="JPEG", quality=85)
     buffer.seek(0)
     return buffer
 
@@ -164,12 +165,13 @@ def to_pdf(data, load_image) -> bytes:
     pdf.cell(width, 8, "Images", new_x="LMARGIN", new_y="NEXT")
     for caption, name in data["images"]:
         image = load_image(name)
-        h = width * image.height / image.width
+        w = width * 0.6
+        h = w * image.height / image.width
         if pdf.get_y() + h + 10 > pdf.h - pdf.b_margin:
             pdf.add_page()
         pdf.set_font("Helvetica", "", 10)
         pdf.cell(width, 6, _latin1(caption), new_x="LMARGIN", new_y="NEXT")
-        pdf.image(_png(image), w=width * 0.8)
+        pdf.image(_jpeg(image), w=w, h=h)
         pdf.ln(3)
     return bytes(pdf.output())
 
@@ -195,7 +197,7 @@ def to_docx(data, load_image) -> bytes:
     doc.add_heading("Images", level=1)
     for caption, name in data["images"]:
         doc.add_paragraph(caption).runs[0].bold = True
-        doc.add_picture(_png(load_image(name)), width=Inches(5.5))
+        doc.add_picture(_jpeg(load_image(name)), width=Inches(4.2))
     buffer = io.BytesIO()
     doc.save(buffer)
     return buffer.getvalue()
