@@ -32,6 +32,8 @@ import { createBackendApi } from "@/lib/backend-api";
 import { createDemoApi } from "@/lib/demo";
 import { waitForJob } from "@/lib/jobs";
 import FileDrop from "./file-drop";
+import { HowItWorks } from "./how-it-works";
+import { ProfileStats } from "./profile-stats";
 import InspectionViewer from "./inspection-viewer";
 import VersionWorkflow from "./version-workflow";
 import AiDescription from "./ai-description";
@@ -1226,6 +1228,7 @@ export default function Workspace({
           </div>
         ) : (
           <>
+            <HowItWorks />
             <section
               className="inspection-controls"
               aria-label="Inspection setup"
@@ -1289,6 +1292,12 @@ export default function Workspace({
                 <ArrowRight size={16} />
               </button>
             </section>
+            {!demo && selected?.status === "ready" && (
+              <ProfileStats
+                profileId={selected.id}
+                refreshKey={`${inspection?.id ?? ""}:${inspection?.feedback ? 1 : 0}`}
+              />
+            )}
             {!ready.length && (
               <div className="alert info">
                 <p>
@@ -1342,7 +1351,9 @@ export default function Workspace({
                     />
                   </>
                 ) : (
-                  <div className="upload-stage">
+                  <div
+                    className={`upload-stage ${showLiveExamples ? "with-examples" : ""}`}
+                  >
                     <FileDrop
                       files={files}
                       onChange={(f) => {
@@ -1365,20 +1376,28 @@ export default function Workspace({
                     )}
                     {showLiveExamples && (
                       <div className="live-examples">
-                        <span>Try a VisA pcb1 test image:</span>
-                        {liveExamples.map((example) => (
-                          <button
-                            key={example.path}
-                            className="text-button"
-                            disabled={
-                              !canOperate || selected?.status !== "ready"
-                            }
-                            onClick={() => void loadLiveExample(example)}
-                          >
-                            {example.label}
-                          </button>
-                        ))}
-                        <small>VisA · CC BY 4.0</small>
+                        <span className="live-examples-title">
+                          Or try a VisA pcb1 test board
+                        </span>
+                        <div className="example-thumbs">
+                          {liveExamples.map((example) => (
+                            <button
+                              key={example.path}
+                              className="example-thumb"
+                              disabled={
+                                !canOperate || selected?.status !== "ready"
+                              }
+                              onClick={() => void loadLiveExample(example)}
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={example.path} alt="" loading="lazy" />
+                              <span>{example.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                        <small>
+                          VisA (Amazon) · CC BY 4.0 · not in the profile
+                        </small>
                       </div>
                     )}
                     <p className="upload-guidance">
