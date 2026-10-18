@@ -1527,6 +1527,7 @@ export default function Workspace({
                       inspection={inspection}
                       view={view}
                       opacity={opacity}
+                      t={t}
                     />
                   </>
                 ) : (
@@ -1995,6 +1996,7 @@ export default function Workspace({
                 api={api}
                 inspection={inspection}
                 disabled={!!busy}
+                t={t}
               />
             )}
           </>

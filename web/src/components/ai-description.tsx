@@ -9,13 +9,16 @@ import type {
 } from "@/lib/contract";
 import { waitForJob } from "@/lib/jobs";
 import { reportForInspection, waitForReport } from "@/lib/reports";
+import { translator, type T } from "@/lib/i18n";
+
+const english = translator("en");
 
 const consistency = {
-  consistent: "Consistent",
-  partly_consistent: "Partly consistent",
-  inconsistent: "Inconsistent",
-  unclear: "Unclear",
-};
+  consistent: "ai.c.consistent",
+  partly_consistent: "ai.c.partly",
+  inconsistent: "ai.c.inconsistent",
+  unclear: "ai.c.unclear",
+} as const;
 const time = (value: string) =>
   new Date(value).toLocaleString("en-GB", {
     day: "numeric",
@@ -26,20 +29,20 @@ const time = (value: string) =>
   });
 export function DescriptionContent({
   report,
+  t = english,
 }: {
   report: Extract<AssistiveReport, { status: "ready" }>;
+  t?: T;
 }) {
   return (
     <div className="ai-report-content" data-report-id={report.id}>
       <p className="ai-report-attribution">
-        {report.model} · Runs on {report.provider}
+        {report.model} · {t("ai.runsOn")} {report.provider}
       </p>
-      <p className="ai-report-summary">
-        {report.summary || "The service returned no summary."}
-      </p>
+      <p className="ai-report-summary">{report.summary || t("ai.noSummary")}</p>
       <div className="ai-report-columns">
         <div>
-          <h3>Visible observations</h3>
+          <h3>{t("ai.observations")}</h3>
           {report.observations.length ? (
             <ul>
               {report.observations.map((item, i) => (
@@ -47,20 +50,20 @@ export function DescriptionContent({
               ))}
             </ul>
           ) : (
-            <p>No visible observations were reported.</p>
+            <p>{t("ai.noObservations")}</p>
           )}
         </div>
         <div>
-          <h3>Suggested engineer check</h3>
-          <p>{report.suggested_check || "No specific check was suggested."}</p>
+          <h3>{t("ai.check")}</h3>
+          <p>{report.suggested_check || t("ai.noCheck")}</p>
           <p className="ai-report-consistency">
-            AI view of heatmap consistency:{" "}
-            <strong>{consistency[report.heatmap_consistency]}</strong>
+            {t("ai.consistency")}{" "}
+            <strong>{t(consistency[report.heatmap_consistency])}</strong>
           </p>
         </div>
       </div>
       <details className="ai-report-metadata">
-        <summary>Report details</summary>
+        <summary>{t("ai.details")}</summary>
         <dl className="detail-list">
           <div>
             <dt>Report created</dt>
@@ -120,16 +123,18 @@ export default function AiDescription({
   api,
   inspection,
   disabled,
+  t = english,
 }: {
   api: WorksightApi;
   inspection: Inspection;
   disabled: boolean;
+  t?: T;
 }) {
   const reports = api.reports!;
   const [report, setReport] = useState<AssistiveReport | null>(null);
   const [enabled, setEnabled] = useState(false);
   const [working, setWorking] = useState(true);
-  const [phase, setPhase] = useState("Checking saved description…");
+  const [phase, setPhase] = useState(t("ai.phase.checking"));
   const [error, setError] = useState("");
   const [job, setJob] = useState<Job | null>(null);
   const controller = useRef<AbortController | null>(null);
@@ -152,7 +157,7 @@ export default function AiDescription({
     if (latest) {
       const saved = accept(latest);
       if (saved.status === "queued" || saved.status === "running") {
-        setPhase("Checking saved description…");
+        setPhase(t("ai.phase.checking"));
         await waitForReport(reports, saved, accept, signal);
       }
     } else setReport(null);
@@ -191,7 +196,7 @@ export default function AiDescription({
     setWorking(true);
     setJob(null);
     setError("");
-    setPhase("Checking saved description…");
+    setPhase(t("ai.phase.checking"));
     try {
       await load(current.signal);
     } catch (e) {
@@ -215,13 +220,13 @@ export default function AiDescription({
     setWorking(true);
     setJob(null);
     setError("");
-    setPhase("Submitting description request…");
+    setPhase(t("ai.phase.submitting"));
     let reportId: string | null = null;
     try {
       const accepted = await reports.request(inspection.id, current.signal);
       reportId = accepted.report_id;
       setReport(null);
-      setPhase("Generating description…");
+      setPhase(t("ai.phase.generating"));
       const done = await waitForJob(
         api,
         accepted.job_id,
@@ -270,29 +275,24 @@ export default function AiDescription({
       id="ai-description"
       tabIndex={-1}
       className="ai-description"
-      aria-label="AI description (assistive)"
+      aria-label={`${t("ai.title")} ${t("ai.assistive")}`}
     >
       <div className="ai-description-heading">
         <div>
           <h2>
-            AI description <span>(assistive)</span>
+            {t("ai.title")} <span>{t("ai.assistive")}</span>
           </h2>
-          <p>Describes visible differences. The engineer makes the decision.</p>
+          <p>{t("ai.sub")}</p>
         </div>
         <button
           className="button secondary"
           disabled={disabled || working}
           onClick={() => void checkSaved()}
         >
-          Check saved description
+          {t("ai.checkSaved")}
         </button>
       </div>
-      <p className="ai-sharing-note">
-        Generating a description sends this part image, heatmap overlay and
-        similar reference to AMD Token Factory. Use images approved for external
-        processing. It does not change the detector result or the engineer
-        review.
-      </p>
+      <p className="ai-sharing-note">{t("ai.sharing")}</p>
       {working && (
         <div className="ai-report-progress" role="status" aria-live="polite">
           <LoaderCircle className="spin" size={20} />
@@ -304,12 +304,9 @@ export default function AiDescription({
                 : report &&
                     (report.status === "queued" || report.status === "running")
                   ? `Report ${report.status}`
-                  : "Waiting for the service response…"}
+                  : t("ai.waiting")}
             </p>
-            <small>
-              You can continue inspecting parts. Leaving this view stops
-              checking; the server may keep processing.
-            </small>
+            <small>{t("ai.continue")}</small>
           </div>
         </div>
       )}
@@ -327,21 +324,18 @@ export default function AiDescription({
       )}
       {report?.status === "failed" && (
         <div className="ai-report-failure">
-          <h3>Description could not be generated</h3>
+          <h3>{t("ai.failed")}</h3>
           <p role="alert">{report.error}</p>
         </div>
       )}
-      {report?.status === "ready" && <DescriptionContent report={report} />}
+      {report?.status === "ready" && (
+        <DescriptionContent report={report} t={t} />
+      )}
       {!working && !report && !error && (
-        <p className="ai-report-empty">
-          No AI description has been requested for this inspection.
-        </p>
+        <p className="ai-report-empty">{t("ai.empty")}</p>
       )}
       {!working && !enabled && (
-        <p className="small-note">
-          AI descriptions are not enabled on this inspection service. Saved
-          descriptions remain available.
-        </p>
+        <p className="small-note">{t("ai.notEnabled")}</p>
       )}
       <div className="ai-description-actions">
         <button
@@ -350,23 +344,18 @@ export default function AiDescription({
           onClick={() => void generate()}
         >
           {report?.status === "ready"
-            ? "Generate new description"
+            ? t("ai.generateNew")
             : report?.status === "failed"
-              ? "Retry description"
-              : "Generate description"}
+              ? t("ai.retry")
+              : t("ai.generate")}
         </button>
-        <span>Optional · runs on AMD Token Factory</span>
+        <span>{t("ai.optional")}</span>
       </div>
       {!working && failedRequest.current && (
-        <p className="small-note">
-          Check the saved description before sending another request.
-        </p>
+        <p className="small-note">{t("ai.checkFirst")}</p>
       )}
       {report?.status === "ready" && (
-        <p className="small-note">
-          AI descriptions can be incorrect. Heatmap consistency is the model’s
-          description, not confidence or a pass/fail decision.
-        </p>
+        <p className="small-note">{t("ai.disclaimer")}</p>
       )}
     </section>
   );

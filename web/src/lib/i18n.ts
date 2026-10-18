@@ -214,6 +214,44 @@ const en = {
   "tour.g.waiting": "Waiting for you to do this step…",
   "tour.g.skipStep": "Skip this step",
   "tour.g.finish": "Finish",
+  "ai.title": "AI description",
+  "ai.assistive": "(assistive)",
+  "ai.sub": "Describes visible differences. The engineer makes the decision.",
+  "ai.checkSaved": "Check saved description",
+  "ai.sharing":
+    "Generating a description sends this part image, heatmap overlay and similar reference to AMD Token Factory. Use images approved for external processing. It does not change the detector result or the engineer review.",
+  "ai.runsOn": "Runs on",
+  "ai.noSummary": "The service returned no summary.",
+  "ai.observations": "Visible observations",
+  "ai.noObservations": "No visible observations were reported.",
+  "ai.check": "Suggested engineer check",
+  "ai.noCheck": "No specific check was suggested.",
+  "ai.consistency": "AI view of heatmap consistency:",
+  "ai.c.consistent": "Consistent",
+  "ai.c.partly": "Partly consistent",
+  "ai.c.inconsistent": "Inconsistent",
+  "ai.c.unclear": "Unclear",
+  "ai.details": "Report details",
+  "ai.phase.checking": "Checking saved description…",
+  "ai.phase.submitting": "Submitting description request…",
+  "ai.phase.generating": "Generating description…",
+  "ai.waiting": "Waiting for the service response…",
+  "ai.continue":
+    "You can continue inspecting parts. Leaving this view stops checking; the server may keep processing.",
+  "ai.failed": "Description could not be generated",
+  "ai.empty": "No AI description has been requested for this inspection.",
+  "ai.notEnabled":
+    "AI descriptions are not enabled on this inspection service. Saved descriptions remain available.",
+  "ai.generate": "Generate description",
+  "ai.generateNew": "Generate new description",
+  "ai.retry": "Retry description",
+  "ai.optional": "Optional · runs on AMD Token Factory",
+  "ai.checkFirst":
+    "Check the saved description before sending another request.",
+  "ai.disclaimer":
+    "AI descriptions can be incorrect. Heatmap consistency is the model’s description, not confidence or a pass/fail decision.",
+  "view.caption.original": "Original image",
+  "view.caption.heatmap": "Image + heatmap",
 };
 
 export type Key = keyof typeof en;
@@ -426,6 +464,45 @@ const it: Dict = {
   "tour.g.waiting": "In attesa che tu completi questo passo…",
   "tour.g.skipStep": "Salta questo passo",
   "tour.g.finish": "Fine",
+  "ai.title": "Descrizione AI",
+  "ai.assistive": "(di supporto)",
+  "ai.sub":
+    "Descrive le differenze visibili. La decisione spetta all’ingegnere.",
+  "ai.checkSaved": "Controlla descrizione salvata",
+  "ai.sharing":
+    "Generare una descrizione invia l’immagine del pezzo, la mappa di calore e il riferimento simile ad AMD Token Factory. Usa immagini approvate per l’elaborazione esterna. Non cambia il risultato del rilevatore né la revisione dell’ingegnere.",
+  "ai.runsOn": "Eseguito su",
+  "ai.noSummary": "Il servizio non ha restituito un riepilogo.",
+  "ai.observations": "Osservazioni visibili",
+  "ai.noObservations": "Nessuna osservazione visibile riportata.",
+  "ai.check": "Verifica suggerita all’ingegnere",
+  "ai.noCheck": "Nessuna verifica specifica suggerita.",
+  "ai.consistency": "Coerenza della mappa di calore secondo l’AI:",
+  "ai.c.consistent": "Coerente",
+  "ai.c.partly": "Parzialmente coerente",
+  "ai.c.inconsistent": "Incoerente",
+  "ai.c.unclear": "Non chiaro",
+  "ai.details": "Dettagli del report",
+  "ai.phase.checking": "Controllo della descrizione salvata…",
+  "ai.phase.submitting": "Invio della richiesta…",
+  "ai.phase.generating": "Generazione della descrizione…",
+  "ai.waiting": "In attesa della risposta del servizio…",
+  "ai.continue":
+    "Puoi continuare a ispezionare. Uscendo da questa vista il controllo si ferma; il server può continuare l’elaborazione.",
+  "ai.failed": "Impossibile generare la descrizione",
+  "ai.empty": "Nessuna descrizione AI richiesta per questa ispezione.",
+  "ai.notEnabled":
+    "Le descrizioni AI non sono attive su questo servizio. Le descrizioni salvate restano disponibili.",
+  "ai.generate": "Genera descrizione",
+  "ai.generateNew": "Genera nuova descrizione",
+  "ai.retry": "Riprova",
+  "ai.optional": "Facoltativo · su AMD Token Factory",
+  "ai.checkFirst":
+    "Controlla la descrizione salvata prima di inviare un’altra richiesta.",
+  "ai.disclaimer":
+    "Le descrizioni AI possono essere errate. La coerenza della mappa di calore è una descrizione del modello, non una confidenza né un esito.",
+  "view.caption.original": "Immagine originale",
+  "view.caption.heatmap": "Immagine + mappa di calore",
 };
 
 const de: Dict = {
@@ -634,6 +711,45 @@ const de: Dict = {
   "tour.g.waiting": "Warten, bis Sie diesen Schritt ausführen …",
   "tour.g.skipStep": "Schritt überspringen",
   "tour.g.finish": "Fertig",
+  "ai.title": "KI-Beschreibung",
+  "ai.assistive": "(unterstützend)",
+  "ai.sub":
+    "Beschreibt sichtbare Unterschiede. Die Entscheidung trifft der Ingenieur.",
+  "ai.checkSaved": "Gespeicherte Beschreibung prüfen",
+  "ai.sharing":
+    "Eine Beschreibung sendet dieses Teilbild, die Heatmap und die ähnliche Referenz an AMD Token Factory. Verwenden Sie für externe Verarbeitung freigegebene Bilder. Das Prüfergebnis und die Ingenieurbewertung ändern sich nicht.",
+  "ai.runsOn": "Läuft auf",
+  "ai.noSummary": "Der Dienst lieferte keine Zusammenfassung.",
+  "ai.observations": "Sichtbare Beobachtungen",
+  "ai.noObservations": "Keine sichtbaren Beobachtungen gemeldet.",
+  "ai.check": "Empfohlene Prüfung",
+  "ai.noCheck": "Keine bestimmte Prüfung empfohlen.",
+  "ai.consistency": "KI-Einschätzung der Heatmap-Übereinstimmung:",
+  "ai.c.consistent": "Übereinstimmend",
+  "ai.c.partly": "Teilweise übereinstimmend",
+  "ai.c.inconsistent": "Nicht übereinstimmend",
+  "ai.c.unclear": "Unklar",
+  "ai.details": "Berichtsdetails",
+  "ai.phase.checking": "Gespeicherte Beschreibung wird geprüft…",
+  "ai.phase.submitting": "Anfrage wird gesendet…",
+  "ai.phase.generating": "Beschreibung wird erstellt…",
+  "ai.waiting": "Warten auf Antwort des Dienstes…",
+  "ai.continue":
+    "Sie können weiter prüfen. Beim Verlassen dieser Ansicht endet die Abfrage; der Server kann weiterarbeiten.",
+  "ai.failed": "Beschreibung konnte nicht erstellt werden",
+  "ai.empty": "Für diese Prüfung wurde keine KI-Beschreibung angefordert.",
+  "ai.notEnabled":
+    "KI-Beschreibungen sind in diesem Dienst nicht aktiviert. Gespeicherte Beschreibungen bleiben verfügbar.",
+  "ai.generate": "Beschreibung erstellen",
+  "ai.generateNew": "Neue Beschreibung erstellen",
+  "ai.retry": "Erneut versuchen",
+  "ai.optional": "Optional · läuft auf AMD Token Factory",
+  "ai.checkFirst":
+    "Prüfen Sie die gespeicherte Beschreibung, bevor Sie erneut anfragen.",
+  "ai.disclaimer":
+    "KI-Beschreibungen können falsch sein. Die Heatmap-Übereinstimmung ist eine Beschreibung des Modells, keine Konfidenz und keine Entscheidung.",
+  "view.caption.original": "Originalbild",
+  "view.caption.heatmap": "Bild + Heatmap",
 };
 
 const fr: Dict = {
@@ -844,6 +960,44 @@ const fr: Dict = {
   "tour.g.waiting": "En attente de cette action…",
   "tour.g.skipStep": "Passer cette étape",
   "tour.g.finish": "Terminer",
+  "ai.title": "Description IA",
+  "ai.assistive": "(d’assistance)",
+  "ai.sub": "Décrit les différences visibles. L’ingénieur prend la décision.",
+  "ai.checkSaved": "Vérifier la description enregistrée",
+  "ai.sharing":
+    "Générer une description envoie l’image de la pièce, la carte thermique et la référence similaire à AMD Token Factory. Utilisez des images autorisées pour un traitement externe. Cela ne change ni le résultat du détecteur ni la revue de l’ingénieur.",
+  "ai.runsOn": "Exécuté sur",
+  "ai.noSummary": "Le service n’a renvoyé aucun résumé.",
+  "ai.observations": "Observations visibles",
+  "ai.noObservations": "Aucune observation visible signalée.",
+  "ai.check": "Vérification suggérée",
+  "ai.noCheck": "Aucune vérification particulière suggérée.",
+  "ai.consistency": "Cohérence de la carte thermique selon l’IA :",
+  "ai.c.consistent": "Cohérente",
+  "ai.c.partly": "Partiellement cohérente",
+  "ai.c.inconsistent": "Incohérente",
+  "ai.c.unclear": "Incertaine",
+  "ai.details": "Détails du rapport",
+  "ai.phase.checking": "Vérification de la description enregistrée…",
+  "ai.phase.submitting": "Envoi de la demande…",
+  "ai.phase.generating": "Génération de la description…",
+  "ai.waiting": "En attente de la réponse du service…",
+  "ai.continue":
+    "Vous pouvez continuer à inspecter. Quitter cette vue arrête le suivi ; le serveur peut continuer le traitement.",
+  "ai.failed": "La description n’a pas pu être générée",
+  "ai.empty": "Aucune description IA n’a été demandée pour cette inspection.",
+  "ai.notEnabled":
+    "Les descriptions IA ne sont pas activées sur ce service. Les descriptions enregistrées restent disponibles.",
+  "ai.generate": "Générer la description",
+  "ai.generateNew": "Générer une nouvelle description",
+  "ai.retry": "Réessayer",
+  "ai.optional": "Facultatif · sur AMD Token Factory",
+  "ai.checkFirst":
+    "Vérifiez la description enregistrée avant d’envoyer une nouvelle demande.",
+  "ai.disclaimer":
+    "Les descriptions IA peuvent être fausses. La cohérence de la carte thermique est une description du modèle, pas une confiance ni une décision.",
+  "view.caption.original": "Image originale",
+  "view.caption.heatmap": "Image + carte thermique",
 };
 
 const zh: Dict = {
@@ -1034,6 +1188,42 @@ const zh: Dict = {
   "tour.g.waiting": "等待您完成这一步…",
   "tour.g.skipStep": "跳过此步",
   "tour.g.finish": "完成",
+  "ai.title": "AI 描述",
+  "ai.assistive": "（辅助）",
+  "ai.sub": "描述可见差异，由工程师做出决定。",
+  "ai.checkSaved": "查看已保存的描述",
+  "ai.sharing":
+    "生成描述会将此零件图像、热力图和相似参考发送到 AMD Token Factory。请使用允许外部处理的图像。它不会改变检测结果或工程师复核。",
+  "ai.runsOn": "运行于",
+  "ai.noSummary": "服务未返回摘要。",
+  "ai.observations": "可见观察",
+  "ai.noObservations": "未报告可见观察。",
+  "ai.check": "建议工程师检查",
+  "ai.noCheck": "没有具体检查建议。",
+  "ai.consistency": "AI 对热力图一致性的看法：",
+  "ai.c.consistent": "一致",
+  "ai.c.partly": "部分一致",
+  "ai.c.inconsistent": "不一致",
+  "ai.c.unclear": "不明确",
+  "ai.details": "报告详情",
+  "ai.phase.checking": "正在查看已保存的描述…",
+  "ai.phase.submitting": "正在提交请求…",
+  "ai.phase.generating": "正在生成描述…",
+  "ai.waiting": "正在等待服务响应…",
+  "ai.continue":
+    "你可以继续检测零件。离开此视图会停止查询，服务器可能继续处理。",
+  "ai.failed": "无法生成描述",
+  "ai.empty": "此次检测尚未请求 AI 描述。",
+  "ai.notEnabled": "此检测服务未启用 AI 描述。已保存的描述仍可查看。",
+  "ai.generate": "生成描述",
+  "ai.generateNew": "重新生成描述",
+  "ai.retry": "重试",
+  "ai.optional": "可选 · 运行于 AMD Token Factory",
+  "ai.checkFirst": "再次请求前请先查看已保存的描述。",
+  "ai.disclaimer":
+    "AI 描述可能有误。热力图一致性是模型的描述，不是置信度或合格判定。",
+  "view.caption.original": "原图",
+  "view.caption.heatmap": "图像 + 热力图",
 };
 
 const hi: Dict = {
@@ -1238,6 +1428,43 @@ const hi: Dict = {
   "tour.g.waiting": "आपके यह क़दम पूरा करने की प्रतीक्षा…",
   "tour.g.skipStep": "यह क़दम छोड़ें",
   "tour.g.finish": "समाप्त करें",
+  "ai.title": "AI विवरण",
+  "ai.assistive": "(सहायक)",
+  "ai.sub": "दिखने वाले अंतर बताता है। निर्णय इंजीनियर लेता है।",
+  "ai.checkSaved": "सहेजा गया विवरण देखें",
+  "ai.sharing":
+    "विवरण बनाने पर इस पुर्ज़े की तस्वीर, हीटमैप और मिलता-जुलता संदर्भ AMD Token Factory को भेजे जाते हैं। बाहरी प्रोसेसिंग के लिए स्वीकृत तस्वीरें ही इस्तेमाल करें। इससे डिटेक्टर का परिणाम या इंजीनियर की समीक्षा नहीं बदलती।",
+  "ai.runsOn": "चलता है",
+  "ai.noSummary": "सेवा ने कोई सारांश नहीं दिया।",
+  "ai.observations": "दिखने वाले अवलोकन",
+  "ai.noObservations": "कोई दिखने वाला अवलोकन नहीं बताया गया।",
+  "ai.check": "इंजीनियर के लिए सुझाई गई जाँच",
+  "ai.noCheck": "कोई विशेष जाँच नहीं सुझाई गई।",
+  "ai.consistency": "हीटमैप की संगति पर AI की राय:",
+  "ai.c.consistent": "संगत",
+  "ai.c.partly": "आंशिक रूप से संगत",
+  "ai.c.inconsistent": "असंगत",
+  "ai.c.unclear": "अस्पष्ट",
+  "ai.details": "रिपोर्ट विवरण",
+  "ai.phase.checking": "सहेजा गया विवरण देखा जा रहा है…",
+  "ai.phase.submitting": "अनुरोध भेजा जा रहा है…",
+  "ai.phase.generating": "विवरण बनाया जा रहा है…",
+  "ai.waiting": "सेवा के जवाब की प्रतीक्षा…",
+  "ai.continue":
+    "आप जाँच जारी रख सकते हैं। यह दृश्य छोड़ने पर जाँचना रुक जाता है; सर्वर काम जारी रख सकता है।",
+  "ai.failed": "विवरण नहीं बन सका",
+  "ai.empty": "इस जाँच के लिए कोई AI विवरण नहीं माँगा गया।",
+  "ai.notEnabled":
+    "इस सेवा पर AI विवरण चालू नहीं हैं। सहेजे गए विवरण उपलब्ध रहते हैं।",
+  "ai.generate": "विवरण बनाएँ",
+  "ai.generateNew": "नया विवरण बनाएँ",
+  "ai.retry": "फिर कोशिश करें",
+  "ai.optional": "वैकल्पिक · AMD Token Factory पर",
+  "ai.checkFirst": "दूसरा अनुरोध भेजने से पहले सहेजा गया विवरण देखें।",
+  "ai.disclaimer":
+    "AI विवरण ग़लत हो सकते हैं। हीटमैप संगति मॉडल का विवरण है, भरोसे का माप या पास/फ़ेल निर्णय नहीं।",
+  "view.caption.original": "मूल तस्वीर",
+  "view.caption.heatmap": "तस्वीर + हीटमैप",
 };
 
 const dictionaries: Record<Lang, Dict> = { en, it, de, fr, zh, hi };

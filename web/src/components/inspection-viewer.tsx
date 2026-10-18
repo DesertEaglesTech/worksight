@@ -10,6 +10,7 @@ import {
 import { Minus, Plus, RotateCcw } from "lucide-react";
 import { assetUrl } from "@/lib/api";
 import type { Inspection } from "@/lib/contract";
+import { translator, type T } from "@/lib/i18n";
 
 export type ImageView = "overlay" | "original" | "split";
 
@@ -18,10 +19,12 @@ export default function InspectionViewer({
   inspection,
   view,
   opacity,
+  t = translator("en"),
 }: {
   inspection: Inspection;
   view: ImageView;
   opacity: number;
+  t?: T;
 }) {
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -135,10 +138,10 @@ export default function InspectionViewer({
           </div>
           <span className="image-caption">
             {view === "original"
-              ? "Original image"
+              ? t("view.caption.original")
               : showHeatmap
-                ? "Image + heatmap"
-                : "Original image"}
+                ? t("view.caption.heatmap")
+                : t("view.caption.original")}
           </span>
         </div>
         {view === "split" && (
