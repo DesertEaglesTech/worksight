@@ -4,6 +4,7 @@ import {
   ArrowRight,
   CheckCircle2,
   ChevronDown,
+  Download,
   LoaderCircle,
   Layers3,
   ScanLine,
@@ -1531,6 +1532,24 @@ export default function Workspace({
                         >
                           View AI description
                         </a>
+                      )}
+                      {!demo && (
+                        <div className="report-download">
+                          <span>
+                            <Download size={14} aria-hidden="true" />
+                            Download report
+                          </span>
+                          {(["pdf", "docx", "txt"] as const).map((format) => (
+                            <a
+                              key={format}
+                              className="text-button"
+                              href={`/api/backend/api/v1/inspections/${encodeURIComponent(inspection.id)}/export?format=${format}`}
+                              download
+                            >
+                              {format.toUpperCase()}
+                            </a>
+                          ))}
+                        </div>
                       )}
                       {inspection.matches_reference_image && (
                         <p className="reference-warning" role="alert">

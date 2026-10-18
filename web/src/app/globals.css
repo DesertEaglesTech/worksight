@@ -2728,3 +2728,25 @@ main#main {
   opacity: 0.55;
 }
 
+/* Report download: PDF / DOCX / TXT built by the backend from stored records. */
+.report-download {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.report-download > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: auto;
+  color: var(--muted);
+  font-size: 13px;
+}
+.report-download .text-button {
+  font-size: 13px;
+  font-weight: 600;
+}

@@ -5,9 +5,10 @@ from typing import Literal
 
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from pydantic import BaseModel, Field
 
+from . import export
 from .config import Settings
 from .service import Conflict, InspectionService, RateLimited, Unavailable
 
@@ -177,6 +178,22 @@ def create_app(settings: Settings | None = None, service: InspectionService | No
     @app.get("/api/v1/inspections/{inspection_id}/report", dependencies=dependencies)
     def latest_report(inspection_id: str, svc=Depends(get_service)):
         return svc.latest_report(inspection_id)
+
+    @app.get("/api/v1/inspections/{inspection_id}/export", dependencies=dependencies)
+    def export_inspection(
+        inspection_id: str,
+        format: Literal["pdf", "docx", "txt"] = "pdf",
+        svc=Depends(get_service),
+    ):
+        body, media_type, filename = export.render(svc, inspection_id, format)
+        return Response(
+            body,
+            media_type=media_type,
+            headers={
+                "Content-Disposition": f'attachment; filename="{filename}"',
+                "Cache-Control": "no-store",
+            },
+        )
 
     @app.get("/api/v1/reports/{report_id}", dependencies=dependencies)
     def report(report_id: str, svc=Depends(get_service)):

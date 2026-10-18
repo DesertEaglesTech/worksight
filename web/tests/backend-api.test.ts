@@ -19,6 +19,7 @@ import {
 } from "../src/lib/backend-api";
 import {
   allowedRoute,
+  exportFilename,
   forwardedQuery,
   idempotencyKey,
   upstreamError,
@@ -556,4 +557,27 @@ it("shows the backend reason for a rate-limited AI description", () => {
   expect(upstreamError(429, { detail: "<html>" })).toBe(
     "The inspection service encountered an error. Try again later.",
   );
+});
+
+it("allows report export with a validated format and a safe filename", () => {
+  const route = ["api", "v1", "inspections", "i1", "export"];
+  expect(allowedRoute("GET", route)).toBe(true);
+  expect(allowedRoute("POST", route)).toBe(false);
+  expect(
+    forwardedQuery(
+      "GET",
+      route,
+      new URLSearchParams("format=docx&x=1"),
+    ).toString(),
+  ).toBe("format=docx");
+  expect(
+    forwardedQuery("GET", route, new URLSearchParams("format=exe")).toString(),
+  ).toBe("");
+  expect(
+    exportFilename('attachment; filename="worksight-inspection-ab12cd34.pdf"'),
+  ).toBe("worksight-inspection-ab12cd34.pdf");
+  expect(exportFilename('attachment; filename="../../etc/passwd"')).toBe(
+    "worksight-inspection-report",
+  );
+  expect(exportFilename(null)).toBe("worksight-inspection-report");
 });
