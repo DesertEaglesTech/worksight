@@ -22,7 +22,7 @@ images and a training run, and defects are rare. Worksight starts from photos of
 
 0:30 — Insight (slide 3), then open the live site in a fresh browser window: the welcome screen
 explains Worksight in three steps; pick a language to show it (English, Italiano, Deutsch, Français,
-中文, हिन्दी), switch back to English and click **Continue as guest**. Point at **How it works** and the
+中文, 日本語, हिन्दी), switch back to English and click **Continue as guest**. Point at **How it works** and the
 profile figures: “Twenty good boards, about nine seconds to build, no defect labels, no training.”
 
 0:50 — Inspect. In **Try it in one click**, click **Inspect a defective board**. Show Fail, the

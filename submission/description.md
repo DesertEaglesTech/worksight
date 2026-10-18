@@ -30,7 +30,7 @@ Every flagged part also gets an explanation from Gemma-4-31B-IT running on AMD G
 
 Measured on the VisA PCB set (CC BY 4.0, CPU, held-out test, settings chosen on other categories): AUROC 0.88–0.99, recall 44–87% at a 2–6% false-alarm rate; with the review band, 56–96% of defects reach the engineer while 4–13% of good boards do. 0.1–0.3 s per inspection on Railway CPU. A new part needs no defect labels and no training run: its profile builds in about 9 s from 20 good photos.
 
-A first-visit tutorial, a guided tour, History with batch inspection, report export and six interface languages make it usable from the first minute. Live demo: web-production-d9743.up.railway.app. Next.js, FastAPI, PyTorch, MIT licence.
+A first-visit tutorial, a guided tour, History with batch inspection, report export and seven interface languages make it usable from the first minute. Live demo: web-production-d9743.up.railway.app. Next.js, FastAPI, PyTorch, MIT licence.
 
 ## Technology tags
 
