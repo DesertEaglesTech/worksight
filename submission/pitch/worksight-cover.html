@@ -3,36 +3,29 @@
 <head>
 <meta charset="utf-8">
 <title>Worksight cover</title>
-<!-- Source of submission/worksight-cover.png (1280×720), matching the Slides deck. Rebuild: bash submission/pitch/build.sh -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=DM+Sans:wght@400;500;700&display=swap">
+<!-- Source of submission/worksight-cover.png (1280×720), matching the Slides deck cover.
+     Photo: "Production Line of Computer Elements" by Andrey Matveev, Pexels (Pexels License).
+     Rebuild: bash submission/pitch/build.sh -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=DM+Sans:wght@400;500&display=swap">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { width: 1280px; height: 720px; background: #f5f4f0; overflow: hidden; }
-  body { font-family: "DM Sans", Arial, sans-serif; color: #1b1d20; padding: 64px 72px; display: flex; flex-direction: column; gap: 32px; }
-  .top { display: flex; align-items: flex-end; gap: 40px; }
-  .eyebrow { font-size: 15px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: #b44606; }
-  h1 { font-family: "Space Grotesk", Arial, sans-serif; font-size: 84px; line-height: 1; letter-spacing: -1.5px; margin-top: 14px; }
-  .tag { font-size: 28px; margin-top: 14px; }
-  .meta { margin-left: auto; text-align: right; font-size: 16px; line-height: 1.5; color: #4e5560; }
-  .images { height: 352px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  figure { position: relative; height: 352px; overflow: hidden; border-radius: 12px; }
-  figure img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; display: block; }
-  figcaption { position: absolute; left: 16px; bottom: 16px; font-size: 16px; font-weight: 700; padding: 6px 14px; border-radius: 999px; }
-  .bad { background: #b44606; color: #f5f4f0; } .good { background: #f5f4f0; color: #1b1d20; }
+  body { font-family: "DM Sans", Arial, sans-serif; color: #1b1d20; position: relative; }
+  img { position: absolute; left: 600px; top: 0; width: 680px; height: 720px; object-fit: cover; }
+  .text { position: absolute; left: 80px; top: 0; width: 460px; height: 720px; display: flex; flex-direction: column; justify-content: center; gap: 24px; }
+  .eyebrow { font-size: 15px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: #b44606; line-height: 1.5; }
+  h1 { font-family: "Space Grotesk", Arial, sans-serif; font-size: 84px; line-height: 1; letter-spacing: -1.5px; }
+  .tag { font-size: 30px; line-height: 1.25; }
+  .meta { font-size: 16px; line-height: 1.5; color: #4e5560; }
 </style>
 </head>
 <body>
-  <div class="top">
-    <div>
-      <div class="eyebrow">AMD Developer Hackathon · ACT III · Intelligent Industry</div>
-      <h1>Worksight</h1>
-      <div class="tag">Find defects on a new part from good photos only</div>
-    </div>
+  <img src="factory.jpg" alt="">
+  <div class="text">
+    <div class="eyebrow">AMD Developer Hackathon · ACT III<br>Intelligent Industry</div>
+    <h1>Worksight</h1>
+    <div class="tag">Find defects on a new part from good photos only</div>
     <div class="meta">Gemma on AMD Token Factory<br>Team Desert Eagles</div>
-  </div>
-  <div class="images">
-    <figure><img src="heatmap.jpg" alt=""><figcaption class="bad">Defect · bent pins</figcaption></figure>
-    <figure><img src="refs.jpg" alt=""><figcaption class="good">Learned from 20 good boards</figcaption></figure>
   </div>
 </body>
 </html>

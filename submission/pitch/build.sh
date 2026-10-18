@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
-# Renders the cover PNG from its HTML source with headless Chromium.
+# Renders the cover PNG (exactly 1280×720) from its HTML source with Playwright's Chromium.
 #   bash submission/pitch/build.sh
-# CHROME overrides the browser binary. The pitch deck itself lives in the Slides artifact
-# (see submission/description.md) and is exported from there as PDF.
+# Needs web/node_modules (cd web && npm ci). CHROME overrides the browser binary. The pitch deck
+# itself lives in the Slides artifact (see submission/description.md) and is exported from there.
 set -euo pipefail
 cd "$(dirname "$0")"
-CHROME=${CHROME:-$(command -v chromium || command -v google-chrome || echo /opt/pw-browsers/chromium-1194/chrome-linux/chrome)}
-"$CHROME" --headless --no-sandbox --disable-gpu --allow-file-access-from-files --hide-scrollbars \
-  --virtual-time-budget=5000 --window-size=1280,720 --screenshot=../worksight-cover.png \
-  "file://$PWD/worksight-cover.html"
+export COVER_HTML="file://$PWD/worksight-cover.html" COVER_PNG="$PWD/../worksight-cover.png"
+node --input-type=module -e '
+const { chromium } = await import(process.cwd() + "/../../web/node_modules/playwright-core/index.mjs");
+const browser = await chromium.launch(process.env.CHROME ? { executablePath: process.env.CHROME } : {});
+const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+await page.goto(process.env.COVER_HTML, { waitUntil: "networkidle" });
+await page.screenshot({ path: process.env.COVER_PNG });
+await browser.close();
+'
