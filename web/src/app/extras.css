@@ -169,25 +169,27 @@
   text-align: right;
 }
 .tool-tag {
-  display: inline-block;
-  padding: 2px 10px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 600;
-  background: var(--bg);
-  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+  color: var(--ink);
 }
-.tool-tag.anomaly {
-  background: #fde7e4;
-  color: #a1251a;
+.tool-tag::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--line);
 }
-.tool-tag.review {
-  background: #fdf1dd;
-  color: #8a5300;
+.tool-tag.anomaly::before {
+  background: #c2410c;
 }
-.tool-tag.normal {
-  background: #e3f4e8;
-  color: #1f6b3a;
+.tool-tag.review::before {
+  background: #ca8a04;
+}
+.tool-tag.normal::before {
+  background: #4b8b63;
 }
 .tool-docs {
   list-style: none;
@@ -228,4 +230,108 @@
 }
 .design-current .viewer-toolbar {
   border-bottom: 0;
+}
+
+/* Tutorial steps */
+.tour-progress {
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0;
+}
+.tour-choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.tour-choice {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+.tour-choice:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+.tour-choice:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.tour-choice img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+}
+.tour-choice span {
+  padding: 10px 12px;
+}
+.tour-saved {
+  align-self: flex-start;
+}
+.tour-links {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 4px;
+}
+.tour-links a {
+  color: var(--accent);
+}
+.tour-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+.tour-spacer {
+  flex: 1;
+}
+/* Settings and documents pages */
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+.settings-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+}
+.settings-card h2 {
+  margin: 0;
+  font-size: 16px;
+}
+.settings-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.profile-docs {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.profile-docs h2 {
+  font-size: 16px;
+  margin: 0 0 10px;
+}
+@media (max-width: 640px) {
+  .tour-choices {
+    grid-template-columns: 1fr;
+  }
 }

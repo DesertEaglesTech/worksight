@@ -239,7 +239,7 @@ function BatchTab({
   );
 }
 
-function DocumentsTab({
+export function DocumentsPanel({
   profileId,
   t,
   disabled,
@@ -335,12 +335,11 @@ export default function ProfileTools({
   disabled: boolean;
   refreshKey: number;
 }) {
-  const [tab, setTab] = useState<"history" | "batch" | "docs">("history");
+  const [tab, setTab] = useState<"history" | "batch">("history");
   const [batchRefresh, setBatchRefresh] = useState(0);
   const tabs = [
     { id: "history", label: t("tools.history"), icon: History },
     { id: "batch", label: t("tools.batch"), icon: Images },
-    { id: "docs", label: t("tools.docs"), icon: FileText },
   ] as const;
   return (
     <section className="profile-tools" aria-label={t("tools.title")}>
@@ -374,9 +373,6 @@ export default function ProfileTools({
           disabled={disabled}
           onDone={() => setBatchRefresh((n) => n + 1)}
         />
-      )}
-      {tab === "docs" && (
-        <DocumentsTab profileId={profileId} t={t} disabled={disabled} />
       )}
     </section>
   );

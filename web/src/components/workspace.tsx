@@ -3,6 +3,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowRight,
   CheckCircle2,
+  History as HistoryIcon,
+  Settings as SettingsIcon,
   ChevronDown,
   Download,
   LoaderCircle,
@@ -41,8 +43,8 @@ import AiDescription from "./ai-description";
 import type { WorkspaceDesign } from "./design-preview";
 import { loadSavedExample } from "@/lib/saved-example";
 import { isLang, translator, type Lang } from "@/lib/i18n";
-import ProfileTools from "./profile-tools";
-import { LanguageSelect, QuickStart, Welcome } from "./onboarding";
+import ProfileTools, { DocumentsPanel } from "./profile-tools";
+import { LanguageSelect, QuickStart, Settings, Tutorial } from "./onboarding";
 
 const decisionLabel: Record<Decision, string> = {
   pass: "Pass",
@@ -162,6 +164,15 @@ export default function Workspace({
       /* not persisted */
     }
   }
+  function applyTheme(next: "light" | "dark") {
+    setTheme(next);
+    document.cookie = `worksight_theme=${next}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
+  }
+  function closeTutorial() {
+    setTutorialOpen(false);
+    setGuest(true);
+    remember("worksight_guest", "1");
+  }
   function chooseLang(next: Lang) {
     setLang(next);
     remember("worksight_lang", next);
@@ -222,7 +233,10 @@ export default function Workspace({
     } catch {}
   };
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [screen, setScreen] = useState<"inspect" | "profiles">("inspect");
+  const [screen, setScreen] = useState<
+    "inspect" | "profiles" | "history" | "settings"
+  >("inspect");
+  const [tutorialOpen, setTutorialOpen] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [selectedId, setSelectedId] = useState("");
   const [capabilities, setCapabilities] = useState<Capabilities | null>(null);
@@ -565,11 +579,7 @@ export default function Workspace({
         title={
           theme === "light" ? "Switch to dark theme" : "Switch to light theme"
         }
-        onClick={() => {
-          const next = theme === "light" ? "dark" : "light";
-          setTheme(next);
-          document.cookie = `worksight_theme=${next}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
-        }}
+        onClick={() => applyTheme(theme === "light" ? "dark" : "light")}
       >
         {theme === "light" ? (
           <Moon size={16} aria-hidden="true" />
@@ -598,9 +608,7 @@ export default function Workspace({
           <Menu size={22} />
         </button>
         <span className="mobile-brand">worksight</span>
-        <span>
-          {screen === "inspect" ? t("nav.inspect") : t("nav.profiles")}
-        </span>
+        <span>{t(`nav.${screen === "inspect" ? "inspect" : screen}`)}</span>
         {themeButton}
       </header>
       {mobileMenuOpen && (
@@ -670,6 +678,36 @@ export default function Workspace({
               {capabilities ? profiles.length : "—"}
             </span>
           </button>
+          {mode === "live" && (
+            <button
+              className={`workspace-nav-item ${screen === "history" ? "active" : ""}`}
+              disabled={!!busy}
+              aria-current={screen === "history" ? "page" : undefined}
+              aria-label={t("nav.history")}
+              title={t("nav.history")}
+              onClick={() => {
+                setScreen("history");
+                setMobileMenuOpen(false);
+              }}
+            >
+              <HistoryIcon size={21} aria-hidden="true" />
+              <span className="navigation-label">{t("nav.history")}</span>
+            </button>
+          )}
+          <button
+            className={`workspace-nav-item ${screen === "settings" ? "active" : ""}`}
+            disabled={!!busy}
+            aria-current={screen === "settings" ? "page" : undefined}
+            aria-label={t("nav.settings")}
+            title={t("nav.settings")}
+            onClick={() => {
+              setScreen("settings");
+              setMobileMenuOpen(false);
+            }}
+          >
+            <SettingsIcon size={21} aria-hidden="true" />
+            <span className="navigation-label">{t("nav.settings")}</span>
+          </button>
         </nav>
         <div className="navigation-profile">
           <span className="navigation-section-label">{t("nav.selected")}</span>
@@ -724,13 +762,9 @@ export default function Workspace({
       <main id="main" inert={mobileMenuOpen}>
         <div className="page-heading">
           <div>
-            <h1>
-              {screen === "inspect" ? t("nav.inspect") : t("nav.profiles")}
-            </h1>
+            <h1>{t(`nav.${screen === "inspect" ? "inspect" : screen}`)}</h1>
             <p>
-              {screen === "inspect"
-                ? t("heading.inspect.sub")
-                : t("heading.profiles.sub")}
+              {t(`heading.${screen === "inspect" ? "inspect" : screen}.sub`)}
             </p>
           </div>
           <div className="heading-actions">
@@ -832,6 +866,41 @@ export default function Workspace({
               </button>
             )}
           </div>
+        ) : screen === "settings" ? (
+          <Settings
+            t={t}
+            lang={lang}
+            onLang={chooseLang}
+            theme={theme}
+            onTheme={applyTheme}
+            onTutorial={() => setTutorialOpen(true)}
+            onReset={() => {
+              try {
+                localStorage.clear();
+              } catch {
+                /* nothing stored */
+              }
+              location.reload();
+            }}
+          />
+        ) : screen === "history" ? (
+          selected?.status === "ready" && !selected.local_draft ? (
+            <ProfileTools
+              key={selected.id}
+              profileId={selected.id}
+              t={t}
+              onOpen={(id) => {
+                setScreen("inspect");
+                void openInspection(id);
+              }}
+              disabled={!canOperate}
+              refreshKey={toolsRefresh}
+            />
+          ) : (
+            <div className="empty">
+              <p>{t("history.noProfile")}</p>
+            </div>
+          )
         ) : screen === "profiles" ? (
           <div className="profiles-layout">
             <section className="library" aria-label="Profile library">
@@ -1255,6 +1324,19 @@ export default function Workspace({
                       </section>
                     </>
                   )}
+                  {mode === "live" &&
+                    selected.status === "ready" &&
+                    !selected.local_draft && (
+                      <section className="profile-docs">
+                        <h2>{t("tools.docs")}</h2>
+                        <DocumentsPanel
+                          key={selected.id}
+                          profileId={selected.id}
+                          t={t}
+                          disabled={!canOperate}
+                        />
+                      </section>
+                    )}
                   <details className="profile-record">
                     <summary>Profile record</summary>
                     <dl className="detail-list">
@@ -1884,18 +1966,6 @@ export default function Workspace({
                 disabled={!!busy}
               />
             )}
-            {mode === "live" &&
-              selected?.status === "ready" &&
-              !selected.local_draft && (
-                <ProfileTools
-                  key={selected.id}
-                  profileId={selected.id}
-                  t={t}
-                  onOpen={(id) => void openInspection(id)}
-                  disabled={!canOperate}
-                  refreshKey={toolsRefresh}
-                />
-              )}
           </>
         )}
         {busy && (
@@ -2001,14 +2071,26 @@ export default function Workspace({
           </div>
         </form>
       </dialog>
-      {mode === "live" && !guest && (
-        <Welcome
+      {mode === "live" && (!guest || tutorialOpen) && (
+        <Tutorial
           t={t}
           lang={lang}
           onLang={chooseLang}
-          onContinue={() => {
-            setGuest(true);
-            remember("worksight_guest", "1");
+          onClose={closeTutorial}
+          canTry={showLiveExamples && selected?.status === "ready"}
+          canTrySaved={!!exampleInspectionId && !!savedExample}
+          onDefect={() => {
+            setScreen("inspect");
+            void tryExample(liveExamples[1]);
+          }}
+          onGood={() => {
+            setScreen("inspect");
+            void tryExample(liveExamples[0]);
+          }}
+          onSaved={() => void openSaved()}
+          onCreate={() => {
+            setFormError("");
+            setShowCreate(true);
           }}
         />
       )}

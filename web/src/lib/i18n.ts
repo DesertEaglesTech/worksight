@@ -137,6 +137,48 @@ const en = {
   "stats.agreement": "Engineer agreement",
   "stats.reviewed": "reviewed parts",
   "stats.none": "no reviews yet",
+  "nav.history": "History",
+  "nav.settings": "Settings",
+  "heading.history.sub":
+    "Past inspections and batch runs for the selected profile.",
+  "heading.settings.sub":
+    "Language, appearance, tutorial and this guest session.",
+  "history.noProfile": "Select a ready profile to see its history.",
+  "tour.step": "Step",
+  "tour.of": "of",
+  "tour.next": "Next",
+  "tour.back": "Back",
+  "tour.skip": "Skip tutorial",
+  "tour.try.title": "Try it with a ready example",
+  "tour.try.body":
+    "The demo profile learned from 20 good circuit boards from the public VisA dataset. Pick a board and Worksight inspects it right away.",
+  "tour.own.title": "Test it with your own photos",
+  "tour.own.1":
+    "Take 10–20 photos of good parts with the same camera angle, lighting and background.",
+  "tour.own.2":
+    "No photos yet? Download a public dataset of good and defective parts:",
+  "tour.own.visa":
+    "VisA by Amazon: 12 objects, including 4 circuit boards (CC BY 4.0)",
+  "tour.own.mvtec":
+    "MVTec AD: 15 industrial objects and textures (non-commercial, CC BY-NC-SA 4.0)",
+  "tour.own.3":
+    "Click New profile, name the part, add the good photos and click Build profile.",
+  "tour.own.4":
+    "Open Part inspection, upload a new photo of the part and click Run inspection.",
+  "tour.own.formats":
+    "JPEG, PNG or WebP, up to 10 MB each. Use only images you may share: this is a shared demo workspace.",
+  "tour.own.create": "Create a profile",
+  "settings.language": "Interface language",
+  "settings.appearance": "Appearance",
+  "settings.light": "Light",
+  "settings.dark": "Dark",
+  "settings.tutorial": "Tutorial",
+  "settings.tutorialText": "Show the three-step introduction again.",
+  "settings.tutorialButton": "Show tutorial",
+  "settings.session": "Guest session",
+  "settings.sessionText":
+    "You are using the shared demo workspace as a guest. Profiles, inspections and reviews are visible to every visitor. Personal accounts and team workspaces are planned.",
+  "settings.reset": "Reset this browser’s preferences",
 };
 
 export type Key = keyof typeof en;
@@ -272,6 +314,47 @@ const it: Dict = {
   "stats.agreement": "Accordo con l’ingegnere",
   "stats.reviewed": "pezzi revisionati",
   "stats.none": "nessuna revisione",
+  "nav.history": "Cronologia",
+  "nav.settings": "Impostazioni",
+  "heading.history.sub":
+    "Ispezioni passate e ispezioni in serie del profilo selezionato.",
+  "heading.settings.sub": "Lingua, aspetto, guida e sessione ospite.",
+  "history.noProfile": "Seleziona un profilo pronto per vederne la cronologia.",
+  "tour.step": "Passo",
+  "tour.of": "di",
+  "tour.next": "Avanti",
+  "tour.back": "Indietro",
+  "tour.skip": "Salta la guida",
+  "tour.try.title": "Provalo con un esempio pronto",
+  "tour.try.body":
+    "Il profilo demo ha imparato da 20 schede conformi del dataset pubblico VisA. Scegli una scheda e Worksight la ispeziona subito.",
+  "tour.own.title": "Provalo con le tue foto",
+  "tour.own.1":
+    "Scatta 10–20 foto di pezzi conformi con la stessa angolazione, luce e sfondo.",
+  "tour.own.2":
+    "Non hai foto? Scarica un dataset pubblico di pezzi conformi e difettosi:",
+  "tour.own.visa":
+    "VisA di Amazon: 12 oggetti, tra cui 4 schede elettroniche (CC BY 4.0)",
+  "tour.own.mvtec":
+    "MVTec AD: 15 oggetti e texture industriali (non commerciale, CC BY-NC-SA 4.0)",
+  "tour.own.3":
+    "Fai clic su Nuovo profilo, dai un nome al pezzo, aggiungi le foto conformi e fai clic su Crea profilo.",
+  "tour.own.4":
+    "Apri Ispezione pezzo, carica una nuova foto del pezzo e fai clic su Avvia ispezione.",
+  "tour.own.formats":
+    "JPEG, PNG o WebP, fino a 10 MB ciascuna. Usa solo immagini condivisibili: è un’area demo condivisa.",
+  "tour.own.create": "Crea un profilo",
+  "settings.language": "Lingua dell’interfaccia",
+  "settings.appearance": "Aspetto",
+  "settings.light": "Chiaro",
+  "settings.dark": "Scuro",
+  "settings.tutorial": "Guida",
+  "settings.tutorialText": "Mostra di nuovo l’introduzione in tre passi.",
+  "settings.tutorialButton": "Mostra guida",
+  "settings.session": "Sessione ospite",
+  "settings.sessionText":
+    "Stai usando l’area demo condivisa come ospite. Profili, ispezioni e revisioni sono visibili a tutti i visitatori. Account personali e aree di team sono previsti.",
+  "settings.reset": "Reimposta le preferenze di questo browser",
 };
 
 const de: Dict = {
@@ -403,6 +486,47 @@ const de: Dict = {
   "stats.agreement": "Übereinstimmung mit Ingenieur",
   "stats.reviewed": "geprüfte Teile",
   "stats.none": "noch keine Prüfungen",
+  "nav.history": "Verlauf",
+  "nav.settings": "Einstellungen",
+  "heading.history.sub":
+    "Frühere Prüfungen und Serienprüfungen des ausgewählten Profils.",
+  "heading.settings.sub": "Sprache, Darstellung, Anleitung und Gastsitzung.",
+  "history.noProfile": "Ein bereites Profil wählen, um den Verlauf zu sehen.",
+  "tour.step": "Schritt",
+  "tour.of": "von",
+  "tour.next": "Weiter",
+  "tour.back": "Zurück",
+  "tour.skip": "Anleitung überspringen",
+  "tour.try.title": "Mit einem fertigen Beispiel ausprobieren",
+  "tour.try.body":
+    "Das Demo-Profil hat aus 20 einwandfreien Platinen des öffentlichen VisA-Datensatzes gelernt. Wählen Sie eine Platine, Worksight prüft sie sofort.",
+  "tour.own.title": "Mit eigenen Fotos testen",
+  "tour.own.1":
+    "10–20 Fotos von Gutteilen mit gleichem Kamerawinkel, Licht und Hintergrund aufnehmen.",
+  "tour.own.2":
+    "Noch keine Fotos? Einen öffentlichen Datensatz mit Gut- und Fehlteilen herunterladen:",
+  "tour.own.visa":
+    "VisA von Amazon: 12 Objekte, darunter 4 Leiterplatten (CC BY 4.0)",
+  "tour.own.mvtec":
+    "MVTec AD: 15 industrielle Objekte und Texturen (nicht kommerziell, CC BY-NC-SA 4.0)",
+  "tour.own.3":
+    "Auf Neues Profil klicken, das Teil benennen, die Gutteil-Fotos hinzufügen und das Profil erstellen.",
+  "tour.own.4":
+    "Teileprüfung öffnen, ein neues Foto des Teils hochladen und die Prüfung starten.",
+  "tour.own.formats":
+    "JPEG, PNG oder WebP, je bis 10 MB. Nur teilbare Bilder verwenden: dies ist ein gemeinsamer Demo-Bereich.",
+  "tour.own.create": "Profil erstellen",
+  "settings.language": "Sprache der Oberfläche",
+  "settings.appearance": "Darstellung",
+  "settings.light": "Hell",
+  "settings.dark": "Dunkel",
+  "settings.tutorial": "Anleitung",
+  "settings.tutorialText": "Die Einführung in drei Schritten erneut zeigen.",
+  "settings.tutorialButton": "Anleitung zeigen",
+  "settings.session": "Gastsitzung",
+  "settings.sessionText":
+    "Sie nutzen den gemeinsamen Demo-Bereich als Gast. Profile, Prüfungen und Bewertungen sind für alle Besucher sichtbar. Persönliche Konten und Team-Bereiche sind geplant.",
+  "settings.reset": "Einstellungen dieses Browsers zurücksetzen",
 };
 
 const fr: Dict = {
@@ -536,6 +660,47 @@ const fr: Dict = {
   "stats.agreement": "Accord avec l’ingénieur",
   "stats.reviewed": "pièces revues",
   "stats.none": "aucune revue",
+  "nav.history": "Historique",
+  "nav.settings": "Paramètres",
+  "heading.history.sub":
+    "Inspections passées et inspections par lot du profil sélectionné.",
+  "heading.settings.sub": "Langue, apparence, tutoriel et session invité.",
+  "history.noProfile": "Sélectionnez un profil prêt pour voir son historique.",
+  "tour.step": "Étape",
+  "tour.of": "sur",
+  "tour.next": "Suivant",
+  "tour.back": "Retour",
+  "tour.skip": "Passer le tutoriel",
+  "tour.try.title": "Essayez avec un exemple prêt",
+  "tour.try.body":
+    "Le profil de démonstration a appris à partir de 20 cartes conformes du jeu de données public VisA. Choisissez une carte et Worksight l’inspecte aussitôt.",
+  "tour.own.title": "Testez avec vos propres photos",
+  "tour.own.1":
+    "Prenez 10 à 20 photos de pièces conformes avec le même angle, éclairage et arrière-plan.",
+  "tour.own.2":
+    "Pas encore de photos ? Téléchargez un jeu de données public de pièces conformes et défectueuses :",
+  "tour.own.visa":
+    "VisA d’Amazon : 12 objets, dont 4 cartes électroniques (CC BY 4.0)",
+  "tour.own.mvtec":
+    "MVTec AD : 15 objets et textures industriels (non commercial, CC BY-NC-SA 4.0)",
+  "tour.own.3":
+    "Cliquez sur Nouveau profil, nommez la pièce, ajoutez les photos conformes et construisez le profil.",
+  "tour.own.4":
+    "Ouvrez Inspection de pièce, importez une nouvelle photo et lancez l’inspection.",
+  "tour.own.formats":
+    "JPEG, PNG ou WebP, 10 Mo maximum chacune. N’utilisez que des images partageables : cet espace de démonstration est partagé.",
+  "tour.own.create": "Créer un profil",
+  "settings.language": "Langue de l’interface",
+  "settings.appearance": "Apparence",
+  "settings.light": "Clair",
+  "settings.dark": "Sombre",
+  "settings.tutorial": "Tutoriel",
+  "settings.tutorialText": "Afficher à nouveau l’introduction en trois étapes.",
+  "settings.tutorialButton": "Afficher le tutoriel",
+  "settings.session": "Session invité",
+  "settings.sessionText":
+    "Vous utilisez l’espace de démonstration partagé en tant qu’invité. Profils, inspections et revues sont visibles par tous. Comptes personnels et espaces d’équipe prévus.",
+  "settings.reset": "Réinitialiser les préférences de ce navigateur",
 };
 
 const zh: Dict = {
@@ -657,6 +822,40 @@ const zh: Dict = {
   "stats.agreement": "与工程师一致",
   "stats.reviewed": "已复核零件",
   "stats.none": "尚无复核",
+  "nav.history": "历史记录",
+  "nav.settings": "设置",
+  "heading.history.sub": "当前档案的历史检测与批量检测。",
+  "heading.settings.sub": "语言、外观、使用教程与访客会话。",
+  "history.noProfile": "请选择一个可用的档案以查看历史记录。",
+  "tour.step": "步骤",
+  "tour.of": "/",
+  "tour.next": "下一步",
+  "tour.back": "上一步",
+  "tour.skip": "跳过教程",
+  "tour.try.title": "用现成示例体验",
+  "tour.try.body":
+    "演示档案从公开 VisA 数据集中的 20 块合格电路板学习而来。选择一块电路板，Worksight 会立即检测。",
+  "tour.own.title": "用您自己的照片测试",
+  "tour.own.1": "在相同角度、光照和背景下拍摄 10–20 张合格零件照片。",
+  "tour.own.2": "还没有照片？可以下载公开的合格与缺陷零件数据集：",
+  "tour.own.visa": "Amazon 的 VisA：12 类物体，其中 4 类为电路板（CC BY 4.0）",
+  "tour.own.mvtec": "MVTec AD：15 类工业物体与纹理（非商业，CC BY-NC-SA 4.0）",
+  "tour.own.3": "点击“新建档案”，为零件命名，添加合格照片，然后建立档案。",
+  "tour.own.4": "打开“零件检测”，上传该零件的新照片并开始检测。",
+  "tour.own.formats":
+    "支持 JPEG、PNG 或 WebP，每张不超过 10 MB。请只使用可公开的图像：这是共享的演示工作区。",
+  "tour.own.create": "新建档案",
+  "settings.language": "界面语言",
+  "settings.appearance": "外观",
+  "settings.light": "浅色",
+  "settings.dark": "深色",
+  "settings.tutorial": "使用教程",
+  "settings.tutorialText": "再次显示三步入门介绍。",
+  "settings.tutorialButton": "显示教程",
+  "settings.session": "访客会话",
+  "settings.sessionText":
+    "您正以访客身份使用共享演示工作区。档案、检测和复核对所有访问者可见。个人账户和团队工作区正在规划中。",
+  "settings.reset": "重置此浏览器的偏好设置",
 };
 
 const hi: Dict = {
@@ -785,6 +984,46 @@ const hi: Dict = {
   "stats.agreement": "इंजीनियर से सहमति",
   "stats.reviewed": "समीक्षित पुर्ज़े",
   "stats.none": "अभी कोई समीक्षा नहीं",
+  "nav.history": "इतिहास",
+  "nav.settings": "सेटिंग्स",
+  "heading.history.sub": "चुनी गई प्रोफ़ाइल की पिछली जाँचें और बैच जाँचें।",
+  "heading.settings.sub": "भाषा, रूप, ट्यूटोरियल और अतिथि सत्र।",
+  "history.noProfile": "इतिहास देखने के लिए तैयार प्रोफ़ाइल चुनें।",
+  "tour.step": "चरण",
+  "tour.of": "में से",
+  "tour.next": "आगे",
+  "tour.back": "पीछे",
+  "tour.skip": "ट्यूटोरियल छोड़ें",
+  "tour.try.title": "तैयार उदाहरण से आज़माएँ",
+  "tour.try.body":
+    "डेमो प्रोफ़ाइल ने सार्वजनिक VisA डेटासेट के 20 सही सर्किट बोर्ड से सीखा है। कोई बोर्ड चुनें, Worksight तुरंत जाँच करेगा।",
+  "tour.own.title": "अपनी तस्वीरों से परखें",
+  "tour.own.1":
+    "एक जैसे कोण, रोशनी और पृष्ठभूमि में सही पुर्ज़ों की 10–20 तस्वीरें लें।",
+  "tour.own.2":
+    "अभी तस्वीरें नहीं हैं? सही और दोषपूर्ण पुर्ज़ों का सार्वजनिक डेटासेट डाउनलोड करें:",
+  "tour.own.visa":
+    "Amazon का VisA: 12 वस्तुएँ, जिनमें 4 सर्किट बोर्ड (CC BY 4.0)",
+  "tour.own.mvtec":
+    "MVTec AD: 15 औद्योगिक वस्तुएँ और बनावट (गैर-व्यावसायिक, CC BY-NC-SA 4.0)",
+  "tour.own.3":
+    "नई प्रोफ़ाइल पर क्लिक करें, पुर्ज़े का नाम दें, सही तस्वीरें जोड़ें और प्रोफ़ाइल बनाएँ।",
+  "tour.own.4":
+    "पुर्ज़े की जाँच खोलें, पुर्ज़े की नई तस्वीर अपलोड करें और जाँच शुरू करें।",
+  "tour.own.formats":
+    "JPEG, PNG या WebP, हर एक 10 MB तक। केवल साझा करने योग्य तस्वीरें इस्तेमाल करें: यह साझा डेमो कार्यक्षेत्र है।",
+  "tour.own.create": "प्रोफ़ाइल बनाएँ",
+  "settings.language": "इंटरफ़ेस की भाषा",
+  "settings.appearance": "रूप",
+  "settings.light": "हल्का",
+  "settings.dark": "गहरा",
+  "settings.tutorial": "ट्यूटोरियल",
+  "settings.tutorialText": "तीन चरणों वाला परिचय फिर से दिखाएँ।",
+  "settings.tutorialButton": "ट्यूटोरियल दिखाएँ",
+  "settings.session": "अतिथि सत्र",
+  "settings.sessionText":
+    "आप अतिथि के रूप में साझा डेमो कार्यक्षेत्र इस्तेमाल कर रहे हैं। प्रोफ़ाइल, जाँच और समीक्षाएँ सभी आगंतुकों को दिखती हैं। निजी खाते और टीम कार्यक्षेत्र योजना में हैं।",
+  "settings.reset": "इस ब्राउज़र की प्राथमिकताएँ रीसेट करें",
 };
 
 const dictionaries: Record<Lang, Dict> = { en, it, de, fr, zh, hi };
