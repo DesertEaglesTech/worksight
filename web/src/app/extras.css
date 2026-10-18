@@ -351,6 +351,7 @@
 .design-current .engineer-panel {
   grid-column: 2;
   grid-row: 1 / span 4;
+  align-self: stretch;
   border-left: 1px solid var(--line);
   border-bottom: 0;
 }
