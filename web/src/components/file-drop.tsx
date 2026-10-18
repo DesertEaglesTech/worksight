@@ -1,4 +1,5 @@
 "use client";
+import type { T } from "@/lib/i18n";
 import { useEffect, useId, useRef, useState } from "react";
 import { ImagePlus, Upload, X } from "lucide-react";
 import type { Capabilities } from "@/lib/contract";
@@ -12,6 +13,7 @@ export default function FileDrop({
   limits = defaultLimits,
   label,
   canvas = false,
+  t,
 }: {
   files: File[];
   onChange: (files: File[]) => void;
@@ -20,6 +22,7 @@ export default function FileDrop({
   limits?: Capabilities["limits"];
   label: string;
   canvas?: boolean;
+  t?: T;
 }) {
   const id = useId();
   const input = useRef<HTMLInputElement>(null);
@@ -96,13 +99,18 @@ export default function FileDrop({
           {files.length
             ? multiple
               ? "Add more images"
-              : "Replace image"
+              : t
+                ? t("upload.replace")
+                : "Replace image"
             : multiple
               ? "Upload reference samples"
-              : "Upload a part image"}
+              : t
+                ? t("upload.part")
+                : "Upload a part image"}
         </strong>
         <span>
-          or <u>browse files</u>
+          {t ? t("upload.or") : "or"}{" "}
+          <u>{t ? t("upload.browse") : "browse files"}</u>
         </span>
         <small id={`${id}-hint`}>
           {limits.allowed_mime_types

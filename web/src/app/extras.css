@@ -79,15 +79,15 @@
   justify-content: space-between;
   gap: 16px 32px;
   margin-bottom: 16px;
-  padding: 14px 56px 14px 20px;
-  border: 1px solid var(--accent);
-  border-left-width: 4px;
+  padding: 12px 56px 12px 20px;
+  border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--paper);
 }
 .quick-start h2 {
   margin: 0;
-  font-size: 17px;
+  font-size: 16px;
+  font-weight: 600;
 }
 .quick-start ol {
   color: var(--muted);
@@ -217,4 +217,15 @@
   .tool-table td:nth-child(4) {
     display: none;
   }
+}
+
+/* Calmer dividers: one line colour everywhere and no rule under the image toolbar. */
+.design-current .inspection-layout {
+  border-color: var(--line);
+}
+.design-current .result-sidebar {
+  border-left-color: var(--line);
+}
+.design-current .viewer-toolbar {
+  border-bottom: 0;
 }

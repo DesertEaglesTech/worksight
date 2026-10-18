@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { backendRequest } from "@/lib/backend-api";
+import { translator, type T } from "@/lib/i18n";
 
 const statsSchema = z.object({
   onboarding: z
@@ -34,9 +35,11 @@ type Stats = z.infer<typeof statsSchema>;
 export function ProfileStats({
   profileId,
   refreshKey,
+  t = translator("en"),
 }: {
   profileId: string;
   refreshKey: string;
+  t?: T;
 }) {
   const [stats, setStats] = useState<Stats | null>(null);
   useEffect(() => {
@@ -57,34 +60,34 @@ export function ProfileStats({
   const agreement = engineer_review.agreement;
   const facts = [
     {
-      label: "Build time",
+      label: t("stats.build"),
       value:
         onboarding?.build_ms != null
           ? `${(onboarding.build_ms / 1000).toFixed(1)} s`
           : "—",
       note: onboarding
-        ? `${onboarding.reference_count} photos, no training`
+        ? `${onboarding.reference_count} ${t("stats.photos")}`
         : undefined,
     },
     {
-      label: "Median inference",
+      label: t("stats.inference"),
       value:
         inspections.inference_ms_p50 === null
           ? "—"
           : `${Math.round(inspections.inference_ms_p50)} ms`,
-      note: "server",
+      note: t("stats.server"),
     },
     {
-      label: "Inspections",
+      label: t("stats.inspections"),
       value: String(inspections.count),
-      note: `${inspections.decisions.anomaly} anomaly · ${inspections.decisions.review} review`,
+      note: `${inspections.decisions.anomaly} ${t("decision.anomaly").toLowerCase()} · ${inspections.decisions.review} ${t("decision.review").toLowerCase()}`,
     },
     {
-      label: "Engineer agreement",
+      label: t("stats.agreement"),
       value: agreement.compared
         ? `${agreement.agree}/${agreement.compared}`
         : "—",
-      note: agreement.compared ? "reviewed parts" : "no reviews yet",
+      note: agreement.compared ? t("stats.reviewed") : t("stats.none"),
     },
   ];
   return (

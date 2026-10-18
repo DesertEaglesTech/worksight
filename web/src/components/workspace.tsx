@@ -69,7 +69,7 @@ const formatBytes = (bytes: number) =>
     : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 const message = (e: unknown) =>
   e instanceof Error ? e.message : "Something went wrong. Please try again.";
-function DecisionTag({ value }: { value: Decision }) {
+function DecisionTag({ value, label }: { value: Decision; label?: string }) {
   return (
     <span className={`decision ${value}`}>
       {value === "pass" ? (
@@ -77,7 +77,7 @@ function DecisionTag({ value }: { value: Decision }) {
       ) : (
         <TriangleAlert size={15} />
       )}
-      {decisionLabel[value]}
+      {label ?? decisionLabel[value]}
     </span>
   );
 }
@@ -1281,7 +1281,7 @@ export default function Workspace({
           </div>
         ) : (
           <>
-            <HowItWorks />
+            <HowItWorks t={t} />
             {showLiveExamples && !inspection && !guideHidden && (
               <QuickStart
                 t={t}
@@ -1301,7 +1301,7 @@ export default function Workspace({
               aria-label="Inspection setup"
             >
               <div className="profile-selector">
-                <label htmlFor="profile">Reference profile</label>
+                <label htmlFor="profile">{t("setup.profile")}</label>
                 <div className="select-wrap">
                   <select
                     id="profile"
@@ -1324,27 +1324,27 @@ export default function Workspace({
               </div>
               <div className="setup-facts">
                 <div>
-                  <span>Status</span>
+                  <span>{t("setup.status")}</span>
                   <strong
                     className={selected?.status === "ready" ? "ready-text" : ""}
                   >
                     {selected
                       ? selected.status === "ready"
-                        ? "Ready for inspection"
+                        ? t("setup.ready")
                         : selected.status
-                      : "No profile selected"}
+                      : t("setup.none")}
                   </strong>
                 </div>
                 <div>
-                  <span>References</span>
+                  <span>{t("setup.references")}</span>
                   <strong>
                     {selected
-                      ? `${selected.sample_count} ${selected.sample_count === 1 ? "sample" : "samples"}`
+                      ? `${selected.sample_count} ${lang === "en" && selected.sample_count === 1 ? "sample" : t("unit.samples")}`
                       : "—"}
                   </strong>
                 </div>
                 <div>
-                  <span>Active version</span>
+                  <span>{t("setup.version")}</span>
                   <strong>
                     {selected?.version ? `v${selected.version}` : "Not built"}
                   </strong>
@@ -1355,7 +1355,7 @@ export default function Workspace({
                 disabled={!!busy}
                 onClick={() => setScreen("profiles")}
               >
-                Manage samples
+                {t("setup.manage")}
                 <ArrowRight size={16} />
               </button>
             </section>
@@ -1363,6 +1363,7 @@ export default function Workspace({
               <ProfileStats
                 profileId={selected.id}
                 refreshKey={`${inspection?.id ?? ""}:${inspection?.feedback ? 1 : 0}`}
+                t={t}
               />
             )}
             {!ready.length && (
@@ -1404,9 +1405,7 @@ export default function Workspace({
                       ))}
                     </div>
                   ) : (
-                    <span className="toolbar-note">
-                      One image per inspection
-                    </span>
+                    <span className="toolbar-note">{t("toolbar.one")}</span>
                   )}
                 </div>
                 {inspection ? (
@@ -1431,6 +1430,7 @@ export default function Workspace({
                       limits={capabilities.limits}
                       label="Upload inspection image"
                       canvas
+                      t={t}
                     />
                     {demo && (
                       <button
@@ -1444,7 +1444,7 @@ export default function Workspace({
                     {showLiveExamples && (
                       <div className="live-examples">
                         <span className="live-examples-title">
-                          Or try a VisA pcb1 test board
+                          {t("examples.title")}
                         </span>
                         <div className="example-thumbs">
                           {liveExamples.map((example) => (
@@ -1458,7 +1458,13 @@ export default function Workspace({
                             >
                               {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img src={example.path} alt="" loading="lazy" />
-                              <span>{example.label}</span>
+                              <span>
+                                {t(
+                                  example.label === "Good board"
+                                    ? "examples.good"
+                                    : "examples.bent",
+                                )}
+                              </span>
                             </button>
                           ))}
                         </div>
@@ -1467,10 +1473,7 @@ export default function Workspace({
                         </small>
                       </div>
                     )}
-                    <p className="upload-guidance">
-                      Match the camera angle, lighting and framing of your
-                      reference samples.
-                    </p>
+                    <p className="upload-guidance">{t("upload.guidance")}</p>
                   </div>
                 )}
                 <div className="inspect-action">
@@ -1530,7 +1533,7 @@ export default function Workspace({
                       )}
                     </div>
                     <div>
-                      <h3>Similar reference</h3>
+                      <h3>{t("ref.similar")}</h3>
                       <p>
                         {inspection.reference_url
                           ? `${selected?.name ?? "Known-good sample"} · profile v${inspection.profile_version}`
@@ -1542,7 +1545,7 @@ export default function Workspace({
                         className="text-button"
                         onClick={() => setView("split")}
                       >
-                        Compare images
+                        {t("ref.compare")}
                       </button>
                     )}
                   </div>
@@ -1553,7 +1556,10 @@ export default function Workspace({
                   <div className="section-heading">
                     <h2>{t("panel.model")}</h2>
                     {inspection && (
-                      <DecisionTag value={inspection.model_decision} />
+                      <DecisionTag
+                        value={inspection.model_decision}
+                        label={t(`tag.${inspection.model_decision}`)}
+                      />
                     )}
                   </div>
                   {inspection ? (
@@ -1561,13 +1567,13 @@ export default function Workspace({
                       <dl className="result-facts">
                         {inspection.anomaly_score !== undefined && (
                           <div>
-                            <dt>Anomaly score</dt>
+                            <dt>{t("result.score")}</dt>
                             <dd>{inspection.anomaly_score.toFixed(4)}</dd>
                           </div>
                         )}
                         {inspection.threshold !== undefined && (
                           <div>
-                            <dt>Threshold</dt>
+                            <dt>{t("result.threshold")}</dt>
                             <dd>{inspection.threshold.toFixed(4)}</dd>
                           </div>
                         )}
@@ -1583,12 +1589,13 @@ export default function Workspace({
                         )}
                       </dl>
                       <p className="result-version">
-                        Inspected with profile v{inspection.profile_version}
+                        {t("result.inspectedWith")} v
+                        {inspection.profile_version}
                       </p>
                       {inspection.threshold_status ===
                         "heuristic_not_probability" && (
                         <p className="result-note">
-                          Anomaly score is not a probability.
+                          {t("result.notProbability")}
                         </p>
                       )}
                       {api.reports && (
@@ -1596,14 +1603,14 @@ export default function Workspace({
                           className="text-button ai-description-link"
                           href="#ai-description"
                         >
-                          View AI description
+                          {t("result.viewAi")}
                         </a>
                       )}
                       {!demo && (
                         <div className="report-download">
                           <span>
                             <Download size={14} aria-hidden="true" />
-                            Download report
+                            {t("result.download")}
                           </span>
                           {(["pdf", "docx", "txt"] as const).map((format) => (
                             <a
@@ -1626,11 +1633,8 @@ export default function Workspace({
                     </>
                   ) : (
                     <div className="awaiting">
-                      <h3>Awaiting inspection</h3>
-                      <p>
-                        Upload an image and run inspection to see the service
-                        result.
-                      </p>
+                      <h3>{t("result.awaiting")}</h3>
+                      <p>{t("result.awaitingText")}</p>
                     </div>
                   )}
                 </section>
@@ -1638,16 +1642,14 @@ export default function Workspace({
                   <div className="section-heading">
                     <h2>{t("panel.engineer")}</h2>
                     {inspection?.feedback && (
-                      <span className="saved-tag">Saved</span>
+                      <span className="saved-tag">{t("review.saved")}</span>
                     )}
                   </div>
                   {inspection && capabilities.features.feedback ? (
                     <form onSubmit={(e) => void submitFeedback(e)}>
-                      <p className="section-copy">
-                        Confirm the part independently of the model.
-                      </p>
+                      <p className="section-copy">{t("review.intro")}</p>
                       <label className="field-label" htmlFor="human-decision">
-                        Human decision
+                        {t("review.human")}
                       </label>
                       <select
                         id="human-decision"
@@ -1657,16 +1659,16 @@ export default function Workspace({
                           setHumanDecision(e.target.value as Decision)
                         }
                       >
-                        <option value="review">Needs review</option>
-                        <option value="pass">Pass · acceptable part</option>
-                        <option value="fail">Fail · defective part</option>
+                        <option value="review">{t("review.optReview")}</option>
+                        <option value="pass">{t("review.optPass")}</option>
+                        <option value="fail">{t("review.optFail")}</option>
                       </select>
                       <label className="field-label" htmlFor="review-comment">
-                        Engineer note <span>(optional)</span>
+                        {t("review.note")} <span>{t("review.optional")}</span>
                       </label>
                       <textarea
                         id="review-comment"
-                        placeholder="Describe the defect or explain your correction"
+                        placeholder={t("review.placeholder")}
                         maxLength={2000}
                         rows={3}
                         value={comment}
@@ -1674,9 +1676,7 @@ export default function Workspace({
                         onChange={(e) => setComment(e.target.value)}
                       />
                       {!demo && !inspection.feedback && (
-                        <p className="small-note">
-                          Saved reviews cannot be edited.
-                        </p>
+                        <p className="small-note">{t("review.locked")}</p>
                       )}
                       <button
                         className="button primary full"
@@ -1688,14 +1688,17 @@ export default function Workspace({
                         {inspection.feedback
                           ? demo
                             ? "Update review"
-                            : "Review saved"
-                          : "Save engineer review"}
+                            : t("review.done")
+                          : t("review.save")}
                       </button>
                       {inspection.feedback && (
                         <div className="recorded-review">
                           <span>Recorded human decision</span>
                           <DecisionTag
                             value={inspection.feedback.human_decision}
+                            label={t(
+                              `tag.${inspection.feedback.human_decision}`,
+                            )}
                           />
                           <p>
                             {inspection.feedback.comment || "No note added."}
@@ -1712,7 +1715,7 @@ export default function Workspace({
                       <p>
                         {inspection
                           ? "Engineer feedback is not supported by the current service."
-                          : "Review controls become available after inspection."}
+                          : t("review.after")}
                       </p>
                       {inspection && <span className="planned">Planned</span>}
                     </div>
@@ -1757,7 +1760,7 @@ export default function Workspace({
                   </section>
                 )}
                 <details className="sidebar-section display-panel">
-                  <summary>Image display</summary>
+                  <summary>{t("display.title")}</summary>
                   <div className="display-options">
                     <div className="opacity-controls">
                       <label htmlFor="opacity">Heatmap opacity</label>
@@ -1782,7 +1785,7 @@ export default function Workspace({
                   </div>
                 </details>
                 <details className="sidebar-section inspection-details">
-                  <summary>Inspection details</summary>
+                  <summary>{t("details.title")}</summary>
                   <dl className="detail-list">
                     {inspection && (
                       <>
