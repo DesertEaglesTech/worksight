@@ -28,8 +28,9 @@ export function HowItWorks() {
     <section className="how-it-works" aria-label="How Worksight works">
       <div className="how-heading">
         <h2>How it works</h2>
-        <span className="amd-badge">
-          AI description · Gemma on AMD Token Factory
+        <span className="how-note">
+          <Sparkles size={14} aria-hidden="true" />
+          Explanations by Gemma on AMD Token Factory
         </span>
       </div>
       <ol>

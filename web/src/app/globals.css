@@ -2578,16 +2578,17 @@ main#main {
   font-size: 15px;
   font-weight: 600;
 }
-.amd-badge {
+.how-note {
+  /* Same quiet style as other section-heading notes ("One image per inspection"). */
   display: inline-flex;
   align-items: center;
-  padding: 4px 10px;
-  border: 1px solid var(--accent);
-  border-radius: 999px;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.how-note svg {
+  flex: 0 0 auto;
   color: var(--accent);
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
 }
 .how-it-works ol {
   display: grid;
@@ -2632,9 +2633,6 @@ main#main {
 @container workspace (max-width: 480px) {
   .how-it-works ol {
     grid-template-columns: minmax(0, 1fr);
-  }
-  .amd-badge {
-    white-space: normal;
   }
 }
 

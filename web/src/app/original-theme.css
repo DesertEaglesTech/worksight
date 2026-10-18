@@ -263,8 +263,8 @@
     display: none;
   }
   .design-current .mobile-workspace-bar > span:last-of-type {
-    /* Theme token: #bac5cd suited only the dark bar and nearly vanished on white. */
-    color: var(--muted);
+    /* The page heading right below already names the page. */
+    display: none;
   }
 }
 @media (max-width: 480px) {
