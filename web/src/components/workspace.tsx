@@ -154,6 +154,37 @@ export default function Workspace({
   }, [api, exampleInspectionId, mode]);
   const [profileQuery, setProfileQuery] = useState("");
   const [menuCollapsed, setMenuCollapsed] = useState(false);
+  const menuChosen = useRef(false);
+  // Below 1280px the menu starts collapsed so the image and result keep their room.
+  // An explicit toggle is remembered and wins over the width.
+  useEffect(() => {
+    let saved: string | null = null;
+    try {
+      saved = window.localStorage.getItem("worksight_menu");
+    } catch {}
+    if (saved === "collapsed" || saved === "expanded") {
+      setMenuCollapsed(saved === "collapsed");
+      return;
+    }
+    const narrow = window.matchMedia("(max-width: 1279px)");
+    const apply = () => {
+      if (!menuChosen.current) setMenuCollapsed(narrow.matches);
+    };
+    apply();
+    narrow.addEventListener("change", apply);
+    return () => narrow.removeEventListener("change", apply);
+  }, []);
+  const toggleMenu = () => {
+    menuChosen.current = true;
+    const next = !menuCollapsed;
+    setMenuCollapsed(next);
+    try {
+      window.localStorage.setItem(
+        "worksight_menu",
+        next ? "collapsed" : "expanded",
+      );
+    } catch {}
+  };
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [screen, setScreen] = useState<"inspect" | "profiles">("inspect");
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -590,7 +621,7 @@ export default function Workspace({
             }
             title={menuCollapsed ? "Expand navigation" : "Collapse navigation"}
             aria-expanded={!menuCollapsed}
-            onClick={() => setMenuCollapsed(!menuCollapsed)}
+            onClick={toggleMenu}
           >
             {menuCollapsed ? (
               <PanelLeftOpen size={20} />
