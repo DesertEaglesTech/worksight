@@ -50,6 +50,30 @@ We are Desert Eagles, a two-person team building Worksight: few-shot visual insp
   VisA benchmark with `--require-amd`, and saves GPU name, ROCm version, metrics and latency. Add the
   result here only after a real run.
 
+## Additional information (form field)
+
+Worksight scales by camera view: each part and camera view is a profile built from its own good
+photos, so a new product needs no labelling project or training run. The detector is a frozen
+encoder plus nearest-patch memory, so serving cost grows with the number of reference patches, not
+with model training; the same PyTorch code selects a ROCm GPU on AMD Instinct for higher throughput
+(`scripts/amd_run.sh` measures it). Engineer feedback is immutable and every profile change passes a
+measured gate on a frozen validation set before an explicit activation, which keeps updates auditable
+across lines and shifts. Explanations come from Gemma on AMD Token Factory and never change the
+detector's decision. Next: batch and stats screens (API ready), an edge station on AMD Ryzen AI and a
+pilot on one production line.
+
+## Form checklist (lablab standard form; the event form takes priority)
+
+- [ ] Title ≤ 50 characters, short description ≤ 255, long description ≥ 100 words
+- [ ] Track: Intelligent Industry; technologies tagged (AMD, ROCm, AMD Token Factory, Gemma, …)
+- [ ] Cover image `worksight-cover.png` (16:9)
+- [ ] Video: MP4 or MOV, under 300 MB and 5 minutes, ideally 3½–4 minutes (under 3 scores lower)
+- [ ] Slides: `worksight-pitch.pdf`
+- [ ] Public GitHub repository, demo platform (Railway) and application URL
+- [ ] Additional information (above)
+- [ ] Every member: lablab profile with Discord connected, in the team, AMD AI Developer Program
+- [ ] Submit before 12:00 CEST on 18 October (15:00 Kazakhstan); the grace period is only 5 minutes
+
 ## Partner prize: Google (Gemma)
 
 Gemma-4-31B-IT on AMD Token Factory is the primary model for every inspection report; it receives
@@ -60,7 +84,7 @@ records which model answered. Show a Gemma answer in the video and slides.
 ## Files to upload
 
 - Cover image: `submission/worksight-cover.png` (1280×720, real VisA images)
-- Slide presentation: `submission/worksight-pitch.pdf` (7 slides)
+- Slide presentation: `submission/worksight-pitch.pdf` (8 slides)
 - Video presentation: `submission/worksight-demo.mp4` once recorded ([script](demo-script.md));
   never the old `worksight-demo.webm`
 

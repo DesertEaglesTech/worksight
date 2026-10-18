@@ -22,7 +22,7 @@ Date: 2026-10-17. Repository initially contained no application source or backen
 - No live FastAPI URL, agreed OpenAPI spec, real part dataset or AMD run artifact was supplied. Real persistence, inference, correction consumption and version restore remain unverified.
 - Dockerfile is provided but a container build was not run here.
 - Hosted demo (18 October 2026): https://web-production-d9743.up.railway.app runs in live mode against the FastAPI backend on Railway. Checked: `/health` reports the model loaded on CPU (`amd_gpu: false`) and the assistive report enabled via AMD Token Factory; the VisA pcb1 profile is ready and a saved inspection has a completed report.
-- The pitch (`submission/worksight-pitch.pdf`, 7 slides) and cover (`submission/worksight-cover.png`) are rendered from HTML in `submission/pitch/` with headless Chromium; pages were checked as images. The old `worksight-demo.webm` is a silent sequence of synthetic demo-mode UI captures, not live-inference footage.
+- The pitch (`submission/worksight-pitch.pdf`, 8 slides) and cover (`submission/worksight-cover.png`) are rendered from HTML in `submission/pitch/` with headless Chromium; pages were checked as images. The old `worksight-demo.webm` is a silent sequence of synthetic demo-mode UI captures, not live-inference footage.
 
 ## Live acceptance checklist
 

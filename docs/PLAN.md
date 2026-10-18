@@ -1,6 +1,6 @@
 # План и статус Worksight — 18 октября 2026
 
-Дедлайн подачи ACT III — **18 октября, 15:00 KT**; подаём до 14:00. «Готово» означает проверено
+Дедлайн подачи ACT III — **18 октября, 12:00 CEST = 15:00 KT** (по расписанию на lablab, после него 5 минут запаса); подаём до 14:00. «Готово» означает проверено
 тестами или живым прогоном, если не сказано иное. Подробности: [STATUS.md](STATUS.md).
 
 Легенда: ✅ готово · 🟡 частично · ❌ не сделано
@@ -36,8 +36,8 @@
 - [x] Живая ссылка на Railway
 - [x] Обложка 16:9 (1280×720) на реальных фото VisA: `submission/worksight-cover.png` (старая была с надписью «SYNTHETIC DEMO»)
 - [x] Тексты формы: [submission/description.md](../submission/description.md)
-- [ ] Видео MP4 2–3 минуты с живым сценарием и голосом ([сценарий](../submission/demo-script.md)) · Али
-- [x] Слайды в PDF с актуальными цифрами: `submission/worksight-pitch.pdf`, 7 слайдов (исходник `submission/pitch/`, сборка `bash submission/pitch/build.sh`)
+- [ ] Видео MP4 3½–4 минуты (короче 3 минут рубрика lablab оценивает ниже) с живым сценарием и голосом ([сценарий](../submission/demo-script.md)) · Али
+- [x] Слайды в PDF с актуальными цифрами: `submission/worksight-pitch.pdf`, 8 слайдов (исходник `submission/pitch/`, сборка `bash submission/pitch/build.sh`)
 - [ ] Описание команды на lablab без сенсоров и прогнозов (текст готов в description.md) · Бахтияр
 - [ ] Задеплоить бэкенд и скрыть три тестовых профиля «VisA pcb4 (live check)»: `POST /api/v1/profiles/{id}/archive` с ключом · Бахтияр
 - [ ] Отметить в форме партнёрский приз Google (Gemma), если в форме есть такое поле · Бахтияр

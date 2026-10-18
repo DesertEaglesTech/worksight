@@ -73,7 +73,7 @@
     <img src="../../web/public/examples/visa-pcb1-bent-014.jpg" alt="VisA PCB1 board with bent pins">
     <figcaption>Real test image: VisA pcb1, bent pins (Amazon, CC BY 4.0)</figcaption>
   </figure>
-  <div class="foot"><span>Team Desert Eagles</span><span>1 / 7</span></div>
+  <div class="foot"><span>Team Desert Eagles</span><span>1 / 8</span></div>
 </section>
 
 <!-- 2. Problem and user -->
@@ -97,7 +97,7 @@
       <p>The engineer has to see <strong>where</strong> the part differs, <strong>compared with what</strong>, and record their own decision.</p>
     </div>
   </div>
-  <div class="foot"><span>Worksight</span><span>2 / 7</span></div>
+  <div class="foot"><span>Worksight</span><span>2 / 8</span></div>
 </section>
 
 <!-- 3. Solution -->
@@ -130,7 +130,7 @@
     </div>
   </div>
   <p style="margin-top: 34px; font-size: 18px;">Live check on the hosted app: VisA pcb1 “bent pins” → <strong>Fail</strong>, score 0.279 against threshold 0.094, heatmap on the pins, Gemma description returned.</p>
-  <div class="foot"><span>Worksight</span><span>3 / 7</span></div>
+  <div class="foot"><span>Worksight</span><span>3 / 8</span></div>
 </section>
 
 <!-- 4. AMD and Gemma -->
@@ -153,7 +153,7 @@
       <p style="margin-top: 18px; font-size: 17px;"><span class="tag warn">Next</span> Detector inference on an AMD GPU: <strong>scripts/amd_run.sh</strong> runs the smoke test and benchmark with --require-amd. Not run yet; hosted detector is CPU.</p>
     </div>
   </div>
-  <div class="foot"><span>Worksight</span><span>4 / 7</span></div>
+  <div class="foot"><span>Worksight</span><span>4 / 8</span></div>
 </section>
 
 <!-- 5. Results -->
@@ -183,7 +183,7 @@
       </div>
     </div>
   </div>
-  <div class="foot"><span>Source: docs/BENCHMARK.md, docs/STATUS.md</span><span>5 / 7</span></div>
+  <div class="foot"><span>Source: docs/BENCHMARK.md, docs/STATUS.md</span><span>5 / 8</span></div>
 </section>
 
 <!-- 6. Human + AI workflow -->
@@ -200,28 +200,52 @@
     <div class="card"><div class="num">ACTIVATE</div><p style="margin-top: 10px;">Explicit activation, audit record, rollback to an earlier approved version.</p></div>
   </div>
   <p style="margin-top: 40px;">Old inspections keep the version they used, so every past decision can be traced to the exact references behind it.</p>
-  <div class="foot"><span>Worksight</span><span>6 / 7</span></div>
+  <div class="foot"><span>Worksight</span><span>6 / 8</span></div>
 </section>
 
-<!-- 7. Business value and next -->
+<!-- 7. Market and competition -->
 <section class="slide">
-  <div class="kicker">Business value</div>
+  <div class="kicker">Market and competition</div>
+  <h1>A growing market built on labelled defects</h1>
+  <div class="row grow" style="margin-top: 30px; gap: 36px;">
+    <div class="card" style="flex: 0.7; display: flex; flex-direction: column; justify-content: center;">
+      <div class="num">MARKET</div>
+      <div class="big" style="margin: 12px 0 6px;">+$26.8B</div>
+      <p>Forecast growth of the AI visual inspection system market, 2024–2029, at a 38.8% CAGR, driven by quality control in manufacturing (Technavio, 2025).</p>
+    </div>
+    <div style="flex: 1.5;">
+      <table style="font-size: 16px;">
+        <tr><th>Approach</th><th>Starts from</th><th>For the operator</th><th>Pricing</th></tr>
+        <tr><td>Enterprise suites<br><span style="color: var(--muted); font-size: 14px;">e.g. Cognex Deep Learning</span></td><td>Labelled training images</td><td>Vendor tooling</td><td>Quote: hardware + licence per line</td></tr>
+        <tr><td>No-code platforms<br><span style="color: var(--muted); font-size: 14px;">e.g. LandingLens</span></td><td>Label and train in the browser</td><td>Hosted app</td><td>Free tier + enterprise</td></tr>
+        <tr><td>Open-source libraries<br><span style="color: var(--muted); font-size: 14px;">e.g. anomalib</span></td><td>Good images</td><td>None: code for ML engineers</td><td>Free</td></tr>
+        <tr><td><strong style="color: var(--accent);">Worksight</strong></td><td><strong>10–20 good photos, ~9 s</strong></td><td><strong>Heatmap, Gemma explanation, engineer decision, gated versions</strong></td><td>Per camera view (planned)</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="foot"><span>Sources: Technavio, AI Visual Inspection System Market 2025–2029; vendor listings on Capterra and Dupple (2026)</span><span>7 / 8</span></div>
+</section>
+
+<!-- 8. Business model and roadmap -->
+<section class="slide">
+  <div class="kicker">Business value and plan</div>
   <h1>Inspection from day one of a new part</h1>
-  <div class="row grow" style="margin-top: 36px; gap: 40px;">
+  <div class="row grow" style="margin-top: 32px; gap: 40px;">
     <div style="flex: 1.2;">
       <ul>
         <li><strong>No defect dataset to start:</strong> a part is onboarded from good photos the line already has, in seconds instead of a labelling and training cycle.</li>
-        <li><strong>Engineer time on the right parts:</strong> results are sorted into normal, review and anomaly; batch inspection ranks a folder by score through the API.</li>
-        <li><strong>Evidence for every decision:</strong> heatmap, closest reference, Gemma explanation and the engineer's own note, stored together.</li>
-        <li><strong>Safe updates:</strong> a profile only changes after a measured gate and explicit approval.</li>
+        <li><strong>Engineer time on the right parts:</strong> normal / review / anomaly; 56–96% of defects reach a person while 4–13% of good boards do (VisA PCB).</li>
+        <li><strong>Evidence for every decision:</strong> heatmap, closest reference, Gemma explanation and the engineer's note, stored together.</li>
+        <li><strong>Who pays:</strong> the quality team of a line. Planned model: subscription per camera view, or on-premises on AMD hardware for plants that keep images on site.</li>
+        <li><strong>Pilot:</strong> one line, one camera; measure engineer time per part and escaped defects against today's inspection.</li>
       </ul>
     </div>
     <div style="flex: 0.8; display: flex; flex-direction: column; gap: 14px;">
-      <div class="card"><div class="num">BUILT</div><p style="margin-top: 8px;">Live web app, FastAPI backend, Gemma reports, versions with gate and rollback. 36 backend + 39 web tests.</p></div>
-      <div class="card"><div class="num">NEXT</div><p style="margin-top: 8px;">Detector on AMD Instinct via ROCm, batch screen in the UI, pilot on a real line's camera.</p></div>
+      <div class="card"><div class="num">BUILT</div><p style="margin-top: 8px;">Live web app, FastAPI backend, Gemma reports on AMD, versions with gate and rollback. 36 backend + 39 web tests.</p></div>
+      <div class="card"><div class="num">NEXT</div><p style="margin-top: 8px;">1. Detector on AMD Instinct via ROCm (script ready)<br>2. Batch and stats screens (API ready)<br>3. Edge station on AMD Ryzen AI<br>4. First pilot line</p></div>
     </div>
   </div>
-  <div class="foot"><span>web-production-d9743.up.railway.app · github.com/DesertEaglesTech/worksight</span><span>7 / 7</span></div>
+  <div class="foot"><span>web-production-d9743.up.railway.app · github.com/DesertEaglesTech/worksight</span><span>8 / 8</span></div>
 </section>
 
 </body>
