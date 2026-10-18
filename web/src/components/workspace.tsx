@@ -18,6 +18,7 @@ import {
   RefreshCw,
   Sun,
   TriangleAlert,
+  UserRound,
   X,
 } from "lucide-react";
 import { assetUrl } from "@/lib/api";
@@ -694,20 +695,6 @@ export default function Workspace({
               <span className="navigation-label">{t("nav.history")}</span>
             </button>
           )}
-          <button
-            className={`workspace-nav-item ${screen === "settings" ? "active" : ""}`}
-            disabled={!!busy}
-            aria-current={screen === "settings" ? "page" : undefined}
-            aria-label={t("nav.settings")}
-            title={t("nav.settings")}
-            onClick={() => {
-              setScreen("settings");
-              setMobileMenuOpen(false);
-            }}
-          >
-            <SettingsIcon size={21} aria-hidden="true" />
-            <span className="navigation-label">{t("nav.settings")}</span>
-          </button>
         </nav>
         <div className="navigation-profile">
           <span className="navigation-section-label">{t("nav.selected")}</span>
@@ -722,12 +709,13 @@ export default function Workspace({
             >
               <strong>{selected.name}</strong>
               <span>
-                {selected.version ? `Version ${selected.version}` : "Not built"}{" "}
-                · {selected.sample_count}{" "}
-                {selected.sample_count === 1 ? "sample" : "samples"}
+                {selected.version ? `v${selected.version}` : t("nav.notBuilt")}{" "}
+                · {selected.sample_count} {t("unit.samples")}
               </span>
               <span className={`status ${selected.status}`}>
-                {selected.status.replaceAll("_", " ")}
+                {selected.status === "ready"
+                  ? t("nav.ready")
+                  : selected.status.replaceAll("_", " ")}
               </span>
             </button>
           ) : (
@@ -735,11 +723,31 @@ export default function Workspace({
           )}
         </div>
         <div className="navigation-bottom">
-          <p>
-            {mode === "live" && guest
-              ? t("nav.guest")
-              : "Industrial visual inspection"}
-          </p>
+          <button
+            className={`workspace-nav-item ${screen === "settings" ? "active" : ""}`}
+            disabled={!!busy}
+            aria-current={screen === "settings" ? "page" : undefined}
+            aria-label={t("nav.settings")}
+            title={t("nav.settings")}
+            onClick={() => {
+              setScreen("settings");
+              setMobileMenuOpen(false);
+            }}
+          >
+            <SettingsIcon size={21} aria-hidden="true" />
+            <span className="navigation-label">{t("nav.settings")}</span>
+          </button>
+          {mode === "live" && guest && (
+            <div className="navigation-guest">
+              <span className="navigation-guest-icon" aria-hidden="true">
+                <UserRound size={16} />
+              </span>
+              <span className="navigation-guest-text">
+                <strong>{t("nav.guest")}</strong>
+                <small>{t("nav.sharedDemo")}</small>
+              </span>
+            </div>
+          )}
           <button
             className="navigation-toggle"
             aria-label={
@@ -754,7 +762,7 @@ export default function Workspace({
             ) : (
               <PanelLeftClose size={20} />
             )}
-            <span>Collapse menu</span>
+            <span>{t("nav.collapse")}</span>
           </button>
         </div>
         {design === "engineering" && themeButton}

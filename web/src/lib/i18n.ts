@@ -179,6 +179,10 @@ const en = {
   "settings.sessionText":
     "You are using the shared demo workspace as a guest. Profiles, inspections and reviews are visible to every visitor. Personal accounts and team workspaces are planned.",
   "settings.reset": "Reset this browser’s preferences",
+  "nav.collapse": "Collapse menu",
+  "nav.sharedDemo": "Shared demo workspace",
+  "nav.ready": "Ready",
+  "nav.notBuilt": "Not built",
 };
 
 export type Key = keyof typeof en;
@@ -355,6 +359,10 @@ const it: Dict = {
   "settings.sessionText":
     "Stai usando l’area demo condivisa come ospite. Profili, ispezioni e revisioni sono visibili a tutti i visitatori. Account personali e aree di team sono previsti.",
   "settings.reset": "Reimposta le preferenze di questo browser",
+  "nav.collapse": "Riduci menu",
+  "nav.sharedDemo": "Area demo condivisa",
+  "nav.ready": "Pronto",
+  "nav.notBuilt": "Non creato",
 };
 
 const de: Dict = {
@@ -527,6 +535,10 @@ const de: Dict = {
   "settings.sessionText":
     "Sie nutzen den gemeinsamen Demo-Bereich als Gast. Profile, Prüfungen und Bewertungen sind für alle Besucher sichtbar. Persönliche Konten und Team-Bereiche sind geplant.",
   "settings.reset": "Einstellungen dieses Browsers zurücksetzen",
+  "nav.collapse": "Menü einklappen",
+  "nav.sharedDemo": "Gemeinsamer Demo-Bereich",
+  "nav.ready": "Bereit",
+  "nav.notBuilt": "Nicht erstellt",
 };
 
 const fr: Dict = {
@@ -701,6 +713,10 @@ const fr: Dict = {
   "settings.sessionText":
     "Vous utilisez l’espace de démonstration partagé en tant qu’invité. Profils, inspections et revues sont visibles par tous. Comptes personnels et espaces d’équipe prévus.",
   "settings.reset": "Réinitialiser les préférences de ce navigateur",
+  "nav.collapse": "Réduire le menu",
+  "nav.sharedDemo": "Espace de démonstration partagé",
+  "nav.ready": "Prêt",
+  "nav.notBuilt": "Non construit",
 };
 
 const zh: Dict = {
@@ -856,6 +872,10 @@ const zh: Dict = {
   "settings.sessionText":
     "您正以访客身份使用共享演示工作区。档案、检测和复核对所有访问者可见。个人账户和团队工作区正在规划中。",
   "settings.reset": "重置此浏览器的偏好设置",
+  "nav.collapse": "收起菜单",
+  "nav.sharedDemo": "共享演示工作区",
+  "nav.ready": "可用",
+  "nav.notBuilt": "未建立",
 };
 
 const hi: Dict = {
@@ -1024,6 +1044,10 @@ const hi: Dict = {
   "settings.sessionText":
     "आप अतिथि के रूप में साझा डेमो कार्यक्षेत्र इस्तेमाल कर रहे हैं। प्रोफ़ाइल, जाँच और समीक्षाएँ सभी आगंतुकों को दिखती हैं। निजी खाते और टीम कार्यक्षेत्र योजना में हैं।",
   "settings.reset": "इस ब्राउज़र की प्राथमिकताएँ रीसेट करें",
+  "nav.collapse": "मेनू छोटा करें",
+  "nav.sharedDemo": "साझा डेमो कार्यक्षेत्र",
+  "nav.ready": "तैयार",
+  "nav.notBuilt": "नहीं बनी",
 };
 
 const dictionaries: Record<Lang, Dict> = { en, it, de, fr, zh, hi };
