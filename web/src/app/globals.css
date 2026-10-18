@@ -1626,27 +1626,12 @@ td {
     border-top: 1px solid var(--line);
     max-height: none;
     height: auto;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    /* Stretch so the review column and its divider reach the bottom of the left column. */
-    align-items: stretch;
+    /* One column on narrow screens: sections stack instead of squeezing side by side. */
+    display: block;
     overflow: visible;
   }
   .sidebar-section {
     padding: 20px;
-  }
-  .engineer-panel {
-    grid-row: span 3;
-    grid-column: 2;
-    border-left: 1px solid var(--line);
-    border-bottom: 0;
-  }
-  .display-panel {
-    grid-column: 1;
-  }
-  .update-panel,
-  .inspection-details {
-    grid-column: 1;
   }
   .decision-panel .section-heading {
     flex-direction: row;
